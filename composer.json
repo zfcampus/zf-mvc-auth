@@ -6,7 +6,7 @@
     "keywords": [
         "zf2",
         "zend",
-        "module",
+        "module"
     ],
     "repositories": [
         { "type": "composer", "url": "https://packages.zendframework.com" }
