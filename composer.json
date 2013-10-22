@@ -1,0 +1,28 @@
+{
+    "name": "zfcampus/zf-mvc-auth",
+    "description": "ZF2 Module providing Authentication and Authorization events and infrastructure",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "zf2",
+        "zend",
+        "module",
+    ],
+    "repositories": [
+        { "type": "composer", "url": "https://packages.zendframework.com" }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "dev-develop"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "3.7.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "ZF\\MvcAuth\\": "src/",
+            "ZFTest\\": "test/"
+        }
+    }
+}
