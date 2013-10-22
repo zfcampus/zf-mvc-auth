@@ -28,4 +28,14 @@ class MvcAuthEvent extends Event
         return $this->mvcEvent;
     }
 
+    public function getIdentity()
+    {
+        
+    }
+
+    public function setIdentity()
+    {
+
+    }
+
 } 
