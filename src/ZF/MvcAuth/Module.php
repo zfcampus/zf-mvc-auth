@@ -5,7 +5,9 @@
  */
 
 namespace ZF\MvcAuth;
+
 use Zend\Mvc\MvcEvent;
+use Zend\Authentication\AuthenticationService;
 
 /**
  * ZF2 module
@@ -34,15 +36,20 @@ class Module
         return include __DIR__ . '/../../../config/module.config.php';
     }
 
+
     public function onBootstrap(MvcEvent $e)
     {
         $app = $e->getApplication();
         $em = $app->getEventManager();
 
+        /** @var AuthenticationService $auth */
+        // $auth = $app->getServiceManager()->get('mvc-auth-authentication');
+
         $routeListener = new RouteListener($e);
 
         $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 1000);
         $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -1000);
+
     }
 
 }
