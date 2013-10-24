@@ -16,8 +16,6 @@ class RouteListener
     /** @var \Zend\Authentication\AuthenticationService */
     protected $authentication;
 
-    protected $authenticateIdentity = false;
-
     protected $configuration;
 
     public function __construct(MvcEvent $event)
@@ -34,68 +32,25 @@ class RouteListener
         $this->configuration = $sm->get('Config');
     }
 
-    public function authenticationPreRoute(MvcEvent $event)
+    public function authentication(MvcEvent $event)
     {
-        $request = $event->getRequest();
-        if (!$request instanceof HttpRequest) {
-            return;
-        }
-
-        if ($request->getHeader('Authorization') === false) {
-            return;
-        }
-
-        $this->authenticateIdentity = true;
-
         $em = $event->getApplication()->getEventManager();
 
-        try {
-            $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $this->mvcAuthEvent);
+        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $this->mvcAuthEvent);
 
-            $storage = $this->authentication->getStorage();
+        $storage = $this->authentication->getStorage();
 
-            // determine if the listener returned an identity?
-            $identity = $responses->last();
-            if ($identity instanceof IdentityInterface) {
-                $storage->write($identity);
-            }
-        } catch (\Exception $e) {
+        // determine if the listener returned an identity?
+        $identity = $responses->last();
+        if ($identity instanceof IdentityInterface) {
+            $storage->write($identity);
+        }
 
+        if ($storage->isEmpty()) {
+            $storage->write(new Identity);
         }
 
         $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent);
-    }
-
-    public function authenticationPostRoute(MvcEvent $event)
-    {
-        $storage = $this->authentication->getStorage();
-
-        if ($this->authenticateIdentity) {
-            if ($storage->isEmpty()) {
-                /**
-                 * @todo By default, when we get an authentication failure, we should allow a
-                 *       a configured controller to run so that consumers can override this behavior
-                 *       for example, Apigility might want to return an ApiProblem
-                 *       (ApiProblem is not a dependency of zf-mvc-auth)
-                 */
-
-                /** @var \Zend\Mvc\Router\RouteMatch $routeMatch */
-                $routeMatch = $event->getRouteMatch();
-
-                if (isset($this->configuration['zf-mvc-auth']['controller'])) {
-                    $controller = $this->configuration['zf-mvc-auth']['controller'];
-                } else {
-                    $controller = 'ZF\MvcAuth\Auth';
-                }
-
-                $routeMatch->setParam('controller', $controller); // @todo This should come from config
-                $routeMatch->setParam('action', 'authenticationFailure');
-            }
-        } else {
-            if ($storage->isEmpty()) {
-                $storage->write(new Identity); // default Guest Identity
-            }
-        }
     }
 
     public function authorization(MvcEvent $event)

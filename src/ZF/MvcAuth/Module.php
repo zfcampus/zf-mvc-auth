@@ -6,6 +6,7 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\Authentication\Validator\Authentication;
 use Zend\Mvc\MvcEvent;
 use Zend\Authentication\AuthenticationService;
 
@@ -47,10 +48,12 @@ class Module
 
         $routeListener = new RouteListener($e);
 
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPreRoute'), 1000);
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPostRoute'), -999);
+        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 1000);
+//        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPostRoute'), -999);
         $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -1000);
 
+        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authentication\DefaultListener());
+        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authorization\DefaultListener());
     }
 
 }
