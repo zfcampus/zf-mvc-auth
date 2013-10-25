@@ -6,7 +6,6 @@
 
 namespace ZF\MvcAuth;
 
-use Zend\Authentication\Validator\Authentication;
 use Zend\Mvc\MvcEvent;
 use Zend\Authentication\AuthenticationService;
 
@@ -43,17 +42,15 @@ class Module
         $app = $e->getApplication();
         $em = $app->getEventManager();
 
-        /** @var AuthenticationService $auth */
-        // $auth = $app->getServiceManager()->get('mvc-auth-authentication');
-
         $routeListener = new RouteListener($e);
 
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 1000);
-//        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPostRoute'), -999);
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -1000);
+        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 500);
+        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPost'), 499);
+        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -500);
 
-        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authentication\DefaultListener());
-        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authorization\DefaultListener());
+        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authentication\DefaultAuthenticationListener, 1);
+        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new Authentication\UnauthorizedListener, 1);
+        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authorization\RbacAuthorizationListener, 1);
     }
 
 }

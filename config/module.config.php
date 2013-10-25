@@ -13,10 +13,12 @@ return array(
     'zf-mvc-auth' => array(
         'controller' => 'ZF\MvcAuth\Auth',
         'authentication' => array(
-            'storage' => 'non-persistent',
-            'first' => array(
-                'type' => 'service',
-                'service' => 'password-callback-service'
+            'basic' => array(
+                'accept_schemes' => 'basic',
+                'realm' => 'My Web Site',
+                'digest_domains' => '/members_only /my_account',
+                'nonce_timeout' => 3600,
+                'file' => APPLICATION_PATH . '/data/htpasswd'
             )
         ),
         'authorization' => array(

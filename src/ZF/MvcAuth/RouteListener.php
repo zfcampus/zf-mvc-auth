@@ -6,6 +6,7 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\Authentication\Result;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
 
@@ -18,12 +19,12 @@ class RouteListener
 
     protected $configuration;
 
-    public function __construct(MvcEvent $event)
+    public function __construct(MvcEvent $mvcEvent)
     {
-        $this->mvcAuthEvent = new MvcAuthEvent($event);
+        $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent);
         $this->mvcAuthEvent->setTarget($this);
 
-        $sm = $event->getApplication()->getServiceManager();
+        $sm = $mvcEvent->getApplication()->getServiceManager();
 
         /** @var \Zend\Authentication\AuthenticationService $auth */
         $auth = $sm->get('authentication');
@@ -32,25 +33,40 @@ class RouteListener
         $this->configuration = $sm->get('Config');
     }
 
-    public function authentication(MvcEvent $event)
+    public function authentication(MvcEvent $mvcEvent)
     {
-        $em = $event->getApplication()->getEventManager();
+        $em = $mvcEvent->getApplication()->getEventManager();
 
         $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $this->mvcAuthEvent);
 
         $storage = $this->authentication->getStorage();
 
+        $createGuestIdentity = false;
+
         // determine if the listener returned an identity?
-        $identity = $responses->last();
-        if ($identity instanceof IdentityInterface) {
-            $storage->write($identity);
+        $result = $responses->last();
+        if ($result instanceof Identity\IdentityInterface) {
+            $storage->write($result);
         }
 
-        if ($storage->isEmpty()) {
-            $storage->write(new Identity);
+        // if not identity is in the authentication service, time to figure some stuff out
+        if ($this->authentication->getIdentity() === null) {
+            if (!$this->mvcAuthEvent->hasAuthenticationResult()) {
+                // if there is no Authentication result, safe to assume we have a guest
+                $createGuestIdentity = true;
+            }
         }
 
-        $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent);
+        if ($createGuestIdentity) {
+            $this->authentication->getStorage()->write(new Identity\GuestIdentity());
+        }
+    }
+
+    public function authenticationPost(MvcEvent $mvcEvent)
+    {
+        $em = $mvcEvent->getApplication()->getEventManager();
+        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent);
+        return $responses->last();
     }
 
     public function authorization(MvcEvent $event)

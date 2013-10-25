@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth\AuthenticationAdapter;
+namespace ZF\MvcAuth\Authentication;
 
 use Zend\Authentication\Adapter\AdapterInterface;
 

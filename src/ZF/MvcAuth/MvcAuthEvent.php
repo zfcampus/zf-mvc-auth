@@ -6,8 +6,10 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\Authentication\Result;
 use Zend\EventManager\Event;
 use Zend\Mvc\MvcEvent;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 class MvcAuthEvent extends Event
 {
@@ -17,6 +19,10 @@ class MvcAuthEvent extends Event
     const EVENT_AUTHORIZATION_DENIED = 'authorization.denied';
 
     protected $authentication;
+
+    /** @var Result */
+    protected $authenticationResult = null;
+
     protected $authorization;
 
     public function __construct(MvcEvent $mvcEvent)
@@ -30,9 +36,30 @@ class MvcAuthEvent extends Event
         }
     }
 
+    /**
+     * @return \Zend\Authentication\AuthenticationService
+     */
     public function getAuthenticationService()
     {
         return $this->authentication;
+    }
+
+    public function hasAuthenticationResult()
+    {
+        return ($this->authenticationResult !== null);
+    }
+
+    public function setAuthenticationResult(Result $result)
+    {
+        $this->authenticationResult = $result;
+    }
+
+    /**
+     * @return null|Result
+     */
+    public function getAuthenticationResult()
+    {
+        return $this->authenticationResult;
     }
 
     public function getAuthorizationService()
@@ -47,7 +74,7 @@ class MvcAuthEvent extends Event
 
     public function getIdentity()
     {
-        $this->authentication->getIdentity();
+        return $this->authentication->getIdentity();
     }
 
     public function setIdentity(IdentityInterface $identity)
