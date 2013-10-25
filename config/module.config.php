@@ -15,10 +15,15 @@ return array(
         'authentication' => array(
             'basic' => array(
                 'accept_schemes' => 'basic',
-                'realm' => 'My Web Site',
-                'digest_domains' => '/members_only /my_account',
-                'nonce_timeout' => 3600,
+                'realm' => 'Test',
                 'file' => APPLICATION_PATH . '/data/htpasswd'
+            ),
+            'digest' => array(
+                'digest_domains' => '/',
+                'accept_schemes' => 'digest',
+                'nonce_timeout' => 3600,
+                'realm' => 'Test',
+                'file' => APPLICATION_PATH . '/data/htdigest'    
             )
         ),
         'authorization' => array(

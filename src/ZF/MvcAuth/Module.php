@@ -40,7 +40,7 @@ class Module
     public function onBootstrap(MvcEvent $e)
     {
         $app = $e->getApplication();
-        $em = $app->getEventManager();
+        $em  = $app->getEventManager();
 
         $routeListener = new RouteListener($e);
 
