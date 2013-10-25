@@ -58,7 +58,7 @@ class RouteListener
         }
 
         if ($createGuestIdentity) {
-            $this->authentication->getStorage()->write(new Identity\GuestIdentity());
+            $this->mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
         }
     }
 
@@ -71,13 +71,6 @@ class RouteListener
 
     public function authorization(MvcEvent $event)
     {
-        $sm = $event->getApplication()->getServiceManager();
-
-        // currently only run if we have a authorization service (RBAC or ACL)
-        if (!$sm->has('authorization')) {
-            return;
-        }
-
         $em = $event->getApplication()->getEventManager();
         $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent);
         if ($responses->last() === false) {

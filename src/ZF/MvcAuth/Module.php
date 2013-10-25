@@ -50,7 +50,7 @@ class Module
 
         $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authentication\DefaultAuthenticationListener, 1);
         $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new Authentication\UnauthorizedListener, 1);
-        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new Authorization\RbacAuthorizationListener, 1);
+        $em->attach(MvcAuthEvent::EVENT_AUTHORIZATION, new Authorization\RbacAuthorizationListener, 1);
     }
 
 }
