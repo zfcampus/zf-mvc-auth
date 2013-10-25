@@ -15,12 +15,38 @@ class DefaultAuthenticationListener
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
         $request = $mvcEvent->getRequest();
         $response = $mvcEvent->getResponse();
+        $configuration = $mvcEvent->getApplication()->getServiceManager()->get('Configuration');
 
         if (!$request instanceof HttpRequest) {
             return;
         }
 
+        // if we have http or digest configured, create adapter as they might need to send challenge
+        if (isset($configuration['zf-mvc-auth']['authentication']['http'])) {
+            $httpConfig = $configuration['zf-mvc-auth']['authentication']['http'];
+
+            if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
+                throw new \Exception('accept_schemes is required');
+            }
+
+            $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
+            $httpAdapter->setRequest($request);
+            $httpAdapter->setResponse($response);
+
+            // basic && htpasswd
+            if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
+                $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+            }
+            if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
+                $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
+            }
+
+        }
+
         if (($authHeader = $request->getHeader('Authorization')) === false) {
+            if (isset($httpAdapter)) {
+                $httpAdapter->challengeClient();
+            }
             return;
         }
 
@@ -33,28 +59,16 @@ class DefaultAuthenticationListener
 
         list($type, $credential) = preg_split('# #', $headerContent, 2);
 
-        $configuration = $mvcEvent->getApplication()->getServiceManager()->get('Configuration');
-
         switch (strtolower($type)) {
             case 'basic':
-                if (!isset($configuration['zf-mvc-auth']['authentication']['basic'])) {
-                    // @todo this probably needs to be a 401 or 500 somehow, not sure
-                    throw new \Exception('Not a valid authentication scheme.');
+            case 'digest':
+
+                if (!isset($httpAdapter)) {
+                    throw new \Exception('an http adapter is not configured');
                 }
-                $basicAdapter = new HttpAuth($configuration['zf-mvc-auth']['authentication']['basic']);
-                $basicResolver = new HttpAuth\ApacheResolver();
-                if (!isset($configuration['zf-mvc-auth']['authentication']['basic']['file'])
-                    || $configuration['zf-mvc-auth']['authentication']['basic']['file'] == '') {
-                    // @todo this probably needs to be a 401 or 500 somehow, not sure
-                    throw new \Exception('Bad configuration, file not provided.');
-                }
-                $basicResolver->setFile($configuration['zf-mvc-auth']['authentication']['basic']['file']);
-                $basicAdapter->setBasicResolver($basicResolver);
-                $basicAdapter->setRequest($request);
-                $basicAdapter->setResponse($response);
 
                 $auth = $mvcAuthEvent->getAuthenticationService();
-                $result = $auth->authenticate($basicAdapter);
+                $result = $auth->authenticate($httpAdapter);
 
                 if ($result->isValid()) {
                     $identity = new Identity\AuthenticatedIdentity($result->getIdentity());
@@ -65,8 +79,6 @@ class DefaultAuthenticationListener
                 $mvcAuthEvent->setAuthenticationResult($result);
                 return;
 
-            case 'digest':
-                throw new \Exception('@todo');
             case 'token':
                 throw new \Exception('@todo');
         }

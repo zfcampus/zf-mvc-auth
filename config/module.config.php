@@ -13,13 +13,14 @@ return array(
     'zf-mvc-auth' => array(
         'controller' => 'ZF\MvcAuth\Auth',
         'authentication' => array(
-            'basic' => array(
-                'accept_schemes' => 'basic',
+            'http' => array(
+                'accept_schemes' => array('basic', 'digest'),
                 'realm' => 'My Web Site',
-                'digest_domains' => '/members_only /my_account',
+                'digest_domains' => '/',
                 'nonce_timeout' => 3600,
-                'file' => APPLICATION_PATH . '/data/htpasswd'
-            )
+                // 'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
+                // 'htdigest' => APPLICATION_PATH . '/data/htdigest' @see http://www.askapache.com/online-tools/htpasswd-generator/
+            ),
         ),
         'authorization' => array(
         )
