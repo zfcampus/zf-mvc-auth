@@ -39,7 +39,6 @@ class AuthorizationListener
             if (($allAction || (isset($controller['action']) && (in_array($params['action'], $controller['action'])))) &&
                 ($allMethod || (isset($controller['method']) && (in_array($method, $controller['method']))))) {
                     if ($identity instanceof GuestIdentity) {
-                        // @todo return 403
                         $response->setStatusCode(403);
                         $response->setReasonPhrase('Forbidden.');
                         return $response;
