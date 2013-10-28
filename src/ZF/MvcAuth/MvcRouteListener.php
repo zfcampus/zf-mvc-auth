@@ -10,7 +10,7 @@ use Zend\Authentication\Result;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
 
-class RouteListener
+class MvcRouteListener
 {
     protected $mvcAuthEvent;
 

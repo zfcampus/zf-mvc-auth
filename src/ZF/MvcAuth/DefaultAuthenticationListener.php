@@ -1,10 +1,9 @@
 <?php
 
-namespace ZF\MvcAuth\Authentication;
+namespace ZF\MvcAuth;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Http\Request as HttpRequest;
-use ZF\MvcAuth\MvcAuthEvent;
 use ZF\MvcAuth\Identity;
 
 
@@ -33,12 +32,20 @@ class DefaultAuthenticationListener
             $httpAdapter->setRequest($request);
             $httpAdapter->setResponse($response);
 
+            $hasFileResolver = false;
+
             // basic && htpasswd
             if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
                 $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+                $hasFileResolver = true;
             }
             if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
                 $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
+                $hasFileResolver = true;
+            }
+
+            if ($hasFileResolver === false) {
+                unset($httpAdapter);
             }
 
         }
@@ -64,7 +71,8 @@ class DefaultAuthenticationListener
             case 'digest':
 
                 if (!isset($httpAdapter)) {
-                    throw new \Exception('an http adapter is not configured');
+                    return;
+                    // throw new \Exception('an http adapter is not configured');
                 }
 
                 $auth = $mvcAuthEvent->getAuthenticationService();

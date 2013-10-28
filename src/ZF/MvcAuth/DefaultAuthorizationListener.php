@@ -1,11 +1,10 @@
 <?php
 
-namespace ZF\MvcAuth\Authorization;
+namespace ZF\MvcAuth;
 
 use Zend\Permissions\Rbac\Rbac;
-use ZF\MvcAuth\MvcAuthEvent;
 
-class RbacAuthorizationListener
+class DefaultAuthorizationListener
 {
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {

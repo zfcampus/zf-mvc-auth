@@ -1,11 +1,8 @@
 <?php
 
-namespace ZF\MvcAuth\Authentication;
+namespace ZF\MvcAuth;
 
-
-use ZF\MvcAuth\MvcAuthEvent;
-
-class UnauthorizedListener
+class DefaultAuthorizationPostListener
 {
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
@@ -14,7 +11,7 @@ class UnauthorizedListener
             /** @var \Zend\Http\Response $response */
             $response = $mvcAuthEvent->getMvcEvent()->getResponse();
             $response->setStatusCode(401);
-            $response->setReasonPhrase('Unauthorized.');
+            $response->setReasonPhrase('Unauthorized');
             return $response;
         }
     }

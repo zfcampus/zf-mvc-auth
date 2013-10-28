@@ -16,7 +16,7 @@ class MvcAuthEvent extends Event
     const EVENT_AUTHENTICATION = 'authentication';
     const EVENT_AUTHENTICATION_POST = 'authentication.post';
     const EVENT_AUTHORIZATION = 'authorization';
-    const EVENT_AUTHORIZATION_DENIED = 'authorization.denied';
+    const EVENT_AUTHORIZATION_POST = 'authorization.post';
 
     protected $authentication;
 
@@ -52,6 +52,7 @@ class MvcAuthEvent extends Event
     public function setAuthenticationResult(Result $result)
     {
         $this->authenticationResult = $result;
+        return $this;
     }
 
     /**
@@ -80,6 +81,7 @@ class MvcAuthEvent extends Event
     public function setIdentity(IdentityInterface $identity)
     {
         $this->authentication->getStorage()->write($identity);
+        return $this;
     }
 
 }
