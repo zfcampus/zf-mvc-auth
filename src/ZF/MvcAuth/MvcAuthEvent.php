@@ -28,7 +28,9 @@ class MvcAuthEvent extends Event
     public function __construct(MvcEvent $mvcEvent)
     {
         $this->mvcEvent = $mvcEvent;
-        /** @var \Zend\ServiceManager\ServiceManager $sm */
+        /** 
+         * @var \Zend\ServiceManager\ServiceManager $sm 
+         */
         $sm = $this->mvcEvent->getApplication()->getServiceManager();
         $this->authentication = $sm->get('authentication');
         if ($sm->has('authorization')) {
