@@ -21,31 +21,28 @@ class DefaultAuthenticationListener
             return;
         }
 
-        // if we have http or digest configured, create adapter as they might need to send challenge
-        if (isset($configuration['zf-mvc-auth']['authentication']['http'])) {
-            $httpConfig = $configuration['zf-mvc-auth']['authentication']['http'];
-
-            if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-                throw new \Exception('accept_schemes is required');
-            }
-
-            $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
-            $httpAdapter->setRequest($request);
-            $httpAdapter->setResponse($response);
-
-            // basic && htpasswd
-            if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
-                $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
-            }
-            if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
-                $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
-            }
-
-        }
-
         if (($authHeader = $request->getHeader('Authorization')) === false) {
-            if (isset($httpAdapter)) {
-                $httpAdapter->challengeClient();
+            // if we have http or digest configured, create adapter as they might need to send challenge
+            if (isset($configuration['zf-mvc-auth']['authentication']['http'])) {
+                $httpConfig = $configuration['zf-mvc-auth']['authentication']['http'];
+
+                if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
+                    throw new \Exception('accept_schemes is required');
+                }
+
+                $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
+                $httpAdapter->setRequest($request);
+                $httpAdapter->setResponse($response);
+
+                // basic && htpasswd
+                if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
+                    $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+                }
+                if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
+                    $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
+                }   
+
+                $httpAdapter->authenticate();
             }
             return;
         }
@@ -63,8 +60,24 @@ class DefaultAuthenticationListener
             case 'basic':
             case 'digest':
 
-                if (!isset($httpAdapter)) {
-                    throw new \Exception('an http adapter is not configured');
+                if (isset($configuration['zf-mvc-auth']['authentication']['http'])) {
+                    $httpConfig = $configuration['zf-mvc-auth']['authentication']['http'];
+
+                    if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
+                        throw new \Exception('accept_schemes is required');
+                    }
+
+                    $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
+                    $httpAdapter->setRequest($request);
+                    $httpAdapter->setResponse($response);
+
+                    // basic && htpasswd
+                    if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
+                        $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+                    }
+                    if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
+                        $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
+                    }   
                 }
 
                 $auth = $mvcAuthEvent->getAuthenticationService();

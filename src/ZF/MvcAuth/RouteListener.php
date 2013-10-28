@@ -73,9 +73,7 @@ class RouteListener
     {
         $em = $event->getApplication()->getEventManager();
         $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent);
-        if ($responses->last() === false) {
-            $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_DENIED, $this->mvcAuthEvent);
-        }
+        return $responses->last();
     }
 
 } 
