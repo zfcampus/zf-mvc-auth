@@ -9,9 +9,6 @@ namespace ZF\MvcAuth;
 use Zend\Mvc\MvcEvent;
 use Zend\Authentication\AuthenticationService;
 
-/**
- * ZF2 module
- */
 class Module
 {
     /**
@@ -39,19 +36,20 @@ class Module
 
     public function onBootstrap(MvcEvent $e)
     {
-        $app = $e->getApplication();
-        $em = $app->getEventManager();
+        $app      = $e->getApplication();
+        $services = $app->getServiceManager();
+        $events   = $app->getEventManager();
 
         $routeListener = new MvcRouteListener($e);
 
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 500);
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPost'), 499);
-        $em->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -500);
+        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 500);
+        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPost'), 499);
+        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -500);
 
-        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new DefaultAuthenticationListener, 1);
-        $em->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new DefaultAuthenticationPostListener, 1);
-        $em->attach(MvcAuthEvent::EVENT_AUTHORIZATION, new DefaultAuthorizationListener, 1);
-        $em->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, new DefaultAuthorizationPostListener, 1);
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new DefaultAuthenticationListener);
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new DefaultAuthenticationPostListener);
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\DefaultAuthorizationListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, new DefaultAuthorizationPostListener);
     }
 
 }
