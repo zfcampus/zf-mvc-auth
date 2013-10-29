@@ -3,64 +3,69 @@
 namespace ZFTest\MvcAuth;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use Zend\EventManager\EventManager;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
+use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Permissions\Acl\Acl;
+use Zend\ServiceManager\Config;
+use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Request;
 use Zend\Stdlib\Response;
-use ZF\MvcAuth\AclFactory;
 use ZF\MvcAuth\DefaultAuthorizationListener;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
+use ZFTest\MvcAuth\TestAsset\AuthenticationService;
 
 class DefaultAuthorizationListenerTest extends TestCase
 {
+    /** @var AuthenticationService */
+    protected $authentication;
+    /** @var Acl */
+    protected $authorization;
+    /** @var array */
+    protected $restControllers = array();
+    /** @var DefaultAuthorizationListener */
+    protected $listener;
+    /** @var MvcAuthEvent */
+    protected $mvcAuthEvent;
+
     public function setUp()
     {
+        // authentication service
+        $this->authentication = new AuthenticationService;
+
+        // authorization service
+        $this->authorization = new Acl();
+        $this->authorization->addRole('guest');
+        $this->authorization->allow();
+
+        // event for mvc and mvc-auth
         $routeMatch = new RouteMatch(array());
         $request    = new HttpRequest();
         $response   = new HttpResponse();
+        $application = new Application(null, new ServiceManager(new Config(array('services' => array(
+            'event_manager' => new EventManager(),
+            'authentication' => $this->authentication,
+            'authorization' => $this->authorization,
+            'request' => $request,
+            'response' => $response
+        )))));
+
         $mvcEvent   = new MvcEvent();
         $mvcEvent->setRequest($request)
             ->setResponse($response)
-            ->setRouteMatch($routeMatch);
-        $this->mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
+            ->setRouteMatch($routeMatch)
+            ->setApplication($application);
 
-        $this->acl = new Acl();
-        $this->acl->addRole('guest');
-        $this->acl->allow();
+        $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
+
         $this->restControllers = array(
             'ZendCon\V1\Rest\Session\Controller' => 'session_id',
         );
-        $this->listener = new DefaultAuthorizationListener($this->acl, $this->restControllers);
-    }
-
-    public function createMvcAuthEvent(MvcEvent $mvcEvent)
-    {
-        $this->authentication = new TestAsset\AuthenticationService();
-
-        $servicesMap = array(
-            array('authentication', $this->authentication),
-            array('authorization', (object) array()),
-        );
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap($servicesMap));
-        $services->expects($this->any())
-            ->method('has')
-            ->will($this->returnValueMap(array(array('authorization', true))));
-
-        $application = $this->getMockBuilder('Zend\Mvc\ApplicationInterface')
-            ->getMock();
-        $application->expects($this->any())
-            ->method('getServiceManager')
-            ->will($this->returnValue($services));
-
-        $mvcEvent->setApplication($application);
-        return new MvcAuthEvent($mvcEvent);
+        $this->listener = new DefaultAuthorizationListener($this->authorization, $this->restControllers);
     }
 
     public function testBailsEarlyOnInvalidRequest()
@@ -86,7 +91,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $mvcEvent   = new MvcEvent();
         $mvcEvent->setRequest($request)
             ->setResponse($response);
-        $mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
+        $mvcAuthEvent = new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
 
         $this->assertNull($listener($mvcAuthEvent));
     }
@@ -115,8 +120,8 @@ class DefaultAuthorizationListenerTest extends TestCase
     public function testReturnsForbiddenResponseIfIdentityFailsAcls()
     {
         $listener = $this->listener;
-        $this->acl->addResource('Foo\Bar\Controller::index');
-        $this->acl->deny('guest', 'Foo\Bar\Controller::index', 'POST');
+        $this->authorization->addResource('Foo\Bar\Controller::index');
+        $this->authorization->deny('guest', 'Foo\Bar\Controller::index', 'POST');
         $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('controller', 'Foo\Bar\Controller');
         $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('action', 'index');
         $this->mvcAuthEvent->getMvcEvent()->getRequest()->setMethod('POST');
