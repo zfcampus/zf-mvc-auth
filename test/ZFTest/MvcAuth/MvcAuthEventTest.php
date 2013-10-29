@@ -20,7 +20,7 @@ class MvcAuthEventTest extends TestCase
 {
 
     /**
-     * @var MvcAuthEvent 
+     * @var MvcAuthEvent
      */
     protected $mvcAuthEvent = null;
 

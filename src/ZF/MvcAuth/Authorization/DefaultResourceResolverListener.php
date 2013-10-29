@@ -27,16 +27,16 @@ class DefaultResourceResolverListener
      *
      * Looks at the matched controller.
      *
-     * If the controller is in the list of rest controllers, determines if we 
-     * have a collection or a resource, based on the presence of the named 
+     * If the controller is in the list of rest controllers, determines if we
+     * have a collection or a resource, based on the presence of the named
      * identifier in the route matches or query string.
      *
-     * Otherwise, looks for the presence of an "action" parameter in the route 
+     * Otherwise, looks for the presence of an "action" parameter in the route
      * matches.
      *
      * Once created, it is injected into the $mvcAuthEvent.
-     * 
-     * @param MvcAuthEvent $mvcAuthEvent 
+     *
+     * @param MvcAuthEvent $mvcAuthEvent
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
