@@ -45,6 +45,10 @@ class DefaultAuthorizationListener
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
+        if ($mvcAuthEvent->isAuthorized()) {
+            return;
+        }
+
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
 
         $request  = $mvcEvent->getRequest();
