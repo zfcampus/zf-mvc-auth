@@ -30,6 +30,12 @@ class MvcAuthEvent extends Event
     protected $authorization;
 
     /**
+     * Whether or not authorization has completed/succeeded
+     * @var bool
+     */
+    protected $authorized = false;
+
+    /**
      * The resource used for authorization queries
      *
      * @var mixed
@@ -99,6 +105,17 @@ class MvcAuthEvent extends Event
     public function setResource($resource)
     {
         $this->resource = $resource;
+        return $this;
+    }
+
+    public function isAuthorized()
+    {
+        return $this->authorized;
+    }
+
+    public function setIsAuthorized($flag)
+    {
+        $this->authorized = (bool) $flag;
         return $this;
     }
 }

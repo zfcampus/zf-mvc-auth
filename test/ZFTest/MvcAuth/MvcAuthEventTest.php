@@ -87,4 +87,18 @@ class MvcAuthEventTest extends TestCase
         $this->mvcAuthEvent->setResource('foo');
         $this->assertEquals('foo', $this->mvcAuthEvent->getResource());
     }
+
+    public function testAuthorizedFlagIsFalseByDefault()
+    {
+        $this->assertFalse($this->mvcAuthEvent->isAuthorized());
+    }
+
+    /**
+     * @depends testAuthorizedFlagIsFalseByDefault
+     */
+    public function testAuthorizedFlagIsMutable()
+    {
+        $this->mvcAuthEvent->setIsAuthorized(true);
+        $this->assertTrue($this->mvcAuthEvent->isAuthorized());
+    }
 }
