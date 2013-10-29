@@ -26,7 +26,7 @@ class AclAuthorization extends Acl implements AuthorizationInterface
      */
     public function isAuthorized(IdentityInterface $identity, $resource, $privilege)
     {
-        if (!$this->hasResource($resource)) {
+        if (null !== $resource && (! $this->hasResource($resource))) {
             $this->addResource($resource);
         }
 

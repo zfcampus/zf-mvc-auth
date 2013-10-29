@@ -117,6 +117,15 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->assertNull($listener($this->mvcAuthEvent));
     }
 
+    public function testBailsEarlyIfMvcAuthEventIsAuthorizedAlready()
+    {
+        $listener = $this->listener;
+        // Setting identity to ensure we don't get a false positive
+        $this->mvcAuthEvent->setIdentity(new GuestIdentity());
+        $this->mvcAuthEvent->setIsAuthorized(true);
+        $this->assertNull($listener($this->mvcAuthEvent));
+    }
+
     public function testReturnsTrueIfIdentityPassesAcls()
     {
         $listener = $this->listener;
