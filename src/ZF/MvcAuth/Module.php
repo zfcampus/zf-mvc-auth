@@ -7,7 +7,6 @@
 namespace ZF\MvcAuth;
 
 use Zend\Mvc\MvcEvent;
-use Zend\Authentication\AuthenticationService;
 
 class Module
 {
@@ -33,7 +32,6 @@ class Module
         return include __DIR__ . '/../../../config/module.config.php';
     }
 
-
     public function onBootstrap(MvcEvent $mvcEvent)
     {
         $app      = $mvcEvent->getApplication();
@@ -53,8 +51,8 @@ class Module
 
         $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new DefaultAuthenticationListener);
         $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new DefaultAuthenticationPostListener);
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\DefaultResourceResolverListener'), 1000);
         $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\DefaultAuthorizationListener'));
         $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, new DefaultAuthorizationPostListener);
     }
-
 }

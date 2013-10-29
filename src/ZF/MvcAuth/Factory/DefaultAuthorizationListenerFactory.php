@@ -18,14 +18,6 @@ use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
  */
 class DefaultAuthorizationListenerFactory implements FactoryInterface
 {
-    protected $httpMethods = array(
-        Request::METHOD_DELETE => true,
-        Request::METHOD_GET    => true,
-        Request::METHOD_PATCH  => true,
-        Request::METHOD_POST   => true,
-        Request::METHOD_PUT    => true,
-    );
-
     /**
      * Create the DefaultAuthorizationListener
      *
@@ -40,40 +32,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
             );
         }
 
-        $config = array();
-        if ($services->has('config')) {
-            $config = $services->get('config');
-        }
-
         return new DefaultAuthorizationListener(
-            $services->get('ZF\MvcAuth\Authorization\AuthorizationInterface'),
-            $this->getRestServicesFromConfig($config)
+            $services->get('ZF\MvcAuth\Authorization\AuthorizationInterface')
         );
-    }
-
-    /**
-     * Generate the list of REST services for the listener
-     *
-     * Looks for zf-rest configuration, and creates a list of controller
-     * service / identifier name pairs to pass to the listener.
-     *
-     * @param array $config
-     * @return array
-     */
-    protected function getRestServicesFromConfig(array $config)
-    {
-        $restServices = array();
-        if (!isset($config['zf-rest'])) {
-            return $restServices;
-        }
-
-        foreach ($config['zf-rest'] as $controllerService => $restConfig) {
-            if (!isset($restConfig['identifier_name'])) {
-                continue;
-            }
-            $restServices[$controllerService] = $restConfig['identifier_name'];
-        }
-
-        return $restServices;
     }
 }
