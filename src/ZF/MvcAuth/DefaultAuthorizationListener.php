@@ -26,8 +26,8 @@ class DefaultAuthorizationListener
     protected $restControllers;
 
     /**
-     * @param Acl $acl 
-     * @param array $restControllers 
+     * @param Acl $acl
+     * @param array $restControllers
      */
     public function __construct(Acl $acl, array $restControllers = array())
     {
@@ -37,8 +37,8 @@ class DefaultAuthorizationListener
 
     /**
      * Attempt to authorize the discovered identity based on the ACLs present
-     * 
-     * @param MvcAuthEvent $mvcAuthEvent 
+     *
+     * @param MvcAuthEvent $mvcAuthEvent
      * @return true|ApiProblemResponse
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
@@ -98,9 +98,9 @@ class DefaultAuthorizationListener
      * - <controller service name>::<action>
      *
      * If it cannot resolve a controller service name, boolean false is returned.
-     * 
-     * @param RouteMatch $routeMatch 
-     * @param Request $request 
+     *
+     * @param RouteMatch $routeMatch
+     * @param Request $request
      * @return false|string
      */
     public function buildResourceString(RouteMatch $routeMatch, Request $request)
@@ -119,8 +119,8 @@ class DefaultAuthorizationListener
             return sprintf('%s::%s', $controller, $action);
         }
 
-        //   - If it is a REST controller, we need to know if we have a 
-        //     resource or a controller. The way to determine that is if we have 
+        //   - If it is a REST controller, we need to know if we have a
+        //     resource or a controller. The way to determine that is if we have
         //     an identifier. We find that info from the route parameters.
         $identifierName = $this->restControllers[$controller];
         $id = $this->getIdentifier($identifierName, $routeMatch, $request);
@@ -135,10 +135,10 @@ class DefaultAuthorizationListener
      *
      * Checks first if the $identifierName is in the route matches, and then
      * as a query string parameter.
-     * 
-     * @param string $identifierName 
-     * @param RouteMatch $routeMatch 
-     * @param Request $request 
+     *
+     * @param string $identifierName
+     * @param RouteMatch $routeMatch
+     * @param Request $request
      * @return false|mixed
      */
     protected function getIdentifier($identifierName, RouteMatch $routeMatch, Request $request)

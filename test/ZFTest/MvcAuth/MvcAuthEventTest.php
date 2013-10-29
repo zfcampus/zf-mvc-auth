@@ -86,4 +86,3 @@ class MvcAuthEventTest extends TestCase
 
 
 }
- 

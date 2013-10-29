@@ -28,8 +28,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
 
     /**
      * Create the DefaultAuthorizationListener
-     * 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param ServiceLocatorInterface $services
      * @return DefaultAuthorizationListener
      */
     public function createService(ServiceLocatorInterface $services)
@@ -52,8 +52,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
      * Generate the ACL instance based on the zf-mc-auth "rules" configuration
      *
      * Consumes the AclFactory in order to create the ACL instance.
-     * 
-     * @param array $config 
+     *
+     * @param array $config
      * @return \Zend\Permissions\Acl\Acl
      */
     protected function createAclFromConfig(array $config)
@@ -76,8 +76,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
      *
      * Looks for zf-rest configuration, and creates a list of controller
      * service / identifier name pairs to pass to the listener.
-     * 
-     * @param array $config 
+     *
+     * @param array $config
      * @return array
      */
     protected function getRestServicesFromConfig(array $config)
@@ -102,10 +102,10 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
      *
      * - Extracts a rule per action
      * - Extracts rules for each of "collection" and "resource" configured
-     * 
-     * @param string $controllerService 
-     * @param array $rules 
-     * @param array $aclConfig 
+     *
+     * @param string $controllerService
+     * @param array $rules
+     * @param array $aclConfig
      */
     protected function createAclConfigFromRules($controllerService, array $rules, &$aclConfig)
     {
@@ -135,8 +135,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
 
     /**
      * Create the list of HTTP methods defining rights
-     * 
-     * @param array $methods 
+     *
+     * @param array $methods
      * @return array|null
      */
     protected function createRightsFromMethods(array $methods)

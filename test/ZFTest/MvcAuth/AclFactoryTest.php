@@ -7,7 +7,7 @@ use ZF\MvcAuth\AclFactory;
 
 class AclFactoryTest extends TestCase
 {
-    public function testFactoryGeneratesAclFromConfiguration() 
+    public function testFactoryGeneratesAclFromConfiguration()
     {
         $config = array(
             array(
