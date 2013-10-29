@@ -18,6 +18,8 @@ class MvcAuthEvent extends Event
     const EVENT_AUTHORIZATION = 'authorization';
     const EVENT_AUTHORIZATION_POST = 'authorization.post';
 
+    protected $mvcEvent;
+
     protected $authentication;
 
     /** @var Result */
@@ -25,17 +27,11 @@ class MvcAuthEvent extends Event
 
     protected $authorization;
 
-    public function __construct(MvcEvent $mvcEvent)
+    public function __construct(MvcEvent $mvcEvent, $authentication, $authorization)
     {
         $this->mvcEvent = $mvcEvent;
-        /**
-         * @var \Zend\ServiceManager\ServiceManager $sm
-         */
-        $sm = $this->mvcEvent->getApplication()->getServiceManager();
-        $this->authentication = $sm->get('authentication');
-        if ($sm->has('authorization')) {
-            $this->authorization = $sm->get('authorization');
-        }
+        $this->authentication = $authentication;
+        $this->authorization = $authorization;
     }
 
     /**

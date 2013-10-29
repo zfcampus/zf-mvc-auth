@@ -3,9 +3,9 @@
 namespace ZF\MvcAuth;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
+use Zend\Config\Config;
 use Zend\Http\Request as HttpRequest;
 use ZF\MvcAuth\Identity;
-
 
 class DefaultAuthenticationListener
 {
@@ -20,9 +20,18 @@ class DefaultAuthenticationListener
             return;
         }
 
+        if (!isset($configuration['zf-mvc-auth']['authentication'])) {
+            return;
+        }
+        $authConfig = $configuration['zf-mvc-auth']['authentication'];
+        if ($authConfig instanceof Config) {
+            $authConfig = $authConfig->toArray();
+        }
+
         // if we have http or digest configured, create adapter as they might need to send challenge
-        if (isset($configuration['zf-mvc-auth']['authentication']['http'])) {
-            $httpConfig = $configuration['zf-mvc-auth']['authentication']['http'];
+        if (isset($authConfig['http'])) {
+
+            $httpConfig = $authConfig['http'];
 
             if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
                 throw new \Exception('accept_schemes is required');

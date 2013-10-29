@@ -9,28 +9,18 @@ namespace ZF\MvcAuth;
 use Zend\Authentication\Result;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
+use Zend\Stdlib\Response;
 
 class MvcRouteListener
 {
     protected $mvcAuthEvent;
 
-    /** @var \Zend\Authentication\AuthenticationService */
-    protected $authentication;
-
     protected $configuration;
 
-    public function __construct(MvcEvent $mvcEvent)
+    public function __construct(MvcAuthEvent $mvcAuthEvent, $configuration)
     {
-        $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent);
+        $this->mvcAuthEvent = $mvcAuthEvent;
         $this->mvcAuthEvent->setTarget($this);
-
-        $sm = $mvcEvent->getApplication()->getServiceManager();
-
-        /** @var \Zend\Authentication\AuthenticationService $auth */
-        $auth = $sm->get('authentication');
-
-        $this->authentication = $auth;
-        $this->configuration = $sm->get('Config');
     }
 
     public function authentication(MvcEvent $mvcEvent)
@@ -39,7 +29,8 @@ class MvcRouteListener
 
         $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $this->mvcAuthEvent);
 
-        $storage = $this->authentication->getStorage();
+        $authentication = $this->mvcAuthEvent->getAuthenticationService();
+        $storage = $authentication->getStorage();
 
         $createGuestIdentity = false;
 
@@ -47,10 +38,12 @@ class MvcRouteListener
         $result = $responses->last();
         if ($result instanceof Identity\IdentityInterface) {
             $storage->write($result);
+        } elseif ($result instanceof Response) {
+            return $result;
         }
 
         // if not identity is in the authentication service, time to figure some stuff out
-        if ($this->authentication->getIdentity() === null) {
+        if ($authentication->getIdentity() === null) {
             if (!$this->mvcAuthEvent->hasAuthenticationResult()) {
                 // if there is no Authentication result, safe to assume we have a guest
                 $createGuestIdentity = true;
@@ -73,9 +66,20 @@ class MvcRouteListener
     {
         $em = $event->getApplication()->getEventManager();
         $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent);
-        if ($responses->last() === false) {
-            $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_DENIED, $this->mvcAuthEvent);
+        $result = $responses->last();
+        // authorization: returns bool, or Response
+        if (is_bool($result)) {
+            // $this->mvcAuthEvent->setIsAuthorized($result); // @todo Matthew fill this in
+        } elseif ($result instanceof Response) {
+            return $result;
         }
+    }
+
+    public function authorizationPost(MvcEvent $event)
+    {
+        $em = $event->getApplication()->getEventManager();
+        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->mvcAuthEvent);
+        return $responses->last();
     }
 
 }
