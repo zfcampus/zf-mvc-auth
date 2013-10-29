@@ -1,4 +1,8 @@
 <?php
+/**
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ */
 
 namespace ZFTest\MvcAuth\Authorization;
 
@@ -31,10 +35,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->acl = new AclAuthorization();
         $this->acl->addRole('guest');
         $this->acl->allow();
-        $this->restControllers = array(
-            'ZendCon\V1\Rest\Session\Controller' => 'session_id',
-        );
-        $this->listener = new DefaultAuthorizationListener($this->acl, $this->restControllers);
+        $this->listener = new DefaultAuthorizationListener($this->acl);
     }
 
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
@@ -97,18 +98,12 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->assertNull($listener($this->mvcAuthEvent));
     }
 
-    public function testBailsEarlyOnMissingControllerInRouteMatch()
-    {
-        $listener = $this->listener;
-        $this->mvcAuthEvent->setIdentity(new GuestIdentity());
-        $this->assertNull($listener($this->mvcAuthEvent));
-    }
-
     public function testReturnsTrueIfIdentityPassesAcls()
     {
         $listener = $this->listener;
         $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('controller', 'Foo\Bar\Controller');
         $this->mvcAuthEvent->setIdentity(new GuestIdentity());
+        $this->mvcAuthEvent->setResource('Foo\Bar\Controller');
         $this->assertTrue($listener($this->mvcAuthEvent));
     }
 
@@ -117,57 +112,9 @@ class DefaultAuthorizationListenerTest extends TestCase
         $listener = $this->listener;
         $this->acl->addResource('Foo\Bar\Controller::index');
         $this->acl->deny('guest', 'Foo\Bar\Controller::index', 'POST');
-        $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('controller', 'Foo\Bar\Controller');
-        $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('action', 'index');
+        $this->mvcAuthEvent->setResource('Foo\Bar\Controller::index');
         $this->mvcAuthEvent->getMvcEvent()->getRequest()->setMethod('POST');
         $this->authentication->setIdentity(new GuestIdentity());
         $this->assertFalse($listener($this->mvcAuthEvent));
-    }
-
-    public function testBuildResourceStringReturnsFalseIfControllerIsMissing()
-    {
-        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
-        $routeMatch = $mvcEvent->getRouteMatch();
-        $request    = $mvcEvent->getRequest();
-        $this->assertFalse($this->listener->buildResourceString($routeMatch, $request));
-    }
-
-    public function testBuildResourceStringReturnsControllerActionFormattedStringForNonRestController()
-    {
-        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
-        $routeMatch = $mvcEvent->getRouteMatch();
-        $routeMatch->setParam('controller', 'Foo\Bar\Controller');
-        $routeMatch->setParam('action', 'foo');
-        $request    = $mvcEvent->getRequest();
-        $this->assertEquals('Foo\Bar\Controller::foo', $this->listener->buildResourceString($routeMatch, $request));
-    }
-
-    public function testBuildResourceStringReturnsControllerNameAndCollectionIfNoIdentifierAvailable()
-    {
-        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
-        $routeMatch = $mvcEvent->getRouteMatch();
-        $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
-        $request    = $mvcEvent->getRequest();
-        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::collection', $this->listener->buildResourceString($routeMatch, $request));
-    }
-
-    public function testBuildResourceStringReturnsControllerNameAndResourceIfIdentifierInRouteMatch()
-    {
-        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
-        $routeMatch = $mvcEvent->getRouteMatch();
-        $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
-        $routeMatch->setParam('session_id', 'foo');
-        $request    = $mvcEvent->getRequest();
-        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::resource', $this->listener->buildResourceString($routeMatch, $request));
-    }
-
-    public function testBuildResourceStringReturnsControllerNameAndResourceIfIdentifierInQueryString()
-    {
-        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
-        $routeMatch = $mvcEvent->getRouteMatch();
-        $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
-        $request    = $mvcEvent->getRequest();
-        $request->getQuery()->set('session_id', 'bar');
-        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::resource', $this->listener->buildResourceString($routeMatch, $request));
     }
 }

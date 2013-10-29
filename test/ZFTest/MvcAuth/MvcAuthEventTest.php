@@ -18,7 +18,9 @@ use PHPUnit_Framework_TestCase as TestCase;
 class MvcAuthEventTest extends TestCase
 {
 
-    /** @var MvcAuthEvent */
+    /**
+     * @var MvcAuthEvent 
+     */
     protected $mvcAuthEvent = null;
 
     public function setup()
@@ -84,5 +86,17 @@ class MvcAuthEventTest extends TestCase
         $this->assertSame($i, $this->mvcAuthEvent->getIdentity());
     }
 
+    public function testResourceStringIsNullByDefault()
+    {
+        $this->assertNull($this->mvcAuthEvent->getResource());
+    }
 
+    /**
+     * @depends testResourceStringIsNullByDefault
+     */
+    public function testResourceStringIsMutable()
+    {
+        $this->mvcAuthEvent->setResource('foo');
+        $this->assertEquals('foo', $this->mvcAuthEvent->getResource());
+    }
 }
