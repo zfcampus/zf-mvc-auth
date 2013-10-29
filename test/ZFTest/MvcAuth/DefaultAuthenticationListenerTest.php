@@ -20,23 +20,44 @@ use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListenerTest extends TestCase
 {
-    /** @var HttpRequest */
+    /**
+     * @var HttpRequest
+     */
     protected $request;
-    /** @var HttpResponse */
+
+    /**
+     * @var HttpResponse
+     */
     protected $response;
 
-    /** @var AuthenticationService */
+    /**
+     * @var AuthenticationService
+     */
     protected $authentication;
-    /** @var Acl */
+
+    /**
+     * @var Acl
+     */
     protected $authorization;
-    /** @var array */
+
+    /**
+     * @var array
+     */
     protected $restControllers = array();
-    /** @var DefaultAuthenticationListener */
+
+    /**
+     * @var DefaultAuthenticationListener
+     */
     protected $listener;
-    /** @var MvcAuthEvent */
+
+    /**
+     * @var MvcAuthEvent
+     */
     protected $mvcAuthEvent;
 
-    /** @var \Zend\Config\Config */
+    /**
+     * @var \Zend\Config\Config
+     */
     protected $configuration;
 
     public function setUp()
@@ -101,7 +122,6 @@ class DefaultAuthenticationListenerTest extends TestCase
         )));
 
         $this->listener->__invoke($this->mvcAuthEvent);
-        /** @var \ZF\MvcAuth\Identity\AuthenticatedIdentity $identity */
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
@@ -126,7 +146,6 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic dXNlcjp1c2Vy');
         $this->listener->__invoke($this->mvcAuthEvent);
-        /** @var \ZF\MvcAuth\Identity\AuthenticatedIdentity $identity */
         $identity = $this->mvcAuthEvent->getIdentity();
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
         $this->assertEquals('user', $identity->getRoleId());
@@ -171,11 +190,9 @@ class DefaultAuthenticationListenerTest extends TestCase
         )));
 
         $this->listener->__invoke($this->mvcAuthEvent);
-        /** @var \ZF\MvcAuth\Identity\AuthenticatedIdentity $identity */
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
-        $this->assertEquals('Digest realm="User Area", domain="/", nonce="1d5a29a623bb4350962d2ea62e741aca", opaque="e66aa41ca5bf6992a5479102cc787bc9", algorithm="MD5", qop="auth"', $authHeader->getFieldValue());
+        $this->assertRegexp('#^Digest realm="User Area", domain="/", nonce="[a-f0-9]{32}", opaque="e66aa41ca5bf6992a5479102cc787bc9", algorithm="MD5", qop="auth"$#', $authHeader->getFieldValue());
     }
-
 }

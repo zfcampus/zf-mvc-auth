@@ -29,27 +29,8 @@ class UnauthorizedListenerTest extends TestCase
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
     {
         $this->authentication = new TestAsset\AuthenticationService();
-
-        $servicesMap = array(
-            array('authentication', $this->authentication),
-            array('authorization', (object) array()),
-        );
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap($servicesMap));
-        $services->expects($this->any())
-            ->method('has')
-            ->will($this->returnValueMap(array(array('authorization', true))));
-
-        $application = $this->getMockBuilder('Zend\Mvc\ApplicationInterface')
-            ->getMock();
-        $application->expects($this->any())
-            ->method('getServiceManager')
-            ->will($this->returnValue($services));
-
-        $mvcEvent->setApplication($application);
-        return new MvcAuthEvent($mvcEvent);
+        $this->authorization  = $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface');
+        return new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
     }
 
     public function testReturnsNullWhenEventIsAuthorized()
