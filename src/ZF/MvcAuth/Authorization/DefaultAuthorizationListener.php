@@ -4,19 +4,21 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth;
+namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Permissions\Acl\Acl;
+use ZF\MvcAuth\MvcAuthEvent;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 class DefaultAuthorizationListener
 {
     /**
-     * @var Acl
+     * @var AuthorizationInterface
      */
-    protected $acl;
+    protected $authorization;
 
     /**
      * Array of controller_service_name/identifier_name pairs
@@ -29,9 +31,9 @@ class DefaultAuthorizationListener
      * @param Acl $acl
      * @param array $restControllers
      */
-    public function __construct(Acl $acl, array $restControllers = array())
+    public function __construct(AuthorizationInterface $authorization, array $restControllers = array())
     {
-        $this->acl = $acl;
+        $this->authorization   = $authorization;
         $this->restControllers = $restControllers;
     }
 
@@ -39,7 +41,7 @@ class DefaultAuthorizationListener
      * Attempt to authorize the discovered identity based on the ACLs present
      *
      * @param MvcAuthEvent $mvcAuthEvent
-     * @return true|ApiProblemResponse
+     * @return bool
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
@@ -61,7 +63,7 @@ class DefaultAuthorizationListener
         }
 
         $identity = $mvcAuthEvent->getIdentity();
-        if (!$identity instanceof Identity\IdentityInterface) {
+        if (!$identity instanceof IdentityInterface) {
             return;
         }
 
@@ -70,19 +72,8 @@ class DefaultAuthorizationListener
             return;
         }
 
-        // If the resource does not exist, add it. Theoretically, though, this
-        // means that the current identity is already allowed.
-        if (!$this->acl->hasResource($resource)) {
-            $this->acl->addResource($resource);
-        }
-
         $identity = $mvcAuthEvent->getIdentity();
-        if (!$this->acl->isAllowed($identity, $resource, $request->getMethod())) {
-            $response->setStatusCode(403);
-            $response->setReasonPhrase('Forbidden');
-            return $response;
-        }
-        return true;
+        return $this->authorization->isAuthorized($identity, $resource, $request->getMethod());
     }
 
     /**

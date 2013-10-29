@@ -1,15 +1,17 @@
 <?php
+/**
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ */
 
-namespace ZF\MvcAuth;
+namespace ZF\MvcAuth\Authorization;
 
-use Zend\Permissions\Acl\Acl;
-
-abstract class AclFactory
+abstract class AclAuthorizationFactory
 {
     public static function factory(array $config)
     {
         // By default, create an open ACL
-        $acl = new Acl;
+        $acl = new AclAuthorization;
         $acl->addRole('guest');
         $acl->allow();
 

@@ -6,9 +6,14 @@
 
 return array(
     'service_manager' => array(
+        'aliases' => array(
+            'authorization' => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
+            'ZF\MvcAuth\Authorization\AuthorizationInterface' => 'ZF\MvcAuth\Authorization\AclAuthorization',
+        ),
         'factories' => array(
             'authentication' => 'ZF\MvcAuth\AuthenticationServiceFactory',
-            'ZF\MvcAuth\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
+            'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
+            'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
         ),
     ),
     'controllers' => array(

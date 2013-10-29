@@ -1,6 +1,6 @@
 <?php
 
-namespace ZFTest\MvcAuth;
+namespace ZFTest\MvcAuth\Authorization;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\EventManager\EventManager;
@@ -9,27 +9,41 @@ use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\RouteMatch;
-use Zend\Permissions\Acl\Acl;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Request;
 use Zend\Stdlib\Response;
-use ZF\MvcAuth\DefaultAuthorizationListener;
+use ZF\MvcAuth\Authorization\AclAuthorization;
+use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZFTest\MvcAuth\TestAsset\AuthenticationService;
 
 class DefaultAuthorizationListenerTest extends TestCase
 {
-    /** @var AuthenticationService */
+    /** 
+     * @var AuthenticationService 
+     */
     protected $authentication;
-    /** @var Acl */
+
+    /**
+     * @var Acl 
+     */
     protected $authorization;
-    /** @var array */
+
+    /**
+     * @var array 
+     */
     protected $restControllers = array();
-    /** @var DefaultAuthorizationListener */
+
+    /**
+     * @var DefaultAuthorizationListener
+     */
     protected $listener;
-    /** @var MvcAuthEvent */
+
+    /**
+     * @var MvcAuthEvent
+     */
     protected $mvcAuthEvent;
 
     public function setUp()
@@ -62,6 +76,9 @@ class DefaultAuthorizationListenerTest extends TestCase
 
         $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
 
+        $this->acl = new AclAuthorization();
+        $this->acl->addRole('guest');
+        $this->acl->allow();
         $this->restControllers = array(
             'ZendCon\V1\Rest\Session\Controller' => 'session_id',
         );
@@ -117,7 +134,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->assertTrue($listener($this->mvcAuthEvent));
     }
 
-    public function testReturnsForbiddenResponseIfIdentityFailsAcls()
+    public function testReturnsFalseIfIdentityFailsAcls()
     {
         $listener = $this->listener;
         $this->authorization->addResource('Foo\Bar\Controller::index');
@@ -126,10 +143,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('action', 'index');
         $this->mvcAuthEvent->getMvcEvent()->getRequest()->setMethod('POST');
         $this->authentication->setIdentity(new GuestIdentity());
-        $result = $listener($this->mvcAuthEvent);
-        $this->assertSame($this->mvcAuthEvent->getMvcEvent()->getResponse(), $result);
-        $this->assertEquals(403, $result->getStatusCode());
-        $this->assertEquals('Forbidden', $result->getReasonPhrase());
+        $this->assertFalse($listener($this->mvcAuthEvent));
     }
 
     public function testBuildResourceStringReturnsFalseIfControllerIsMissing()
