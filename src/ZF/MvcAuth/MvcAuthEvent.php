@@ -29,7 +29,7 @@ class MvcAuthEvent extends Event
 
     /**
      * The resource used for authorization queries
-     * 
+     *
      * @var mixed
      */
     protected $resource;
