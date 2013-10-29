@@ -1,19 +1,19 @@
 <?php
 
-namespace ZFTest\MvcAuth;
+namespace ZFTest\MvcAuth\Authorization;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\RouteMatch;
-use Zend\Permissions\Acl\Acl;
 use Zend\Stdlib\Request;
 use Zend\Stdlib\Response;
-use ZF\MvcAuth\AclFactory;
-use ZF\MvcAuth\DefaultAuthorizationListener;
+use ZF\MvcAuth\Authorization\AclAuthorization;
+use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
+use ZFTest\MvcAuth\TestAsset;
 
 class DefaultAuthorizationListenerTest extends TestCase
 {
@@ -28,7 +28,7 @@ class DefaultAuthorizationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
         $this->mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
 
-        $this->acl = new Acl();
+        $this->acl = new AclAuthorization();
         $this->acl->addRole('guest');
         $this->acl->allow();
         $this->restControllers = array(
@@ -112,7 +112,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->assertTrue($listener($this->mvcAuthEvent));
     }
 
-    public function testReturnsForbiddenResponseIfIdentityFailsAcls()
+    public function testReturnsFalseIfIdentityFailsAcls()
     {
         $listener = $this->listener;
         $this->acl->addResource('Foo\Bar\Controller::index');
@@ -121,10 +121,7 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->mvcAuthEvent->getMvcEvent()->getRouteMatch()->setParam('action', 'index');
         $this->mvcAuthEvent->getMvcEvent()->getRequest()->setMethod('POST');
         $this->authentication->setIdentity(new GuestIdentity());
-        $result = $listener($this->mvcAuthEvent);
-        $this->assertSame($this->mvcAuthEvent->getMvcEvent()->getResponse(), $result);
-        $this->assertEquals(403, $result->getStatusCode());
-        $this->assertEquals('Forbidden', $result->getReasonPhrase());
+        $this->assertFalse($listener($this->mvcAuthEvent));
     }
 
     public function testBuildResourceStringReturnsFalseIfControllerIsMissing()

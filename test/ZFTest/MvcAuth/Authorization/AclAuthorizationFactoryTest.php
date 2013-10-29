@@ -1,11 +1,11 @@
 <?php
 
-namespace ZFTest\MvcAuth;
+namespace ZFTest\MvcAuth\Authorization;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use ZF\MvcAuth\AclFactory;
+use ZF\MvcAuth\Authorization\AclAuthorizationFactory;
 
-class AclFactoryTest extends TestCase
+class AclAuthorizationFactoryTest extends TestCase
 {
     public function testFactoryGeneratesAclFromConfiguration()
     {
@@ -24,8 +24,9 @@ class AclFactoryTest extends TestCase
             ),
         );
 
-        $acl = AclFactory::factory($config);
+        $acl = AclAuthorizationFactory::factory($config);
 
+        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
         $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $acl);
         $this->assertTrue($acl->hasRole('guest'));
         $this->assertFalse($acl->hasRole('authenticated'));
