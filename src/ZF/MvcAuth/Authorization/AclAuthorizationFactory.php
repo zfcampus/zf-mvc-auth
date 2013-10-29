@@ -10,13 +10,26 @@ abstract class AclAuthorizationFactory
 {
     public static function factory(array $config)
     {
+        // Determine whether we are whitelisting or blacklisting
+        $denyByDefault = false;
+        if (isset($config['deny_by_default'])) {
+            $denyByDefault = (bool) $config['deny_by_default'];
+            unset($config['deny_by_default']);
+        }
+
         // By default, create an open ACL
         $acl = new AclAuthorization;
         $acl->addRole('guest');
         $acl->allow();
 
+        $grant = 'deny';
+        if ($denyByDefault) {
+            $acl->deny('guest', null, null);
+            $grant = 'allow';
+        }
+
         foreach ($config as $set) {
-            if (!isset($set['resource'])) {
+            if (!is_array($set) || !isset($set['resource'])) {
                 continue;
             }
 
@@ -25,8 +38,8 @@ abstract class AclAuthorizationFactory
             $acl->addResource($set['resource']);
 
             // Deny guest specified privileges to resource
-            $rights   = isset($set['rights']) ? $set['rights'] : null;
-            $acl->deny('guest', $resource, $rights);
+            $rights = isset($set['rights']) ? $set['rights'] : null;
+            $acl->$grant('guest', $resource, $rights);
         }
 
         return $acl;

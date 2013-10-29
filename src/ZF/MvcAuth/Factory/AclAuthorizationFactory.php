@@ -54,6 +54,14 @@ class AclAuthorizationFactory implements FactoryInterface
     protected function createAclFromConfig(array $config)
     {
         $aclConfig = array();
+
+        if (isset($config['zf-mvc-auth'])
+            && isset($config['zf-mvc-auth']['deny_by_default'])
+            && $config['zf-mvc-auth']['deny_by_default']
+        ) {
+            $aclConfig['deny_by_default'] = true;
+        }
+
         if (isset($config['zf-mvc-auth'])
             && isset($config['zf-mvc-auth']['rules'])
         ) {
