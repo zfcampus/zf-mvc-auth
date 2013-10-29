@@ -20,10 +20,25 @@ class MvcAuthEvent extends Event
 
     protected $authentication;
 
-    /** @var Result */
+    /**
+     * @var Result
+     */
     protected $authenticationResult = null;
 
     protected $authorization;
+
+    /**
+     * Whether or not authorization has completed/succeeded
+     * @var bool
+     */
+    protected $authorized = false;
+
+    /**
+     * The resource used for authorization queries
+     *
+     * @var mixed
+     */
+    protected $resource;
 
     public function __construct(MvcEvent $mvcEvent)
     {
@@ -86,4 +101,25 @@ class MvcAuthEvent extends Event
         return $this;
     }
 
+    public function getResource()
+    {
+        return $this->resource;
+    }
+
+    public function setResource($resource)
+    {
+        $this->resource = $resource;
+        return $this;
+    }
+
+    public function isAuthorized()
+    {
+        return $this->authorized;
+    }
+
+    public function setIsAuthorized($flag)
+    {
+        $this->authorized = (bool) $flag;
+        return $this;
+    }
 }
