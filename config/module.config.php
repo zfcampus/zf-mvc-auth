@@ -16,6 +16,10 @@ return array(
             'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
             'ZF\MvcAuth\Authorization\DefaultResourceResolverListener' => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
         ),
+        'invokables' => array(
+            'ZF\MvcAuth\Authentication\UnauthenticatedListener' => 'ZF\MvcAuth\Authentication\UnauthenticatedListener',
+            'ZF\MvcAuth\Authorization\UnauthorizedListener' => 'ZF\MvcAuth\Authorization\UnauthorizedListener',
+        ),
     ),
     'controllers' => array(
         'invokables' => array(
@@ -23,10 +27,10 @@ return array(
         ),
     ),
     'zf-mvc-auth' => array(
-        // Toggle the following to true to change the ACL creation to require an 
+        // Toggle the following to true to change the ACL creation to require an
         // authenticated user by default, and thus selectively allow unauthenticated
         // users based on the rules.
-        'deny_by_default' => false, 
+        'deny_by_default' => false,
         'rules' => array(
             /*
              * Rules indicating what controllers are behind authentication.
