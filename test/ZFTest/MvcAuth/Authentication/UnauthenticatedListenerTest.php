@@ -11,11 +11,11 @@ use Zend\Authentication\Result as AuthenticationResult;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Response;
-use ZF\MvcAuth\Authentication\UnauthenticatedListener;
+use ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZFTest\MvcAuth\TestAsset;
 
-class UnauthenticatedListenerTest extends TestCase
+class DefaultAuthenticationPostListenerTest extends TestCase
 {
     public function setUp()
     {
@@ -24,7 +24,7 @@ class UnauthenticatedListenerTest extends TestCase
         $mvcEvent->setResponse($response);
         $this->mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
 
-        $this->listener = new UnauthenticatedListener();
+        $this->listener = new DefaultAuthenticationPostListener();
     }
 
     public function createMvcAuthEvent(MvcEvent $mvcEvent)

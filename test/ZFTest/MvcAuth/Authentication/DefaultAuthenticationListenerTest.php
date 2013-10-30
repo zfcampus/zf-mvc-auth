@@ -1,6 +1,10 @@
 <?php
+/**
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ */
 
-namespace ZFTest\MvcAuth;
+namespace ZFTest\MvcAuth\Authentication;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Authentication\AuthenticationService;
@@ -15,7 +19,7 @@ use Zend\Mvc\Router\Http\RouteMatch;
 use Zend\Permissions\Acl\Acl;
 use Zend\ServiceManager\Config as ServiceConfig;
 use Zend\ServiceManager\ServiceManager;
-use ZF\MvcAuth\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListenerTest extends TestCase
@@ -115,7 +119,7 @@ class DefaultAuthenticationListenerTest extends TestCase
                         'realm' => 'My Web Site',
                         'digest_domains' => '/',
                         'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/TestAsset/htpasswd'
+                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
                     )
                 )
             )
@@ -138,7 +142,7 @@ class DefaultAuthenticationListenerTest extends TestCase
                         'realm' => 'My Web Site',
                         'digest_domains' => '/',
                         'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/TestAsset/htpasswd'
+                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
                     )
                 )
             )
@@ -161,7 +165,7 @@ class DefaultAuthenticationListenerTest extends TestCase
                         'realm' => 'My Web Site',
                         'digest_domains' => '/',
                         'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/TestAsset/htpasswd'
+                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
                     )
                 )
             )
@@ -183,7 +187,7 @@ class DefaultAuthenticationListenerTest extends TestCase
                         'realm' => 'User Area',
                         'digest_domains' => '/',
                         'nonce_timeout' => 3600,
-                        'htdigest' => __DIR__ . '/TestAsset/htdigest'
+                        'htdigest' => __DIR__ . '/../TestAsset/htdigest'
                     )
                 )
             )

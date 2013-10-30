@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth;
+namespace ZF\MvcAuth\Authentication;
 
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\NonPersistent;
@@ -17,7 +17,7 @@ class AuthenticationServiceFactory implements FactoryInterface
      * Create service
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
+     * @return AuthenticationService
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {

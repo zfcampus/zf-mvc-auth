@@ -4,27 +4,22 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth\Authentication;
+namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Response as HttpResponse;
 use ZF\MvcAuth\MvcAuthEvent;
 
-class UnauthenticatedListener
+class DefaultAuthorizationPostListener
 {
     /**
-     * Determine if we have an authentication failure, and, if so, return a 401 response
+     * Determine if we have an authorization failure, and, if so, return a 403 response
      *
      * @param MvcAuthEvent $mvcAuthEvent
      * @return null|\Zend\Http\Response
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
-        if (!$mvcAuthEvent->hasAuthenticationResult()) {
-            return;
-        }
-
-        $authResult = $mvcAuthEvent->getAuthenticationResult();
-        if ($authResult->isValid()) {
+        if ($mvcAuthEvent->isAuthorized()) {
             return;
         }
 
@@ -34,8 +29,8 @@ class UnauthenticatedListener
             return $response;
         }
 
-        $response->setStatusCode(401);
-        $response->setReasonPhrase('Unauthorized');
+        $response->setStatusCode(403);
+        $response->setReasonPhrase('Forbidden');
         return $response;
     }
 }

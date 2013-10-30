@@ -1,11 +1,16 @@
 <?php
+/**
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ */
 
-namespace ZF\MvcAuth;
+namespace ZF\MvcAuth\Authentication;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Config\Config;
 use Zend\Http\Request as HttpRequest;
 use ZF\MvcAuth\Identity;
+use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListener
 {

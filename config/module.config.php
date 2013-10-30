@@ -7,18 +7,19 @@
 return array(
     'service_manager' => array(
         'aliases' => array(
+            'authentication' => 'ZF\MvcAuth\Authentication',
             'authorization' => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
             'ZF\MvcAuth\Authorization\AuthorizationInterface' => 'ZF\MvcAuth\Authorization\AclAuthorization',
         ),
         'factories' => array(
-            'authentication' => 'ZF\MvcAuth\AuthenticationServiceFactory',
+            'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
             'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
             'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
             'ZF\MvcAuth\Authorization\DefaultResourceResolverListener' => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
         ),
         'invokables' => array(
-            'ZF\MvcAuth\Authentication\UnauthenticatedListener' => 'ZF\MvcAuth\Authentication\UnauthenticatedListener',
-            'ZF\MvcAuth\Authorization\UnauthorizedListener' => 'ZF\MvcAuth\Authorization\UnauthorizedListener',
+            'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => 'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener',
+            'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
         ),
     ),
     'controllers' => array(

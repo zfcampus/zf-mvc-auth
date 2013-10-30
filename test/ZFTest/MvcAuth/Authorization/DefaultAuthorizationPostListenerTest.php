@@ -10,11 +10,11 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Response;
-use ZF\MvcAuth\Authorization\UnauthorizedListener;
+use ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZFTest\MvcAuth\TestAsset;
 
-class UnauthorizedListenerTest extends TestCase
+class DefaultAuthorizationPostListenerTest extends TestCase
 {
     public function setUp()
     {
@@ -23,7 +23,7 @@ class UnauthorizedListenerTest extends TestCase
         $mvcEvent->setResponse($response);
         $this->mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
 
-        $this->listener = new UnauthorizedListener();
+        $this->listener = new DefaultAuthorizationPostListener();
     }
 
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
