@@ -91,7 +91,9 @@ class MvcRouteListener extends AbstractListenerAggregate
         }
 
         // If we have a Result, we create an AuthenticatedIdentity from it
-        if ($result instanceof Result) {
+        if ($result instanceof Result
+            && $result->isValid()
+        ) {
             $mvcAuthEvent->setAuthenticationResult($result);
             $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($result->getIdentity()));
             return;
@@ -104,8 +106,14 @@ class MvcRouteListener extends AbstractListenerAggregate
             return;
         }
 
+        if ($mvcAuthEvent->hasAuthenticationResult()
+            && $mvcAuthEvent->getAuthenticationResult()->isValid()
+        ) {
+            $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($mvcAuthEvent->getAuthenticationResult()->getIdentity()));
+        }
+
         if ($identity !== null) {
-            // identity found in authentication; create an authenticated identity
+            // identity found in authentication; we can assume we're authenticated
             $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
             return;
         }

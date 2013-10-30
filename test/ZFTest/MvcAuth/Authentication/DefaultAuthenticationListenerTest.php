@@ -7,18 +7,13 @@
 namespace ZFTest\MvcAuth\Authentication;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\NonPersistent;
-use Zend\Config\Config as Configuration;
-use Zend\EventManager\EventManager;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
-use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\Http\RouteMatch;
-use Zend\Permissions\Acl\Acl;
-use Zend\ServiceManager\Config as ServiceConfig;
-use Zend\ServiceManager\ServiceManager;
+use Zend\Stdlib\Request;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\MvcAuthEvent;
 
@@ -39,9 +34,6 @@ class DefaultAuthenticationListenerTest extends TestCase
      */
     protected $authentication;
 
-    /**
-     * @var Acl
-     */
     protected $authorization;
 
     /**
@@ -70,60 +62,36 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->authentication = new AuthenticationService(new NonPersistent());
 
         // authorization service
-        $this->authorization = new Acl();
-        $this->authorization->addRole('guest');
-        $this->authorization->allow();
-
-        $this->configuration = new Configuration(array());
+        $this->authorization = $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface');
 
         // event for mvc and mvc-auth
-        $routeMatch = new RouteMatch(array());
         $this->request    = new HttpRequest();
         $this->response   = new HttpResponse();
-        $application = new Application($this->configuration, new ServiceManager(new ServiceConfig(array('services' => array(
-            'event_manager' => new EventManager(),
-            'authentication' => $this->authentication,
-            'authorization' => $this->authorization,
-            'request' => $this->request,
-            'response' => $this->response,
-            'configuration' => $this->configuration
-        )))));
 
-        $mvcEvent   = new MvcEvent();
+        $mvcEvent = new MvcEvent();
         $mvcEvent->setRequest($this->request)
-            ->setResponse($this->response)
-            ->setRouteMatch($routeMatch)
-            ->setApplication($application);
+            ->setResponse($this->response);
 
         $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
-
-        $this->restControllers = array(
-            'ZendCon\V1\Rest\Session\Controller' => 'session_id',
-        );
-        $this->listener = new DefaultAuthenticationListener($this->authorization, $this->restControllers);
+        $this->listener     = new DefaultAuthenticationListener();
     }
 
     public function testInvokeReturnsEarlyWhenNotHttpRequest()
     {
-        $this->mvcAuthEvent->getMvcEvent()->setRequest(new \Zend\Stdlib\Request());
+        $this->mvcAuthEvent->getMvcEvent()->setRequest(new Request());
         $this->assertNull($this->listener->__invoke($this->mvcAuthEvent));
     }
 
     public function testInvokeForBasicAuthAddsAuthorizationHeader()
     {
-        $this->configuration->merge(new Configuration(array(
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'http' => array(
-                        'accept_schemes' => array('basic'),
-                        'realm' => 'My Web Site',
-                        'digest_domains' => '/',
-                        'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
-                    )
-                )
-            )
-        )));
+        $httpAuth = new HttpAuth(array(
+            'accept_schemes' => 'basic',
+            'realm' => 'My Web Site',
+            'digest_domains' => '/',
+            'nonce_timeout' => 3600,
+        ));
+        $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
+        $this->listener->setHttpAdapter($httpAuth);
 
         $this->listener->__invoke($this->mvcAuthEvent);
 
@@ -134,64 +102,47 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testInvokeForBasicAuthSetsIdentityWhenValid()
     {
-        $this->configuration->merge(new Configuration(array(
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'http' => array(
-                        'accept_schemes' => array('basic'),
-                        'realm' => 'My Web Site',
-                        'digest_domains' => '/',
-                        'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
-                    )
-                )
-            )
-        )));
+        $httpAuth = new HttpAuth(array(
+            'accept_schemes' => 'basic',
+            'realm' => 'My Web Site',
+            'digest_domains' => '/',
+            'nonce_timeout' => 3600,
+        ));
+        $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
+        $this->listener->setHttpAdapter($httpAuth);
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic dXNlcjp1c2Vy');
-        $this->listener->__invoke($this->mvcAuthEvent);
-        $identity = $this->mvcAuthEvent->getIdentity();
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
         $this->assertEquals('user', $identity->getRoleId());
     }
 
     public function testInvokeForBasicAuthHasNoIdentityWhenNotValid()
     {
-        $this->configuration->merge(new Configuration(array(
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'http' => array(
-                        'accept_schemes' => array('basic'),
-                        'realm' => 'My Web Site',
-                        'digest_domains' => '/',
-                        'nonce_timeout' => 3600,
-                        'htpasswd' => __DIR__ . '/../TestAsset/htpasswd'
-                    )
-                )
-            )
-        )));
+        $httpAuth = new HttpAuth(array(
+            'accept_schemes' => 'basic',
+            'realm' => 'My Web Site',
+            'digest_domains' => '/',
+            'nonce_timeout' => 3600,
+        ));
+        $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
+        $this->listener->setHttpAdapter($httpAuth);
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic xxxxxxxxx');
         $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertNull($this->mvcAuthEvent->getIdentity());
     }
 
-
     public function testInvokeForDigestAuthAddsAuthorizationHeader()
     {
-        $this->configuration->merge(new Configuration(array(
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'http' => array(
-                        'accept_schemes' => array('digest'),
-                        'realm' => 'User Area',
-                        'digest_domains' => '/',
-                        'nonce_timeout' => 3600,
-                        'htdigest' => __DIR__ . '/../TestAsset/htdigest'
-                    )
-                )
-            )
-        )));
+        $httpAuth = new HttpAuth(array(
+            'accept_schemes' => 'digest',
+            'realm' => 'User Area',
+            'digest_domains' => '/',
+            'nonce_timeout' => 3600,
+        ));
+        $httpAuth->setDigestResolver(new HttpAuth\FileResolver(__DIR__ . '/../TestAsset/htdigest'));
+        $this->listener->setHttpAdapter($httpAuth);
 
         $this->listener->__invoke($this->mvcAuthEvent);
 

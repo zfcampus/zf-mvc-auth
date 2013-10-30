@@ -14,59 +14,48 @@ use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListener
 {
+    /**
+     * @var HttpAuth
+     */
+    protected $httpAdapter;
+
+    /**
+     * Set the HTTP authentication adapter
+     * 
+     * @param HttpAuth $httpAdapter 
+     * @return self
+     */
+    public function setHttpAdapter(HttpAuth $httpAdapter)
+    {
+        $this->httpAdapter = $httpAdapter;
+        return $this;
+    }
+
+    /**
+     * Listen to the authentication event
+     * 
+     * @param MvcAuthEvent $mvcAuthEvent 
+     * @return mixed
+     */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
-        $request = $mvcEvent->getRequest();
+        $request  = $mvcEvent->getRequest();
         $response = $mvcEvent->getResponse();
-        $configuration = $mvcEvent->getApplication()->getServiceManager()->get('Configuration');
 
         if (!$request instanceof HttpRequest) {
             return;
         }
 
-        if (!isset($configuration['zf-mvc-auth']['authentication'])) {
-            return;
-        }
-        $authConfig = $configuration['zf-mvc-auth']['authentication'];
-        if ($authConfig instanceof Config) {
-            $authConfig = $authConfig->toArray();
+        $authHeader = $request->getHeader('Authorization');
+        if ($this->httpAdapter instanceof HttpAuth) {
+            $this->httpAdapter->setRequest($request);
+            $this->httpAdapter->setResponse($response);
         }
 
-        // if we have http or digest configured, create adapter as they might need to send challenge
-        if (isset($authConfig['http'])) {
-
-            $httpConfig = $authConfig['http'];
-
-            if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-                throw new \Exception('accept_schemes is required');
-            }
-
-            $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
-            $httpAdapter->setRequest($request);
-            $httpAdapter->setResponse($response);
-
-            $hasFileResolver = false;
-
-            // basic && htpasswd
-            if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
-                $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
-                $hasFileResolver = true;
-            }
-            if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
-                $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
-                $hasFileResolver = true;
-            }
-
-            if ($hasFileResolver === false) {
-                unset($httpAdapter);
-            }
-
-        }
-
-        if (($authHeader = $request->getHeader('Authorization')) === false) {
-            if (isset($httpAdapter)) {
-                $httpAdapter->challengeClient();
+        if ($authHeader === false) {
+            if ($this->httpAdapter instanceof HttpAuth) {
+                $this->httpAdapter->challengeClient();
             }
             return;
         }
@@ -84,28 +73,25 @@ class DefaultAuthenticationListener
             case 'basic':
             case 'digest':
 
-                if (!isset($httpAdapter)) {
+                if (!$this->httpAdapter instanceof HttpAuth) {
                     return;
-                    // throw new \Exception('an http adapter is not configured');
                 }
 
-                $auth = $mvcAuthEvent->getAuthenticationService();
-                $result = $auth->authenticate($httpAdapter);
+                $auth   = $mvcAuthEvent->getAuthenticationService();
+                $result = $auth->authenticate($this->httpAdapter);
+                $mvcAuthEvent->setAuthenticationResult($result);
 
                 if ($result->isValid()) {
                     $identity = new Identity\AuthenticatedIdentity($result->getIdentity());
                     $identity->setName($result->getIdentity());
-                    $mvcAuthEvent->setIdentity($identity);
+                    return $identity;
                 }
 
-                $mvcAuthEvent->setAuthenticationResult($result);
-                return;
+                $identity = new Identity\GuestIdentity();
+                return $identity;
 
             case 'token':
-                throw new \Exception('@todo');
+                throw new \Exception('zf-mvc-auth has not yet implemented a "token" authentication adapter');
         }
-
-
-
     }
 }
