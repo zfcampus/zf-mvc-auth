@@ -70,6 +70,10 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authentication(MvcEvent $mvcEvent)
     {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+            return;
+        }
+
         $mvcAuthEvent = $this->mvcAuthEvent;
         $responses    = $this->events->trigger($mvcAuthEvent::EVENT_AUTHENTICATION, $mvcAuthEvent, function ($r) {
             return ($r instanceof Identity\IdentityInterface
@@ -128,6 +132,10 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authenticationPost(MvcEvent $mvcEvent)
     {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+            return;
+        }
+
         $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent, function ($r) {
             return ($r instanceof Response);
         });
@@ -137,11 +145,15 @@ class MvcRouteListener extends AbstractListenerAggregate
     /**
      * Trigger the authorization event
      *
-     * @param MvcEvent $event
+     * @param MvcEvent $mvcEvent
      * @return null|Response
      */
-    public function authorization(MvcEvent $event)
+    public function authorization(MvcEvent $mvcEvent)
     {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+            return;
+        }
+
         $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent, function ($r) {
             return (is_bool($r) || $r instanceof Response);
         });
@@ -161,11 +173,15 @@ class MvcRouteListener extends AbstractListenerAggregate
     /**
      * Trigger the authorization.post event
      *
-     * @param MvcEvent $event
+     * @param MvcEvent $mvcEvent
      * @return null|Response
      */
-    public function authorizationPost(MvcEvent $event)
+    public function authorizationPost(MvcEvent $mvcEvent)
     {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+            return;
+        }
+
         $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->mvcAuthEvent, function ($r) {
             return ($r instanceof Response);
         });
