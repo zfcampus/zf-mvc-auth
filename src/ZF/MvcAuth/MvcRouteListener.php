@@ -6,6 +6,7 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
