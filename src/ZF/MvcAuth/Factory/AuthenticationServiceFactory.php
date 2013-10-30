@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth\Authentication;
+namespace ZF\MvcAuth\Factory;
 
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\NonPersistent;
