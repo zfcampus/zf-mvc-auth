@@ -30,6 +30,10 @@ class AclAuthorization extends Acl implements AuthorizationInterface
             $this->addResource($resource);
         }
 
+        if (!$this->hasRole($identity)) {
+            $this->addRole($identity);
+        }
+
         return $this->isAllowed($identity, $resource, $privilege);
     }
 }
