@@ -19,12 +19,18 @@ class DefaultAuthorizationPostListener
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
+        $mvcEvent = $mvcAuthEvent->getMvcEvent();
+        $response = $mvcEvent->getResponse();
+
         if ($mvcAuthEvent->isAuthorized()) {
+            if ($response instanceof HttpResponse) {
+                if ($response->getStatusCode() != 200) {
+                    $response->setStatusCode(200);
+                }
+            }
             return;
         }
 
-        $mvcEvent = $mvcAuthEvent->getMvcEvent();
-        $response = $mvcEvent->getResponse();
         if (!$response instanceof HttpResponse) {
             return $response;
         }
