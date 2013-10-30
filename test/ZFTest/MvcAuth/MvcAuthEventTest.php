@@ -13,31 +13,21 @@ use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
+use Zend\Permissions\Acl\Acl;
 use PHPUnit_Framework_TestCase as TestCase;
 
 class MvcAuthEventTest extends TestCase
 {
 
-    /** @var MvcAuthEvent */
+    /**
+     * @var MvcAuthEvent
+     */
     protected $mvcAuthEvent = null;
 
     public function setup()
     {
         $mvcEvent = new MvcEvent();
-        $mvcEvent->setApplication(
-            new Application(
-                null,
-                new ServiceManager(new Config(array(
-                    'services' => array(
-                        'authentication' => new AuthenticationService(),
-                        'event_manager' => new EventManager(),
-                        'request' => new Request(),
-                        'response' => new Response()
-                    )
-                )))
-            )
-        );
-        $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent);
+        $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent, new AuthenticationService(), new Acl);
     }
 
     public function testGetAuthenticationService()
@@ -65,7 +55,7 @@ class MvcAuthEventTest extends TestCase
 
     public function testGetAuthorizationService()
     {
-        $this->assertNull($this->mvcAuthEvent->getAuthorizationService());
+        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $this->mvcAuthEvent->getAuthorizationService());
     }
 
     public function testGetMvcEvent()
@@ -84,5 +74,31 @@ class MvcAuthEventTest extends TestCase
         $this->assertSame($i, $this->mvcAuthEvent->getIdentity());
     }
 
+    public function testResourceStringIsNullByDefault()
+    {
+        $this->assertNull($this->mvcAuthEvent->getResource());
+    }
 
+    /**
+     * @depends testResourceStringIsNullByDefault
+     */
+    public function testResourceStringIsMutable()
+    {
+        $this->mvcAuthEvent->setResource('foo');
+        $this->assertEquals('foo', $this->mvcAuthEvent->getResource());
+    }
+
+    public function testAuthorizedFlagIsFalseByDefault()
+    {
+        $this->assertFalse($this->mvcAuthEvent->isAuthorized());
+    }
+
+    /**
+     * @depends testAuthorizedFlagIsFalseByDefault
+     */
+    public function testAuthorizedFlagIsMutable()
+    {
+        $this->mvcAuthEvent->setIsAuthorized(true);
+        $this->assertTrue($this->mvcAuthEvent->isAuthorized());
+    }
 }

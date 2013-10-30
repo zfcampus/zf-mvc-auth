@@ -4,85 +4,52 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZF\MvcAuth;
+namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Request;
-use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
-use Zend\Permissions\Acl\Acl;
+use ZF\MvcAuth\MvcAuthEvent;
 
-class DefaultAuthorizationListener
+class DefaultResourceResolverListener
 {
     /**
-     * @var Acl
-     */
-    protected $acl;
-
-    /**
-     * Array of controller_service_name/identifier_name pairs
-     *
      * @var array
      */
     protected $restControllers;
 
-    /**
-     * @param Acl $acl
-     * @param array $restControllers
-     */
-    public function __construct(Acl $acl, array $restControllers = array())
+    public function __construct(array $restControllers = array())
     {
-        $this->acl = $acl;
         $this->restControllers = $restControllers;
     }
 
     /**
-     * Attempt to authorize the discovered identity based on the ACLs present
+     * Attempt to determine the authorization resource based on the request
+     *
+     * Looks at the matched controller.
+     *
+     * If the controller is in the list of rest controllers, determines if we
+     * have a collection or a resource, based on the presence of the named
+     * identifier in the route matches or query string.
+     *
+     * Otherwise, looks for the presence of an "action" parameter in the route
+     * matches.
+     *
+     * Once created, it is injected into the $mvcAuthEvent.
      *
      * @param MvcAuthEvent $mvcAuthEvent
-     * @return true|ApiProblemResponse
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
-        $mvcEvent = $mvcAuthEvent->getMvcEvent();
-
-        $request  = $mvcEvent->getRequest();
-        if (!$request instanceof Request) {
-            return;
-        }
-
-        $response  = $mvcEvent->getResponse();
-        if (!$response instanceof Response) {
-            return;
-        }
-
+        $mvcEvent   = $mvcAuthEvent->getMvcEvent();
+        $request    = $mvcEvent->getRequest();
         $routeMatch = $mvcEvent->getRouteMatch();
-        if (!$routeMatch instanceof RouteMatch) {
-            return;
-        }
-
-        $identity = $mvcAuthEvent->getIdentity();
-        if (!$identity instanceof Identity\IdentityInterface) {
-            return;
-        }
 
         $resource = $this->buildResourceString($routeMatch, $request);
         if (!$resource) {
             return;
         }
 
-        // If the resource does not exist, add it. Theoretically, though, this
-        // means that the current identity is already allowed.
-        if (!$this->acl->hasResource($resource)) {
-            $this->acl->addResource($resource);
-        }
-
-        $identity = $mvcAuthEvent->getIdentity();
-        if (!$this->acl->isAllowed($identity, $resource, $request->getMethod())) {
-            $response->setStatusCode(403);
-            $response->setReasonPhrase('Forbidden');
-            return $response;
-        }
-        return true;
+        $mvcAuthEvent->setResource($resource);
     }
 
     /**
@@ -100,10 +67,10 @@ class DefaultAuthorizationListener
      * If it cannot resolve a controller service name, boolean false is returned.
      *
      * @param RouteMatch $routeMatch
-     * @param Request $request
+     * @param \Zend\Stdlib\RequestInterface $request
      * @return false|string
      */
-    public function buildResourceString(RouteMatch $routeMatch, Request $request)
+    public function buildResourceString(RouteMatch $routeMatch, $request)
     {
         // Considerations:
         // - We want the controller service name
@@ -138,15 +105,20 @@ class DefaultAuthorizationListener
      *
      * @param string $identifierName
      * @param RouteMatch $routeMatch
-     * @param Request $request
+     * @param \Zend\Stdlib\RequestInterface $request
      * @return false|mixed
      */
-    protected function getIdentifier($identifierName, RouteMatch $routeMatch, Request $request)
+    protected function getIdentifier($identifierName, RouteMatch $routeMatch, $request)
     {
         $id = $routeMatch->getParam($identifierName, false);
         if ($id) {
             return $id;
         }
+
+        if (!$request instanceof Request) {
+            return false;
+        }
+
         return $request->getQuery($identifierName, false);
     }
 }

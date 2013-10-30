@@ -7,7 +7,6 @@
 namespace ZF\MvcAuth;
 
 use Zend\Mvc\MvcEvent;
-use Zend\Authentication\AuthenticationService;
 
 class Module
 {
@@ -33,23 +32,28 @@ class Module
         return include __DIR__ . '/../../../config/module.config.php';
     }
 
-
-    public function onBootstrap(MvcEvent $e)
+    public function onBootstrap(MvcEvent $mvcEvent)
     {
-        $app      = $e->getApplication();
+        $app      = $mvcEvent->getApplication();
         $services = $app->getServiceManager();
         $events   = $app->getEventManager();
 
-        $routeListener = new MvcRouteListener($e);
-
-        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authentication'), 500);
-        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authenticationPost'), 499);
-        $events->attach(MvcEvent::EVENT_ROUTE, array($routeListener, 'authorization'), -500);
+        $authentication = $services->get('authentication');
+        $mvcAuthEvent   = new MvcAuthEvent(
+            $mvcEvent,
+            $services->get('authentication'),
+            $services->get('authorization')
+        );
+        $routeListener  = new MvcRouteListener(
+            $mvcAuthEvent,
+            $events,
+            $authentication
+        );
 
         $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, new DefaultAuthenticationListener);
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, new DefaultAuthenticationPostListener);
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\DefaultAuthorizationListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, new DefaultAuthorizationPostListener);
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'), 1000);
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizePostListener'));
     }
-
 }

@@ -18,24 +18,35 @@ class MvcAuthEvent extends Event
     const EVENT_AUTHORIZATION = 'authorization';
     const EVENT_AUTHORIZATION_POST = 'authorization.post';
 
+    protected $mvcEvent;
+
     protected $authentication;
 
-    /** @var Result */
+    /**
+     * @var Result
+     */
     protected $authenticationResult = null;
 
     protected $authorization;
 
-    public function __construct(MvcEvent $mvcEvent)
+    /**
+     * Whether or not authorization has completed/succeeded
+     * @var bool
+     */
+    protected $authorized = false;
+
+    /**
+     * The resource used for authorization queries
+     *
+     * @var mixed
+     */
+    protected $resource;
+
+    public function __construct(MvcEvent $mvcEvent, $authentication, $authorization)
     {
         $this->mvcEvent = $mvcEvent;
-        /**
-         * @var \Zend\ServiceManager\ServiceManager $sm
-         */
-        $sm = $this->mvcEvent->getApplication()->getServiceManager();
-        $this->authentication = $sm->get('authentication');
-        if ($sm->has('authorization')) {
-            $this->authorization = $sm->get('authorization');
-        }
+        $this->authentication = $authentication;
+        $this->authorization = $authorization;
     }
 
     /**
@@ -86,4 +97,25 @@ class MvcAuthEvent extends Event
         return $this;
     }
 
+    public function getResource()
+    {
+        return $this->resource;
+    }
+
+    public function setResource($resource)
+    {
+        $this->resource = $resource;
+        return $this;
+    }
+
+    public function isAuthorized()
+    {
+        return $this->authorized;
+    }
+
+    public function setIsAuthorized($flag)
+    {
+        $this->authorized = (bool) $flag;
+        return $this;
+    }
 }
