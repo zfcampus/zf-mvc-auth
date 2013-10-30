@@ -19,7 +19,7 @@ use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 class DefaultAuthenticationListenerFactory implements FactoryInterface
 {
     /**
-     * @param ServiceLocatorInterface $services 
+     * @param ServiceLocatorInterface $services
      * @return DefaultAuthenticationListener
      */
     public function createService(ServiceLocatorInterface $services)
@@ -39,7 +39,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     }
 
     /**
-     * @param array $config 
+     * @param array $config
      * @return false|HttpAuth
      */
     protected function createHttpAdapterFromConfig(array $config)

@@ -25,18 +25,18 @@ use ZFTest\MvcAuth\TestAsset\AuthenticationService;
 
 class DefaultAuthorizationListenerTest extends TestCase
 {
-    /** 
-     * @var AuthenticationService 
+    /**
+     * @var AuthenticationService
      */
     protected $authentication;
 
     /**
-     * @var Acl 
+     * @var Acl
      */
     protected $authorization;
 
     /**
-     * @var array 
+     * @var array
      */
     protected $restControllers = array();
 

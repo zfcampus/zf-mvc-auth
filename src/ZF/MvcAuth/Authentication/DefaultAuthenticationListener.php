@@ -21,8 +21,8 @@ class DefaultAuthenticationListener
 
     /**
      * Set the HTTP authentication adapter
-     * 
-     * @param HttpAuth $httpAdapter 
+     *
+     * @param HttpAuth $httpAdapter
      * @return self
      */
     public function setHttpAdapter(HttpAuth $httpAdapter)
@@ -33,8 +33,8 @@ class DefaultAuthenticationListener
 
     /**
      * Listen to the authentication event
-     * 
-     * @param MvcAuthEvent $mvcAuthEvent 
+     *
+     * @param MvcAuthEvent $mvcAuthEvent
      * @return mixed
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)

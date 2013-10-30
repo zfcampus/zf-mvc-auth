@@ -50,8 +50,8 @@ class MvcRouteListener extends AbstractListenerAggregate
 
     /**
      * Attach listeners
-     * 
-     * @param EventManagerInterface $events 
+     *
+     * @param EventManagerInterface $events
      */
     public function attach(EventManagerInterface $events)
     {
@@ -63,8 +63,8 @@ class MvcRouteListener extends AbstractListenerAggregate
 
     /**
      * Trigger the authentication event
-     * 
-     * @param MvcEvent $mvcEvent 
+     *
+     * @param MvcEvent $mvcEvent
      * @return null|Response
      */
     public function authentication(MvcEvent $mvcEvent)
@@ -121,8 +121,8 @@ class MvcRouteListener extends AbstractListenerAggregate
 
     /**
      * Trigger the authentication.post event
-     * 
-     * @param MvcEvent $mvcEvent 
+     *
+     * @param MvcEvent $mvcEvent
      * @return Response|mixed
      */
     public function authenticationPost(MvcEvent $mvcEvent)
@@ -135,8 +135,8 @@ class MvcRouteListener extends AbstractListenerAggregate
 
     /**
      * Trigger the authorization event
-     * 
-     * @param MvcEvent $event 
+     *
+     * @param MvcEvent $event
      * @return null|Response
      */
     public function authorization(MvcEvent $event)
@@ -159,8 +159,8 @@ class MvcRouteListener extends AbstractListenerAggregate
 
     /**
      * Trigger the authorization.post event
-     * 
-     * @param MvcEvent $event 
+     *
+     * @param MvcEvent $event
      * @return null|Response
      */
     public function authorizationPost(MvcEvent $event)
