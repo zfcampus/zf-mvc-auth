@@ -7,79 +7,159 @@
 namespace ZF\MvcAuth;
 
 use Zend\Authentication\Result;
+use Zend\EventManager\AbstractListenerAggregate;
+use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
-use Zend\Stdlib\Response;
+use Zend\Stdlib\ResponseInterface as Response;
 
-class MvcRouteListener
+class MvcRouteListener extends AbstractListenerAggregate
 {
+    /**
+     * @var AuthenticationService
+     */
+    protected $authentication;
+
+    /**
+     * @var EventManagerInterface
+     */
+    protected $events;
+
+    /**
+     * @var MvcAuthEvent
+     */
     protected $mvcAuthEvent;
 
-    protected $configuration;
+    /**
+     * @param MvcAuthEvent $mvcAuthEvent
+     * @param EventManagerInterface $events
+     * @param AuthenticationService $authentication
+     */
+    public function __construct(
+        MvcAuthEvent $mvcAuthEvent,
+        EventManagerInterface $events,
+        AuthenticationService $authentication
+    ) {
+        $mvcAuthEvent->setTarget($this);
+        $events->attach($this);
 
-    public function __construct(MvcAuthEvent $mvcAuthEvent, $configuration)
-    {
-        $this->mvcAuthEvent = $mvcAuthEvent;
-        $this->mvcAuthEvent->setTarget($this);
+        $this->mvcAuthEvent   = $mvcAuthEvent;
+        $this->events         = $events;
+        $this->authentication = $authentication;
     }
 
+    /**
+     * Attach listeners
+     * 
+     * @param EventManagerInterface $events 
+     */
+    public function attach(EventManagerInterface $events)
+    {
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'authentication'), 500);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'authenticationPost'), 499);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'authorization'), -600);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'authorizationPost'), -601);
+    }
+
+    /**
+     * Trigger the authentication event
+     * 
+     * @param MvcEvent $mvcEvent 
+     * @return null|Response
+     */
     public function authentication(MvcEvent $mvcEvent)
     {
-        $em = $mvcEvent->getApplication()->getEventManager();
+        $mvcAuthEvent = $this->mvcAuthEvent;
+        $responses    = $this->events->trigger($mvcAuthEvent::EVENT_AUTHENTICATION, $mvcAuthEvent, function ($r) {
+            return ($r instanceof Identity\IdentityInterface
+                || $r instanceof Result
+                || $r instanceof Response
+            );
+        });
 
-        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $this->mvcAuthEvent);
+        $result  = $responses->last();
+        $storage = $this->authentication->getStorage();
 
-        $authentication = $this->mvcAuthEvent->getAuthenticationService();
-        $storage = $authentication->getStorage();
+        // If we have a response, return immediately
+        if ($result instanceof Response) {
+            return $result;
+        }
 
-        $createGuestIdentity = false;
-
-        // determine if the listener returned an identity?
-        $result = $responses->last();
+        // Determine if the listener returned an identity
         if ($result instanceof Identity\IdentityInterface) {
             $storage->write($result);
-        } elseif ($result instanceof Response) {
-            return $result;
         }
 
-        // if not identity is in the authentication service, time to figure some stuff out
-        if ($authentication->getIdentity() === null) {
-            if (!$this->mvcAuthEvent->hasAuthenticationResult()) {
-                // if there is no Authentication result, safe to assume we have a guest
-                $createGuestIdentity = true;
-            }
+        // If we have a Result, we create an AuthenticatedIdentity from it
+        if ($result instanceof Result) {
+            $mvcAuthEvent->setAuthenticationResult($result);
+            $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($result->getIdentity()));
+            return;
         }
 
-        if ($createGuestIdentity) {
-            $this->mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
+        $identity = $this->authentication->getIdentity();
+        if ($identity === null && !$mvcAuthEvent->hasAuthenticationResult()) {
+            // if there is no Authentication identity or result, safe to assume we have a guest
+            $mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
+            return;
+        }
+
+        if ($identity !== null) {
+            // identity found in authentication; create an authenticated identity
+            $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
+            return;
         }
     }
 
+    /**
+     * Trigger the authentication.post event
+     * 
+     * @param MvcEvent $mvcEvent 
+     * @return Response|mixed
+     */
     public function authenticationPost(MvcEvent $mvcEvent)
     {
-        $em = $mvcEvent->getApplication()->getEventManager();
-        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent);
+        $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->mvcAuthEvent, function ($r) {
+            return ($r instanceof Response);
+        });
         return $responses->last();
     }
 
+    /**
+     * Trigger the authorization event
+     * 
+     * @param MvcEvent $event 
+     * @return null|Response
+     */
     public function authorization(MvcEvent $event)
     {
-        $em = $event->getApplication()->getEventManager();
-        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent);
+        $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent, function ($r) {
+            return (is_bool($r) || $r instanceof Response);
+        });
+
         $result = $responses->last();
-        // authorization: returns bool, or Response
+
         if (is_bool($result)) {
-            // $this->mvcAuthEvent->setIsAuthorized($result); // @todo Matthew fill this in
-        } elseif ($result instanceof Response) {
+            $this->mvcAuthEvent->setIsAuthorized($result);
+            return;
+        }
+
+        if ($result instanceof Response) {
             return $result;
         }
     }
 
+    /**
+     * Trigger the authorization.post event
+     * 
+     * @param MvcEvent $event 
+     * @return null|Response
+     */
     public function authorizationPost(MvcEvent $event)
     {
-        $em = $event->getApplication()->getEventManager();
-        $responses = $em->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->mvcAuthEvent);
+        $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->mvcAuthEvent, function ($r) {
+            return ($r instanceof Response);
+        });
         return $responses->last();
     }
-
 }
