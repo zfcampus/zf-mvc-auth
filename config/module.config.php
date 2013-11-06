@@ -29,11 +29,25 @@ return array(
         ),
     ),
     'zf-mvc-auth' => array(
-        // Toggle the following to true to change the ACL creation to require an
-        // authenticated user by default, and thus selectively allow unauthenticated
-        // users based on the rules.
-        'deny_by_default' => false,
-        'rules' => array(
+        'authentication' => array(
+            /**
+             *
+            'http' => array(
+                'accept_schemes' => array('basic', 'digest'),
+                'realm' => 'My Web Site',
+                'digest_domains' => '/',
+                'nonce_timeout' => 3600,
+                'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
+                'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+            ),
+             */
+        ),
+        'authorization' => array(
+            // Toggle the following to true to change the ACL creation to 
+            // require an authenticated user by default, and thus selectively 
+            // allow unauthenticated users based on the rules.
+            'deny_by_default' => false,
+
             /*
              * Rules indicating what controllers are behind authentication.
              *
@@ -74,21 +88,6 @@ return array(
                 ),
             ),
              */
-        ),
-        'authentication' => array(
-            /**
-             *
-            'http' => array(
-                'accept_schemes' => array('basic', 'digest'),
-                'realm' => 'My Web Site',
-                'digest_domains' => '/',
-                'nonce_timeout' => 3600,
-                'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
-                'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
-            ),
-             */
-        ),
-        'authorization' => array(
         ),
     ),
 );

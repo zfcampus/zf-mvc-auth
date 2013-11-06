@@ -38,8 +38,8 @@ abstract class AclAuthorizationFactory
             $acl->addResource($set['resource']);
 
             // Deny guest specified privileges to resource
-            $rights = isset($set['rights']) ? $set['rights'] : null;
-            $acl->$grant('guest', $resource, $rights);
+            $privileges = isset($set['privileges']) ? $set['privileges'] : null;
+            $acl->$grant('guest', $resource, $privileges);
         }
 
         return $acl;
