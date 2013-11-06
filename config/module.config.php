@@ -48,26 +48,29 @@ return array(
              * Method values are arrays of HTTP method/boolean pairs. By
              * default, if an HTTP method is not present in the list, it is
              * assumed to be open (i.e., not require authentication). The
-             * special key "all_methods" can be used to set the default
-             * flag for all HTTP methods.
+             * special key "default" can be used to set the default flag for 
+             * all HTTP methods.
              *
             'Controller\Service\Name' => array(
                 'actions' => array(
                     'action' => array(
-                        'all_methods' => boolean,
-                        'method' => boolean,
-                        'name' => boolean,
+                        'default' => boolean,
+                        'GET' => boolean,
+                        'POST' => boolean,
+                        // etc.
                     ),
                 ),
                 'collection' => array(
-                    'all_methods' => boolean,
-                    'method' => boolean,
-                    'name' => boolean,
+                    'default' => boolean,
+                    'GET' => boolean,
+                    'POST' => boolean,
+                    // etc.
                 ),
                 'resource' => array(
-                    'all_methods' => boolean,
-                    'method' => boolean,
-                    'name' => boolean,
+                    'default' => boolean,
+                    'GET' => boolean,
+                    'POST' => boolean,
+                    // etc.
                 ),
             ),
              */

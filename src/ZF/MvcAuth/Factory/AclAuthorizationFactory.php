@@ -120,8 +120,9 @@ class AclAuthorizationFactory implements FactoryInterface
     {
         $rights = array();
 
-        if (isset($methods['all_methods']) && $methods['all_methods']) {
+        if (isset($methods['default']) && $methods['default']) {
             $rights = $this->httpMethods;
+            unset($methods['default']);
         }
 
         foreach ($methods as $method => $flag) {
