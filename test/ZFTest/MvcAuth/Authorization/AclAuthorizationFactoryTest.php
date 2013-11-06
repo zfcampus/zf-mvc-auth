@@ -12,15 +12,15 @@ class AclAuthorizationFactoryTest extends TestCase
         $config = array(
             array(
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'rights' => array('POST'),
+                'privileges' => array('POST'),
             ),
             array(
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
-                'rights' => array('PATCH', 'DELETE'),
+                'privileges' => array('PATCH', 'DELETE'),
             ),
             array(
                 'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'rights' => array('POST'),
+                'privileges' => array('POST'),
             ),
         );
 
@@ -59,15 +59,15 @@ class AclAuthorizationFactoryTest extends TestCase
             'deny_by_default' => true,
             array(
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'rights' => array('GET'),
+                'privileges' => array('GET'),
             ),
             array(
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
-                'rights' => array('GET'),
+                'privileges' => array('GET'),
             ),
             array(
                 'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'rights' => array('GET'),
+                'privileges' => array('GET'),
             ),
         );
 

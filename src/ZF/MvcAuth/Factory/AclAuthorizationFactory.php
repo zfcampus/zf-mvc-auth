@@ -44,7 +44,7 @@ class AclAuthorizationFactory implements FactoryInterface
     }
 
     /**
-     * Generate the ACL instance based on the zf-mc-auth "rules" configuration
+     * Generate the ACL instance based on the zf-mc-auth "authorization" configuration
      *
      * Consumes the AclFactory in order to create the AclAuthorization instance.
      *
@@ -56,18 +56,17 @@ class AclAuthorizationFactory implements FactoryInterface
         $aclConfig = array();
 
         if (isset($config['zf-mvc-auth'])
-            && isset($config['zf-mvc-auth']['deny_by_default'])
-            && $config['zf-mvc-auth']['deny_by_default']
+            && isset($config['zf-mvc-auth']['authorization'])
         ) {
-            $aclConfig['deny_by_default'] = true;
-        }
+            $config = $config['zf-mvc-auth']['authorization'];
 
-        if (isset($config['zf-mvc-auth'])
-            && isset($config['zf-mvc-auth']['rules'])
-        ) {
-            $rulesConfig = $config['zf-mvc-auth']['rules'];
-            foreach ($rulesConfig as $controllerService => $rules) {
-                $this->createAclConfigFromRules($controllerService, $rules, $aclConfig);
+            if (array_key_exists('deny_by_default', $config)) {
+                $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
+                unset($config['deny_by_default']);
+            }
+            
+            foreach ($config as $controllerService => $privileges) {
+                $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig);
             }
         }
 
@@ -75,69 +74,70 @@ class AclAuthorizationFactory implements FactoryInterface
     }
 
     /**
-     * Creates ACL configuration based on the rules configured
+     * Creates ACL configuration based on the privileges configured
      *
-     * - Extracts a rule per action
-     * - Extracts rules for each of "collection" and "resource" configured
+     * - Extracts a privilege per action
+     * - Extracts privileges for each of "collection" and "resource" configured
      *
      * @param string $controllerService
-     * @param array $rules
+     * @param array $privileges
      * @param array $aclConfig
      */
-    protected function createAclConfigFromRules($controllerService, array $rules, &$aclConfig)
+    protected function createAclConfigFromPrivileges($controllerService, array $privileges, &$aclConfig)
     {
-        if (isset($rules['actions'])) {
-            foreach ($rules['actions'] as $action => $methods) {
+        if (isset($privileges['actions'])) {
+            foreach ($privileges['actions'] as $action => $methods) {
                 $aclConfig[] = array(
-                    'resource' => sprintf('%s::%s', $controllerService, $action),
-                    'rights'   => $this->createRightsFromMethods($methods),
+                    'resource'   => sprintf('%s::%s', $controllerService, $action),
+                    'privileges' => $this->createPrivilegesFromMethods($methods),
                 );
             }
         }
 
-        if (isset($rules['collection'])) {
+        if (isset($privileges['collection'])) {
             $aclConfig[] = array(
-                'resource' => sprintf('%s::collection', $controllerService),
-                'rights'   => $this->createRightsFromMethods($rules['collection']),
+                'resource'   => sprintf('%s::collection', $controllerService),
+                'privileges' => $this->createPrivilegesFromMethods($privileges['collection']),
             );
         }
 
-        if (isset($rules['resource'])) {
+        if (isset($privileges['resource'])) {
             $aclConfig[] = array(
-                'resource' => sprintf('%s::resource', $controllerService),
-                'rights'   => $this->createRightsFromMethods($rules['resource']),
+                'resource'   => sprintf('%s::resource', $controllerService),
+                'privileges' => $this->createPrivilegesFromMethods($privileges['resource']),
             );
         }
     }
 
     /**
-     * Create the list of HTTP methods defining rights
+     * Create the list of HTTP methods defining privileges
      *
      * @param array $methods
      * @return array|null
      */
-    protected function createRightsFromMethods(array $methods)
+    protected function createPrivilegesFromMethods(array $methods)
     {
-        $rights = array();
+        $privileges = array();
 
-        if (isset($methods['all_methods']) && $methods['all_methods']) {
-            $rights = $this->httpMethods;
+        if (isset($methods['default']) && $methods['default']) {
+            $privileges = $this->httpMethods;
+            unset($methods['default']);
         }
 
         foreach ($methods as $method => $flag) {
             if (!$flag) {
-                if (isset($rights[$method])) {
-                    unset($rights[$method]);
+                if (isset($privileges[$method])) {
+                    unset($privileges[$method]);
                 }
                 continue;
             }
-            $rights[$method] = true;
+            $privileges[$method] = true;
         }
 
-        if (empty($rights)) {
+        if (empty($privileges)) {
             return null;
         }
 
-        return array_keys($rights);
+        return array_keys($privileges);
     }
 }
