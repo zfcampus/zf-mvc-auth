@@ -29,49 +29,6 @@ return array(
         ),
     ),
     'zf-mvc-auth' => array(
-        // Toggle the following to true to change the ACL creation to require an
-        // authenticated user by default, and thus selectively allow unauthenticated
-        // users based on the rules.
-        'deny_by_default' => false,
-        'rules' => array(
-            /*
-             * Rules indicating what controllers are behind authentication.
-             *
-             * Keys are controller service names.
-             *
-             * Values are arrays with either the key "actions" and/or one or
-             * more of the keys "collection" and "resource".
-             *
-             * The "actions" key will be a set of action name/method pairs.
-             * The "collection" and "resource" keys will have method values.
-             *
-             * Method values are arrays of HTTP method/boolean pairs. By
-             * default, if an HTTP method is not present in the list, it is
-             * assumed to be open (i.e., not require authentication). The
-             * special key "all_methods" can be used to set the default
-             * flag for all HTTP methods.
-             *
-            'Controller\Service\Name' => array(
-                'actions' => array(
-                    'action' => array(
-                        'all_methods' => boolean,
-                        'method' => boolean,
-                        'name' => boolean,
-                    ),
-                ),
-                'collection' => array(
-                    'all_methods' => boolean,
-                    'method' => boolean,
-                    'name' => boolean,
-                ),
-                'resource' => array(
-                    'all_methods' => boolean,
-                    'method' => boolean,
-                    'name' => boolean,
-                ),
-            ),
-             */
-        ),
         'authentication' => array(
             /**
              *
@@ -86,6 +43,51 @@ return array(
              */
         ),
         'authorization' => array(
+            // Toggle the following to true to change the ACL creation to 
+            // require an authenticated user by default, and thus selectively 
+            // allow unauthenticated users based on the rules.
+            'deny_by_default' => false,
+
+            /*
+             * Rules indicating what controllers are behind authentication.
+             *
+             * Keys are controller service names.
+             *
+             * Values are arrays with either the key "actions" and/or one or
+             * more of the keys "collection" and "resource".
+             *
+             * The "actions" key will be a set of action name/method pairs.
+             * The "collection" and "resource" keys will have method values.
+             *
+             * Method values are arrays of HTTP method/boolean pairs. By
+             * default, if an HTTP method is not present in the list, it is
+             * assumed to be open (i.e., not require authentication). The
+             * special key "default" can be used to set the default flag for 
+             * all HTTP methods.
+             *
+            'Controller\Service\Name' => array(
+                'actions' => array(
+                    'action' => array(
+                        'default' => boolean,
+                        'GET' => boolean,
+                        'POST' => boolean,
+                        // etc.
+                    ),
+                ),
+                'collection' => array(
+                    'default' => boolean,
+                    'GET' => boolean,
+                    'POST' => boolean,
+                    // etc.
+                ),
+                'resource' => array(
+                    'default' => boolean,
+                    'GET' => boolean,
+                    'POST' => boolean,
+                    // etc.
+                ),
+            ),
+             */
         ),
     ),
 );
