@@ -119,27 +119,26 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             return false;
         }
 
-        if (!isset($authConfig['oauth2']['db'])) {
-            throw new ServiceNotCreatedException('db is required when configuring an OAuth2 authentication adapter');
-        }
-        $dbConfig = $authConfig['oauth2']['db'];
+        $oauthConfig = $authConfig['oauth2'];
 
-        if (!isset($dbConfig['dsn'])) {
-            throw new ServiceNotCreatedException('dsn is required when configuring the db for OAuth2 authentication');
+        if (!isset($oauthConfig['dsn'])) {
+            throw new ServiceNotCreatedException('DSN is required when configuring the db for OAuth2 authentication');
         }
-        $username = isset($dbConfig['username']) ? $dbConfig['username'] : null;
-        $password = isset($dbConfig['password']) ? $dbConfig['password'] : null;
+        $username = isset($oauthConfig['username']) ? $oauthConfig['username'] : null;
+        $password = isset($oauthConfig['password']) ? $oauthConfig['password'] : null;
 
         $storage = new OAuth2Storage(array(
-            'dsn'      => $config['oauth2']['db']['dsn'],
+            'dsn'      => $oauthConfig['dsn'],
             'username' => $username,
             'password' => $password,
         ));
 
         // Pass a storage object or array of storage objects to the OAuth2 server class
         $oauth2Server = new OAuth2Server($storage);
+
         // Add the "Client Credentials" grant type (it is the simplest of the grant types)
         $oauth2Server->addGrantType(new ClientCredentials($storage));
+
         // Add the "Authorization Code" grant type
         $oauth2Server->addGrantType(new AuthorizationCode($storage));
 
