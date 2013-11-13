@@ -12,6 +12,10 @@ use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\OAuth2\Adapter\Pdo as OAuth2Storage;
+use OAuth2\Server as OAuth2Server;
+use OAuth2\GrantType\ClientCredentials;
+use OAuth2\GrantType\AuthorizationCode;
 
 /**
  * Factory for creating the DefaultAuthenticationListener from configuration
@@ -26,13 +30,19 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     {
         $listener = new DefaultAuthenticationListener();
 
-        $httpAdapter = false;
+        $httpAdapter  = false;
+        $oauth2Server = false;
         if ($services->has('config')) {
-            $httpAdapter = $this->createHttpAdapterFromConfig($services->get('config'));
+            $httpAdapter  = $this->createHttpAdapterFromConfig($services->get('config'));
+            $oauth2Server = $this->createOauth2ServerFromConfig($services->get('config'));
         }
 
         if ($httpAdapter) {
             $listener->setHttpAdapter($httpAdapter);
+        }
+
+        if ($oauth2Server) {
+            $listener->setOauth2Server($oauth2Server);
         }
 
         return $listener;
@@ -90,5 +100,48 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         }
 
         return $httpAdapter;
+    }
+
+    /**
+     * Create an OAuth2 server from configuration
+     *
+     * @param  array $config
+     * @return OAuth2Server
+     */
+    protected function createOauth2ServerFromConfig(array $config)
+    {
+        if (!isset($config['zf-mvc-auth']['authentication'])) {
+            return false;
+        }
+        $authConfig = $config['zf-mvc-auth']['authentication'];
+
+        if (!isset($authConfig['oauth2'])) {
+            return false;
+        }
+
+        $oauthConfig = $authConfig['oauth2'];
+
+        if (!isset($oauthConfig['dsn'])) {
+            throw new ServiceNotCreatedException('DSN is required when configuring the db for OAuth2 authentication');
+        }
+        $username = isset($oauthConfig['username']) ? $oauthConfig['username'] : null;
+        $password = isset($oauthConfig['password']) ? $oauthConfig['password'] : null;
+
+        $storage = new OAuth2Storage(array(
+            'dsn'      => $oauthConfig['dsn'],
+            'username' => $username,
+            'password' => $password,
+        ));
+
+        // Pass a storage object or array of storage objects to the OAuth2 server class
+        $oauth2Server = new OAuth2Server($storage);
+
+        // Add the "Client Credentials" grant type (it is the simplest of the grant types)
+        $oauth2Server->addGrantType(new ClientCredentials($storage));
+
+        // Add the "Authorization Code" grant type
+        $oauth2Server->addGrantType(new AuthorizationCode($storage));
+
+        return $oauth2Server;
     }
 }

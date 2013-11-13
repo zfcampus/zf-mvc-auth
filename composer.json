@@ -14,7 +14,8 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "dev-develop"
+        "zendframework/zendframework": "dev-develop",
+        "zfcampus/zf-oauth2": "dev-master"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*"
