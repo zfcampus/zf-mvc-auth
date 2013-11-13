@@ -115,7 +115,7 @@ class DefaultAuthenticationListener
                     return;
                 }
 
-                if ($this->oauth2Server->verifyResourceRequest(OAuth2Request::createFromGlobals())) {    
+                if ($this->oauth2Server->verifyResourceRequest(OAuth2Request::createFromGlobals())) {
                     $token    = $this->oauth2Server->getAccessTokenData(OAuth2Request::createFromGlobals());
                     $identity = new Identity\AuthenticatedIdentity($token['user_id']);
                     $identity->setName($token['user_id']);
