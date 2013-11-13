@@ -11,6 +11,8 @@ use Zend\Config\Config;
 use Zend\Http\Request as HttpRequest;
 use ZF\MvcAuth\Identity;
 use ZF\MvcAuth\MvcAuthEvent;
+use OAuth2\Server as OAuth2Server;
+use OAuth2\Request as OAuth2Request;
 
 class DefaultAuthenticationListener
 {
@@ -18,6 +20,11 @@ class DefaultAuthenticationListener
      * @var HttpAuth
      */
     protected $httpAdapter;
+
+    /**
+     * @var OAuth2Server
+     */
+    protected $oauth2Server;
 
     /**
      * Set the HTTP authentication adapter
@@ -28,6 +35,18 @@ class DefaultAuthenticationListener
     public function setHttpAdapter(HttpAuth $httpAdapter)
     {
         $this->httpAdapter = $httpAdapter;
+        return $this;
+    }
+
+    /**
+     * Set the OAuth2 server
+     *
+     * @param  OAuth2Server $oauth2Server
+     * @return self
+     */
+    public function setOauth2Server(OAuth2Server $oauth2Server)
+    {
+        $this->oauth2Server = $oauth2Server;
         return $this;
     }
 
@@ -84,6 +103,22 @@ class DefaultAuthenticationListener
                 if ($result->isValid()) {
                     $identity = new Identity\AuthenticatedIdentity($result->getIdentity());
                     $identity->setName($result->getIdentity());
+                    return $identity;
+                }
+
+                $identity = new Identity\GuestIdentity();
+                return $identity;
+
+            case 'oauth2':
+
+                if (!$this->oauth2Server instanceof OAuth2Server) {
+                    return;
+                }
+
+                if ($this->oauth2Server->verifyResourceRequest(OAuth2Request::createFromGlobals())) {    
+                    $token    = $this->oauth2Server->getAccessTokenData(OAuth2Request::createFromGlobals());
+                    $identity = new Identity\AuthenticatedIdentity($token['user_id']);
+                    $identity->setName($token['user_id']);
                     return $identity;
                 }
 
