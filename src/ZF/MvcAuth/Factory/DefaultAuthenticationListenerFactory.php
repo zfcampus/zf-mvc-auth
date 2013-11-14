@@ -110,25 +110,21 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      */
     protected function createOauth2ServerFromConfig(array $config)
     {
-        if (!isset($config['zf-mvc-auth']['authentication'])) {
-            return false;
-        }
-        $authConfig = $config['zf-mvc-auth']['authentication'];
-
-        if (!isset($authConfig['oauth2'])) {
+        if (!isset($config['zf-mvc-auth']['authentication']['oauth2']['db'])) {
             return false;
         }
 
-        $oauthConfig = $authConfig['oauth2'];
+        $dbConfig = $config['zf-mvc-auth']['authentication']['oauth2']['db'];
 
-        if (!isset($oauthConfig['dsn'])) {
+        if (!isset($dbConfig['dsn'])) {
             throw new ServiceNotCreatedException('DSN is required when configuring the db for OAuth2 authentication');
         }
-        $username = isset($oauthConfig['username']) ? $oauthConfig['username'] : null;
-        $password = isset($oauthConfig['password']) ? $oauthConfig['password'] : null;
+
+        $username = isset($dbConfig['username']) ? $dbConfig['username'] : null;
+        $password = isset($dbConfig['password']) ? $dbConfig['password'] : null;
 
         $storage = new OAuth2Storage(array(
-            'dsn'      => $oauthConfig['dsn'],
+            'dsn'      => $dbConfig['dsn'],
             'username' => $username,
             'password' => $password,
         ));
