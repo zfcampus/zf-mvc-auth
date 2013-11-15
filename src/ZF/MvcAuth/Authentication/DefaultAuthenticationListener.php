@@ -110,6 +110,7 @@ class DefaultAuthenticationListener
                 return $identity;
 
             case 'oauth2':
+            case 'bearer':
 
                 if (!$this->oauth2Server instanceof OAuth2Server) {
                     return;
