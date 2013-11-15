@@ -39,6 +39,12 @@ abstract class AclAuthorizationFactory
 
             // Deny guest specified privileges to resource
             $privileges = isset($set['privileges']) ? $set['privileges'] : null;
+
+            // "null" privileges means no permissions were setup; nothing to do
+            if (null === $privileges) {
+                continue;
+            }
+
             $acl->$grant('guest', $resource, $privileges);
         }
 
