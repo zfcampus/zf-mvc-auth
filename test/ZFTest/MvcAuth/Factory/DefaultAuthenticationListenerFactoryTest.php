@@ -20,7 +20,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->factory  = new DefaultAuthenticationListenerFactory();
     }
 
-    public function testCreatingOAuth2ServerFromZf2Request()
+    public function testCreatingOAuth2ServerFromStorageService()
     {
         $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
 
