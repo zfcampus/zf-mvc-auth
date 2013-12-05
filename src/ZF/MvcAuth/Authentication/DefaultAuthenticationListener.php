@@ -7,7 +7,6 @@
 namespace ZF\MvcAuth\Authentication;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
-use Zend\Config\Config;
 use Zend\Http\Request as HttpRequest;
 use ZF\MvcAuth\Identity;
 use ZF\MvcAuth\MvcAuthEvent;
@@ -116,8 +115,11 @@ class DefaultAuthenticationListener
                     return;
                 }
 
-                if ($this->oauth2Server->verifyResourceRequest(OAuth2Request::createFromGlobals())) {
-                    $token    = $this->oauth2Server->getAccessTokenData(OAuth2Request::createFromGlobals());
+                $content       = $request->getContent();
+                $oauth2request = new OAuth2Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER, $content);
+
+                if ($this->oauth2Server->verifyResourceRequest($oauth2request)) {
+                    $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
                     $identity = new Identity\AuthenticatedIdentity($token['user_id']);
                     $identity->setName($token['user_id']);
                     return $identity;
