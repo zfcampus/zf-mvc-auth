@@ -106,16 +106,13 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      *
      * @param  ServiceLocatorInterface $services
      * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
-     * @return OAuth2Server
+     * @return null|OAuth2Server
      */
     protected function createOauth2ServerFromConfig(ServiceLocatorInterface $services)
     {
         $config = $services->get('config');
-
         if (!isset($config['zf-oauth2']['storage'])) {
-            throw new ServiceNotCreatedException(
-                'Storage class is required when configuring the db for OAuth2 authentication'
-            );
+            return null;
         }
 
         $storage = $services->get($config['zf-oauth2']['storage']);
