@@ -7,12 +7,10 @@
 namespace ZF\MvcAuth\Factory;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
-use Zend\Http\Request;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
-use ZF\OAuth2\Adapter\Pdo as OAuth2Storage;
 use OAuth2\Server as OAuth2Server;
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\AuthorizationCode;
@@ -34,7 +32,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         $oauth2Server = false;
         if ($services->has('config')) {
             $httpAdapter  = $this->createHttpAdapterFromConfig($services->get('config'));
-            $oauth2Server = $this->createOauth2ServerFromConfig($services->get('config'));
+            $oauth2Server = $this->createOauth2ServerFromConfig($services);
         }
 
         if ($httpAdapter) {
@@ -50,6 +48,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
 
     /**
      * @param array $config
+     * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
      * @return false|HttpAuth
      */
     protected function createHttpAdapterFromConfig(array $config)
@@ -105,29 +104,18 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     /**
      * Create an OAuth2 server from configuration
      *
-     * @param  array $config
-     * @return OAuth2Server
+     * @param  ServiceLocatorInterface $services
+     * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
+     * @return null|OAuth2Server
      */
-    protected function createOauth2ServerFromConfig(array $config)
+    protected function createOauth2ServerFromConfig(ServiceLocatorInterface $services)
     {
-        if (!isset($config['zf-oauth2']['db'])) {
-            return false;
+        $config = $services->get('config');
+        if (!isset($config['zf-oauth2']['storage'])) {
+            return null;
         }
 
-        $dbConfig = $config['zf-oauth2']['db'];
-
-        if (!isset($dbConfig['dsn'])) {
-            throw new ServiceNotCreatedException('DSN is required when configuring the db for OAuth2 authentication');
-        }
-
-        $username = isset($dbConfig['username']) ? $dbConfig['username'] : null;
-        $password = isset($dbConfig['password']) ? $dbConfig['password'] : null;
-
-        $storage = new OAuth2Storage(array(
-            'dsn'      => $dbConfig['dsn'],
-            'username' => $username,
-            'password' => $password,
-        ));
+        $storage = $services->get($config['zf-oauth2']['storage']);
 
         // Pass a storage object or array of storage objects to the OAuth2 server class
         $oauth2Server = new OAuth2Server($storage);
