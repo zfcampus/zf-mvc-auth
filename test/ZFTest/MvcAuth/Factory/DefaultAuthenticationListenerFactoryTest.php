@@ -20,6 +20,21 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->factory  = new DefaultAuthenticationListenerFactory();
     }
 
+    public function testCreatingOAuth2ServerFromStorageService()
+    {
+        $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
+
+        $this->services->setService('TestAdapter', $adapter);
+        $this->services->setService('config', array(
+            'zf-oauth2' => array(
+                'storage' => 'TestAdapter'
+            )
+        ));
+        $listener = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+    }
+
     public function testCallingFactoryWithNoConfigServiceReturnsListenerWithNoHttpAdapter()
     {
         $listener = $this->factory->createService($this->services);
