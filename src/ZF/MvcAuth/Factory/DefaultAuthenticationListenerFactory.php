@@ -111,7 +111,10 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     protected function createOauth2ServerFromConfig(ServiceLocatorInterface $services)
     {
         $config = $services->get('config');
-        if (!isset($config['zf-oauth2']['storage'])) {
+        if (!isset($config['zf-oauth2']['storage'])
+            || !is_string($config['zf-oauth2']['storage'])
+            || !$services->has($config['zf-oauth2']['storage'])
+        ) {
             return null;
         }
 
