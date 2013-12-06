@@ -11,11 +11,17 @@
     "repositories": [
         { "type": "composer", "url": "https://packages.zendframework.com" }
     ],
-    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "dev-develop",
-        "zfcampus/zf-oauth2": "dev-master"
+        "bshaffer/oauth2-server-php": "dev-develop",
+        "zendframework/zendframework": "~2.3-dev",
+        "zfcampus/zf-api-problem": "~1.0-dev",
+        "zfcampus/zf-oauth2": "~1.0-dev"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*"
