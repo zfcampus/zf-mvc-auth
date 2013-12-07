@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-namespace ZFTest;
+namespace ZFTest\MvcAuth;
 
 use Zend\Loader\AutoloaderFactory;
 use RuntimeException;
@@ -49,9 +49,8 @@ class Bootstrap
                 'Zend\Loader\StandardAutoloader' => array(
                     'autoregister_zf' => true,
                     'namespaces' => array(
-                        'ZF\Apigility' => __DIR__ . '/../src/ZF/Apigility/',
-                        __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
-                        'Test' => __DIR__ . '/../vendor/Test/',
+                        'ZF\MvcAuth' => __DIR__ . '/../src/ZF/MvcAuth/',
+                        __NAMESPACE__ => __DIR__ . '/ZFTest/MvcAuth/',
                     ),
                 ),
             ));

@@ -29,7 +29,10 @@
     "autoload": {
         "psr-0": {
             "ZF\\MvcAuth\\": "src/",
-            "ZFTest\\": "test/"
-        }
+            "ZFTest\\MvcAuth\\": "test/"
+        },
+        "classmap": [
+            "Module.php"
+        ]
     }
 }
