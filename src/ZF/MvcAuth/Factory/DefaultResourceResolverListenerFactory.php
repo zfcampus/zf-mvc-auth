@@ -59,10 +59,10 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
         }
 
         foreach ($config['zf-rest'] as $controllerService => $restConfig) {
-            if (!isset($restConfig['identifier_name'])) {
+            if (!isset($restConfig['route_identifier_name'])) {
                 continue;
             }
-            $restServices[$controllerService] = $restConfig['identifier_name'];
+            $restServices[$controllerService] = $restConfig['route_identifier_name'];
         }
 
         return $restServices;
