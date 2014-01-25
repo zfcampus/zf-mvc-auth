@@ -13,6 +13,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
 use Zend\Stdlib\ResponseInterface as Response;
+use ZF\MvcAuth\MvcAuthEvent;
 
 class MvcRouteListener extends AbstractListenerAggregate
 {
@@ -77,7 +78,7 @@ class MvcRouteListener extends AbstractListenerAggregate
         }
 
         $mvcAuthEvent = $this->mvcAuthEvent;
-        $responses    = $this->events->trigger($mvcAuthEvent::EVENT_AUTHENTICATION, $mvcAuthEvent, function ($r) {
+        $responses    = $this->events->trigger(MvcAuthEvent::EVENT_AUTHENTICATION, $mvcAuthEvent, function ($r) {
             return ($r instanceof Identity\IdentityInterface
                 || $r instanceof Result
                 || $r instanceof Response
@@ -85,19 +86,13 @@ class MvcRouteListener extends AbstractListenerAggregate
         });
 
         $result  = $responses->last();
-        $storage = $this->authentication->getStorage();
 
         // If we have a response, return immediately
         if ($result instanceof Response) {
             return $result;
         }
 
-        // Determine if the listener returned an identity
-        if ($result instanceof Identity\IdentityInterface) {
-            $storage->write($result);
-        }
-
-        // If we have a Result, we create an AuthenticatedIdentity from it
+        // If we have a valid Result, we create an AuthenticatedIdentity from it and return
         if ($result instanceof Result
             && $result->isValid()
         ) {
@@ -106,29 +101,34 @@ class MvcRouteListener extends AbstractListenerAggregate
             return;
         }
 
-        $identity = $this->authentication->getIdentity();
-        if ($identity === null && !$mvcAuthEvent->hasAuthenticationResult()) {
-            // if there is no Authentication identity or result, safe to assume we have a guest
-            $mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
+        // Determine if the listener returned an identity and if so...
+        if ($result instanceof Identity\IdentityInterface) {
+            // overwrite the identity value that authentication service could have
+            $mvcAuthEvent->setIdentity($result);
             return;
         }
 
+        $identity = $mvcAuthEvent->getIdentity();
+        // Identity taken from authentication service has priority over MvcAuthEvent result so we must process it first
+        if ($identity instanceof Identity\IdentityInterface) {
+            $mvcAuthEvent->setIdentity($identity);
+            return;
+        }
+        if ($identity !== null) {
+            // identity found in authentication; we can assume we're authenticated
+            $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
+            return;
+        }
+
+        // No identity, lets look at MvcAuthEvent result
         if ($mvcAuthEvent->hasAuthenticationResult()
             && $mvcAuthEvent->getAuthenticationResult()->isValid()
         ) {
             $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($mvcAuthEvent->getAuthenticationResult()->getIdentity()));
         }
 
-        if ($identity instanceof Identity\IdentityInterface) {
-            $mvcAuthEvent->setIdentity($identity);
-            return;
-        } 
-        
-        if ($identity !== null) {
-            // identity found in authentication; we can assume we're authenticated
-            $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
-            return;
-        }
+        // If there is no Authentication identity or valid result, safe to assume we have a guest
+        $mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
     }
 
     /**
