@@ -14,6 +14,7 @@ return array(
         'factories' => array(
             'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
             'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
+            'ZF\MvcAuth\Authentication\AuthHttpAdapter' => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
             'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
             'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
             'ZF\MvcAuth\Authorization\DefaultResourceResolverListener' => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
@@ -43,8 +44,8 @@ return array(
              */
         ),
         'authorization' => array(
-            // Toggle the following to true to change the ACL creation to 
-            // require an authenticated user by default, and thus selectively 
+            // Toggle the following to true to change the ACL creation to
+            // require an authenticated user by default, and thus selectively
             // allow unauthenticated users based on the rules.
             'deny_by_default' => false,
 
@@ -62,7 +63,7 @@ return array(
              * Method values are arrays of HTTP method/boolean pairs. By
              * default, if an HTTP method is not present in the list, it is
              * assumed to be open (i.e., not require authentication). The
-             * special key "default" can be used to set the default flag for 
+             * special key "default" can be used to set the default flag for
              * all HTTP methods.
              *
             'Controller\Service\Name' => array(
