@@ -64,7 +64,7 @@ class AclAuthorizationFactory implements FactoryInterface
                 $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
                 unset($config['deny_by_default']);
             }
-            
+
             foreach ($config as $controllerService => $privileges) {
                 $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig);
             }
