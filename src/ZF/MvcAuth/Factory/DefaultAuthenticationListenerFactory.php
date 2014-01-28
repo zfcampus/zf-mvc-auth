@@ -31,7 +31,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         $httpAdapter  = false;
         $oauth2Server = false;
         if ($services->has('config')) {
-            $httpAdapter  = $this->createHttpAdapterFromConfig($services->get('config'));
+            $httpAdapter  = $this->createHttpAdapterFromConfig($services);
             $oauth2Server = $this->createOauth2ServerFromConfig($services);
         }
 
@@ -47,54 +47,36 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     }
 
     /**
-     * @param array $config
-     * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
+     * @param  ServiceLocatorInterface $services
+     * @throws ServiceNotCreatedException
      * @return false|HttpAuth
      */
-    protected function createHttpAdapterFromConfig(array $config)
+    protected function createHttpAdapterFromConfig(ServiceLocatorInterface $services)
     {
-        if (!isset($config['zf-mvc-auth']['authentication'])) {
-            return false;
-        }
-        $authConfig = $config['zf-mvc-auth']['authentication'];
-
-        if (!isset($authConfig['http'])) {
+        // Apps could provide theirs own resolvers while creating its custom AuthHttpAdapter but...
+        $httpAdapter = $services->get('ZF\MvcAuth\Authentication\AuthHttpAdapter');
+        if ($httpAdapter === false) {
             return false;
         }
 
-        $httpConfig = $authConfig['http'];
-
-        if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-            throw new ServiceNotCreatedException('accept_schemes is required when configuring an HTTP authentication adapter');
-        }
-
-        if (!isset($httpConfig['realm'])) {
-            throw new ServiceNotCreatedException('realm is required when configuring an HTTP authentication adapter');
-        }
-
-        if (in_array('digest', $httpConfig['accept_schemes'])) {
-            if (!isset($httpConfig['digest_domains'])
-                || !isset($httpConfig['nonce_timeout'])
-            ) {
-                throw new ServiceNotCreatedException('Both digest_domains and nonce_timeout are required when configuring an HTTP digest authentication adapter');
+        // ZF\MvcAuth configuration can overwrite custom resolvers and...
+        $config = $services->get('config');
+        if (isset($config['zf-mvc-auth']['authentication']['http']['accept_schemes'])
+            && is_array($config['zf-mvc-auth']['authentication']['http']['accept_schemes'])
+        ) {
+            $httpConfig = $config['zf-mvc-auth']['authentication']['http'];
+            if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
+                $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+            }
+            if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
+                $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
             }
         }
 
-        $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
-
-        $hasFileResolver = false;
-
-        // basic && htpasswd
-        if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
-            $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
-            $hasFileResolver = true;
-        }
-        if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
-            $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
-            $hasFileResolver = true;
-        }
-
-        if ($hasFileResolver === false) {
+        // we must abort if no resolver was provided
+        if (!$httpAdapter->getBasicResolver()
+            && !$httpAdapter->getDigestResolver()
+        ) {
             return false;
         }
 
