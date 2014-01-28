@@ -28,17 +28,12 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     {
         $listener = new DefaultAuthenticationListener();
 
-        $httpAdapter  = false;
-        $oauth2Server = false;
-        if ($services->has('config')) {
-            $httpAdapter  = $this->createHttpAdapterFromConfig($services->get('config'));
-            $oauth2Server = $this->createOauth2ServerFromConfig($services);
-        }
-
+        $httpAdapter = $this->retrieveHttpAdapter($services);
         if ($httpAdapter) {
             $listener->setHttpAdapter($httpAdapter);
         }
 
+        $oauth2Server = $this->createOAuth2Server($services);
         if ($oauth2Server) {
             $listener->setOauth2Server($oauth2Server);
         }
@@ -47,54 +42,23 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     }
 
     /**
-     * @param array $config
-     * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
+     * @param  ServiceLocatorInterface $services
+     * @throws ServiceNotCreatedException
      * @return false|HttpAuth
      */
-    protected function createHttpAdapterFromConfig(array $config)
+    protected function retrieveHttpAdapter(ServiceLocatorInterface $services)
     {
-        if (!isset($config['zf-mvc-auth']['authentication'])) {
+        // Allow applications to provide their own AuthHttpAdapter service; if none provided,
+        // or no HTTP adapter configuration provided to zf-mvc-auth, we can stop early.
+        $httpAdapter = $services->get('ZF\MvcAuth\Authentication\AuthHttpAdapter');
+        if ($httpAdapter === false) {
             return false;
         }
-        $authConfig = $config['zf-mvc-auth']['authentication'];
 
-        if (!isset($authConfig['http'])) {
-            return false;
-        }
-
-        $httpConfig = $authConfig['http'];
-
-        if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-            throw new ServiceNotCreatedException('accept_schemes is required when configuring an HTTP authentication adapter');
-        }
-
-        if (!isset($httpConfig['realm'])) {
-            throw new ServiceNotCreatedException('realm is required when configuring an HTTP authentication adapter');
-        }
-
-        if (in_array('digest', $httpConfig['accept_schemes'])) {
-            if (!isset($httpConfig['digest_domains'])
-                || !isset($httpConfig['nonce_timeout'])
-            ) {
-                throw new ServiceNotCreatedException('Both digest_domains and nonce_timeout are required when configuring an HTTP digest authentication adapter');
-            }
-        }
-
-        $httpAdapter = new HttpAuth(array_merge($httpConfig, array('accept_schemes' => implode(' ', $httpConfig['accept_schemes']))));
-
-        $hasFileResolver = false;
-
-        // basic && htpasswd
-        if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
-            $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
-            $hasFileResolver = true;
-        }
-        if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
-            $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
-            $hasFileResolver = true;
-        }
-
-        if ($hasFileResolver === false) {
+        // We must abort if no resolver was provided
+        if (!$httpAdapter->getBasicResolver()
+            && !$httpAdapter->getDigestResolver()
+        ) {
             return false;
         }
 
@@ -102,20 +66,24 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     }
 
     /**
-     * Create an OAuth2 server from configuration
+     * Create an OAuth2 server by introspecting the config service
      *
      * @param  ServiceLocatorInterface $services
      * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
-     * @return null|OAuth2Server
+     * @return false|OAuth2Server
      */
-    protected function createOauth2ServerFromConfig(ServiceLocatorInterface $services)
+    protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
+        if (!$services->has('config')) {
+            return false;
+        }
+
         $config = $services->get('config');
         if (!isset($config['zf-oauth2']['storage'])
             || !is_string($config['zf-oauth2']['storage'])
             || !$services->has($config['zf-oauth2']['storage'])
         ) {
-            return null;
+            return false;
         }
 
         $storage = $services->get($config['zf-oauth2']['storage']);
