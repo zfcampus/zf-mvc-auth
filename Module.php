@@ -41,7 +41,7 @@ class Module
         $authentication = $services->get('authentication');
         $mvcAuthEvent   = new MvcAuthEvent(
             $mvcEvent,
-            $services->get('authentication'),
+            $authentication,
             $services->get('authorization')
         );
         $routeListener  = new MvcRouteListener(
