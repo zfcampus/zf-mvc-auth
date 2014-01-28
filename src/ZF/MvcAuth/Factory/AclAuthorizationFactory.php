@@ -44,7 +44,7 @@ class AclAuthorizationFactory implements FactoryInterface
     }
 
     /**
-     * Generate the ACL instance based on the zf-mc-auth "authorization" configuration
+     * Generate the ACL instance based on the zf-mvc-auth "authorization" configuration
      *
      * Consumes the AclFactory in order to create the AclAuthorization instance.
      *
