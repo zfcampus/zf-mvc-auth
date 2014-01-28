@@ -44,7 +44,7 @@ class AclAuthorizationFactory implements FactoryInterface
     }
 
     /**
-     * Generate the ACL instance based on the zf-mc-auth "authorization" configuration
+     * Generate the ACL instance based on the zf-mvc-auth "authorization" configuration
      *
      * Consumes the AclFactory in order to create the AclAuthorization instance.
      *
@@ -64,7 +64,7 @@ class AclAuthorizationFactory implements FactoryInterface
                 $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
                 unset($config['deny_by_default']);
             }
-            
+
             foreach ($config as $controllerService => $privileges) {
                 $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig);
             }
