@@ -98,6 +98,14 @@ class DefaultAuthenticationListener
                 }
 
                 $auth   = $mvcAuthEvent->getAuthenticationService();
+                if ($auth->hasIdentity()) {
+                    $identity = $auth->getIdentity();
+                    if (!$identity instanceof Identity\AuthenticatedIdentity) {
+                        $identity = new Identity\AuthenticatedIdentity($identity);
+                    }
+                    return $identity;
+                }
+
                 $result = $auth->authenticate($this->httpAdapter);
                 $mvcAuthEvent->setAuthenticationResult($result);
 
