@@ -65,8 +65,10 @@ class AclAuthorizationFactory implements FactoryInterface
                 unset($config['deny_by_default']);
             }
 
-            foreach ($config as $controllerService => $privileges) {
-                $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig);
+            foreach ($config as $role => $controllerConfig) {
+                foreach ($controllerConfig as $controllerService => $privileges) {
+                    $this->createAclConfigFromPrivileges($controllerService, $privileges, $role, $aclConfig);
+                }
             }
         }
 
@@ -81,15 +83,17 @@ class AclAuthorizationFactory implements FactoryInterface
      *
      * @param string $controllerService
      * @param array $privileges
+     * @param string $role
      * @param array $aclConfig
      */
-    protected function createAclConfigFromPrivileges($controllerService, array $privileges, &$aclConfig)
+    protected function createAclConfigFromPrivileges($controllerService, array $privileges, $role, &$aclConfig)
     {
         if (isset($privileges['actions'])) {
             foreach ($privileges['actions'] as $action => $methods) {
                 $aclConfig[] = array(
                     'resource'   => sprintf('%s::%s', $controllerService, $action),
                     'privileges' => $this->createPrivilegesFromMethods($methods),
+                    'role' => $role
                 );
             }
         }
@@ -98,6 +102,7 @@ class AclAuthorizationFactory implements FactoryInterface
             $aclConfig[] = array(
                 'resource'   => sprintf('%s::collection', $controllerService),
                 'privileges' => $this->createPrivilegesFromMethods($privileges['collection']),
+                'role' => $role
             );
         }
 
@@ -105,6 +110,7 @@ class AclAuthorizationFactory implements FactoryInterface
             $aclConfig[] = array(
                 'resource'   => sprintf('%s::resource', $controllerService),
                 'privileges' => $this->createPrivilegesFromMethods($privileges['resource']),
+                'role' => $role
             );
         }
     }

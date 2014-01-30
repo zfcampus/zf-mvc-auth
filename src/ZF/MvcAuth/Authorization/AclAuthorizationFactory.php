@@ -8,6 +8,12 @@ namespace ZF\MvcAuth\Authorization;
 
 abstract class AclAuthorizationFactory
 {
+    /**
+     * Transforms a config array into an AclAuthorization
+     *
+     * @param array $config
+     * @return AclAuthorization
+     */
     public static function factory(array $config)
     {
         // Determine whether we are whitelisting or blacklisting
@@ -24,7 +30,7 @@ abstract class AclAuthorizationFactory
 
         $grant = 'deny';
         if ($denyByDefault) {
-            $acl->deny('guest', null, null);
+            $acl->deny(null, null, null);
             $grant = 'allow';
         }
 
@@ -33,9 +39,12 @@ abstract class AclAuthorizationFactory
                 continue;
             }
 
-            // Add new resource to ACL
+            // Add new resource to ACL if needed
             $resource = $set['resource'];
-            $acl->addResource($set['resource']);
+
+            if (!$acl->hasResource($set['resource'])) {
+                $acl->addResource($set['resource']);
+            }
 
             // Deny guest specified privileges to resource
             $privileges = isset($set['privileges']) ? $set['privileges'] : null;
@@ -45,7 +54,19 @@ abstract class AclAuthorizationFactory
                 continue;
             }
 
-            $acl->$grant('guest', $resource, $privileges);
+            // Add new role to ACL
+            $role = isset($set['role']) ? $set['role'] : null;
+
+            // "null" role means no roles were specified; nothing to do
+            if (null === $role) {
+                continue;
+            }
+
+            if (!$acl->hasRole($role)) {
+                $acl->addRole($role);
+            }
+
+            $acl->$grant($role, $resource, $privileges);
         }
 
         return $acl;
