@@ -10,6 +10,8 @@ use Zend\Mvc\MvcEvent;
 
 class Module
 {
+    protected $services;
+
     /**
      * Retrieve autoloader configuration
      *
@@ -35,14 +37,14 @@ class Module
     public function onBootstrap(MvcEvent $mvcEvent)
     {
         $app      = $mvcEvent->getApplication();
-        $services = $app->getServiceManager();
         $events   = $app->getEventManager();
+        $this->services = $app->getServiceManager();
 
-        $authentication = $services->get('authentication');
+        $authentication = $this->services->get('authentication');
         $mvcAuthEvent   = new MvcAuthEvent(
             $mvcEvent,
             $authentication,
-            $services->get('authorization')
+            $this->services->get('authorization')
         );
         $routeListener  = new MvcRouteListener(
             $mvcAuthEvent,
@@ -50,10 +52,17 @@ class Module
             $authentication
         );
 
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'), 1000);
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $this->services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'), 1000);
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener'));
+        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener'));
+
+        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, array($this, 'onAuthenticationPost'), -1);
+    }
+
+    public function onAuthenticationPost(MvcAuthEvent $e)
+    {
+        $this->services->setService('api-identity', $e->getIdentity());
     }
 }
