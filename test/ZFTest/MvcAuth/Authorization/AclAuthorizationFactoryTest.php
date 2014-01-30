@@ -3,100 +3,142 @@
 namespace ZFTest\MvcAuth\Authorization;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ZF\MvcAuth\Authorization\AclAuthorization;
 use ZF\MvcAuth\Authorization\AclAuthorizationFactory;
 
 class AclAuthorizationFactoryTest extends TestCase
 {
-    public function testFactoryGeneratesAclFromConfiguration()
+    public function testIfRolesAreGrantedPrivilegesByDenyByDefault()
     {
-        $config = array(
-            array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'privileges' => array('POST'),
+        $aclConfig = array(
+            'deny_by_default' => true,
+            0 => array(
+                'resource' => 'TestController::index',
+                'privileges' => array(
+                    'GET',
+                ),
+                'role' => 'guest'
             ),
-            array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
-                'privileges' => array('PATCH', 'DELETE'),
+            1 => array(
+                'resource' => 'TestController::index',
+                'privileges' => array(
+                    'GET',
+                    'POST',
+                ),
+                'role' => 'admin'
             ),
-            array(
-                'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'privileges' => array('POST'),
+            2 => array(
+                'resource' => 'TestController2::index',
+                'role' => 'guest'
+            ),
+            3 => array(
+                'resource' => 'TestController2::index',
+                'privileges' => array(
+                    'GET',
+                ),
+                'role' => 'admin'
+            ),
+            4 => array(
+                'resource' => 'TestController3::index',
+                'privileges' => array(
+                    'GET',
+                ),
             ),
         );
 
-        $acl = AclAuthorizationFactory::factory($config);
+        /** @var AclAuthorization $acl */
+        $acl = AclAuthorizationFactory::factory($aclConfig);
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
-        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $acl);
-        $this->assertTrue($acl->hasRole('guest'));
-        $this->assertFalse($acl->hasRole('authenticated'));
+        // Test all configured privileges
+        $this->assertTrue($acl->isAllowed('guest', 'TestController::index', 'GET'));
+        $this->assertFalse($acl->isAllowed('guest', 'TestController::index', 'POST'));
+        $this->assertFalse($acl->isAllowed('guest', 'TestController2::index', 'GET'));
+        $this->assertFalse($acl->isAllowed('guest', 'TestController2::index', 'POST'));
+        $this->assertFalse($acl->isAllowed('guest', 'TestController3::index', 'GET'));
+        $this->assertTrue($acl->isAllowed('admin', 'TestController::index', 'GET'));
+        $this->assertTrue($acl->isAllowed('admin', 'TestController::index', 'POST'));
+        $this->assertTrue($acl->isAllowed('admin', 'TestController2::index', 'GET'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController3::index', 'GET'));
 
-        // Add a non-guest role to the ACL
-        $acl->addRole('authenticated');
-
-        // Test access to a collection that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::collection', 'POST'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'POST'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
-
-        // Test access to a resource that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'DELETE'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'DELETE'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-
-        // Test access to an RPC service that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
+        // Test if not configured privileges are denied
+        $this->assertFalse($acl->isAllowed('guest', 'TestController::index', 'PUT'));
+        $this->assertFalse($acl->isAllowed('guest', 'TestController::index', 'PATCH'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController::index', 'PATCH'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController::index', 'PUT'));
     }
 
-    public function testFactoryGeneratesBlacklistAclFromConfiguration()
+    public function testIfRolesAreGrantedPrivilegesByAllowByDefault()
     {
-        $config = array(
-            'deny_by_default' => true,
-            array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'privileges' => array('GET'),
+        $aclConfig = array(
+            'deny_by_default' => false,
+            0 => array(
+                'resource' => 'TestController::index',
+                'privileges' => array(
+                    'GET',
+                ),
+                'role' => 'guest'
             ),
-            array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
-                'privileges' => array('GET'),
+            1 => array(
+                'resource' => 'TestController::index',
+                'privileges' => array(
+                    'GET',
+                    'POST',
+                ),
+                'role' => 'admin'
             ),
-            array(
-                'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'privileges' => array('GET'),
+            2 => array(
+                'resource' => 'TestController2::index',
+                'role' => 'guest'
+            ),
+            3 => array(
+                'resource' => 'TestController2::index',
+                'privileges' => array(
+                    'GET',
+                ),
+                'role' => 'admin'
+            ),
+            4 => array(
+                'resource' => 'TestController3::index',
+                'privileges' => array(
+                    'GET',
+                ),
             ),
         );
 
-        $acl = AclAuthorizationFactory::factory($config);
+        /** @var AclAuthorization $acl */
+        $acl = AclAuthorizationFactory::factory($aclConfig);
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
-        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $acl);
-        $this->assertTrue($acl->hasRole('guest'));
-        $this->assertFalse($acl->hasRole('authenticated'));
+        // Test all configured privileges
+        $this->assertFalse($acl->isAllowed('guest', 'TestController::index', 'GET'));
+        $this->assertTrue($acl->isAllowed('guest', 'TestController::index', 'POST'));
+        $this->assertTrue($acl->isAllowed('guest', 'TestController2::index', 'GET'));
+        $this->assertTrue($acl->isAllowed('guest', 'TestController2::index', 'POST'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController::index', 'GET'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController::index', 'POST'));
+        $this->assertFalse($acl->isAllowed('admin', 'TestController2::index', 'GET'));
 
-        // Add a non-guest role to the ACL
-        $acl->addRole('authenticated');
+        // Test if not configured privileges are denied
+        $this->assertTrue($acl->isAllowed('guest', 'TestController::index', 'PUT'));
+        $this->assertTrue($acl->isAllowed('guest', 'TestController::index', 'PATCH'));
+        $this->assertTrue($acl->isAllowed('admin', 'TestController::index', 'PATCH'));
+        $this->assertTrue($acl->isAllowed('admin', 'TestController::index', 'PUT'));
+    }
 
-        // Test access to a collection that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::collection', 'POST'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'POST'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
+    public function testIfRuleIgnoredWhenNoResourceSpecified()
+    {
+        $aclConfig = array(
+            'deny_by_default' => false,
+            0 => array(
+                'privileges' => array(
+                    'GET',
+                ),
+                'role' => 'guest'
+            ),
+        );
 
-        // Test access to a resource that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'POST'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-
-        // Test access to an RPC service that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rpc\Message\Controller::message', 'GET'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rpc\Message\Controller::message', 'GET'));
+        /** @var AclAuthorization $acl */
+        $acl = AclAuthorizationFactory::factory($aclConfig);
+        $this->assertCount(0, $acl->getResources());
+        $this->assertCount(1, $acl->getRoles());
     }
 }

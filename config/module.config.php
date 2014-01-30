@@ -32,7 +32,6 @@ return array(
     'zf-mvc-auth' => array(
         'authentication' => array(
             /**
-             *
             'http' => array(
                 'accept_schemes' => array('basic', 'digest'),
                 'realm' => 'My Web Site',
@@ -50,9 +49,11 @@ return array(
             'deny_by_default' => false,
 
             /*
-             * Rules indicating what controllers are behind authentication.
+             * Rules indicating what controllers are behind authentication,
+             * specified per role.
              *
-             * Keys are controller service names.
+             * First-lever keys indicate the role, second level keys
+             * are controller service names.
              *
              * Values are arrays with either the key "actions" and/or one or
              * more of the keys "collection" and "resource".
@@ -66,26 +67,28 @@ return array(
              * special key "default" can be used to set the default flag for
              * all HTTP methods.
              *
-            'Controller\Service\Name' => array(
-                'actions' => array(
-                    'action' => array(
+            'admin' => array(
+                'Controller\Service\Name' => array(
+                    'actions' => array(
+                        'action' => array(
+                            'default' => boolean,
+                            'GET' => boolean,
+                            'POST' => boolean,
+                            // etc.
+                        ),
+                    ),
+                    'collection' => array(
                         'default' => boolean,
                         'GET' => boolean,
                         'POST' => boolean,
                         // etc.
                     ),
-                ),
-                'collection' => array(
-                    'default' => boolean,
-                    'GET' => boolean,
-                    'POST' => boolean,
-                    // etc.
-                ),
-                'resource' => array(
-                    'default' => boolean,
-                    'GET' => boolean,
-                    'POST' => boolean,
-                    // etc.
+                    'resource' => array(
+                        'default' => boolean,
+                        'GET' => boolean,
+                        'POST' => boolean,
+                        // etc.
+                    ),
                 ),
             ),
              */
