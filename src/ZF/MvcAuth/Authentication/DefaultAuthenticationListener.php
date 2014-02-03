@@ -77,14 +77,14 @@ class DefaultAuthenticationListener
             if ($this->httpAdapter instanceof HttpAuth) {
                 $this->httpAdapter->challengeClient();
             }
-            return;
+            return new Identity\GuestIdentity();
         }
 
         $headerContent = trim($authHeader->getFieldValue());
 
         // we only support headers in the format: Authorization: xxx yyyyy
         if (strpos($headerContent, ' ') === false) {
-            return;
+            return new Identity\GuestIdentity();
         }
 
         list($type, $credential) = preg_split('# #', $headerContent, 2);
@@ -94,7 +94,7 @@ class DefaultAuthenticationListener
             case 'digest':
 
                 if (!$this->httpAdapter instanceof HttpAuth) {
-                    return;
+                    return new Identity\GuestIdentity();
                 }
 
                 $auth   = $mvcAuthEvent->getAuthenticationService();
@@ -114,7 +114,7 @@ class DefaultAuthenticationListener
             case 'bearer':
 
                 if (!$this->oauth2Server instanceof OAuth2Server) {
-                    return;
+                    return new Identity\GuestIdentity();
                 }
 
                 $content       = $request->getContent();

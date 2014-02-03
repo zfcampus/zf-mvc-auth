@@ -117,6 +117,23 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->assertEquals('user', $identity->getRoleId());
     }
 
+    public function testInvokeForBasicAuthSetsGuestIdentityWhenValid()
+    {
+        $httpAuth = new HttpAuth(array(
+            'accept_schemes' => 'basic',
+            'realm' => 'My Web Site',
+            'digest_domains' => '/',
+            'nonce_timeout' => 3600,
+        ));
+        $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
+        $this->listener->setHttpAdapter($httpAuth);
+
+        $this->request->getHeaders()->addHeaderLine('Authorization: Basic xxxxxxxxx');
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertEquals('guest', $identity->getRoleId());
+    }
+
     public function testInvokeForBasicAuthHasNoIdentityWhenNotValid()
     {
         $httpAuth = new HttpAuth(array(
