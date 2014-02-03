@@ -70,7 +70,9 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authentication(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest
+            || $mvcEvent->getRequest()->isOptions()
+        ) {
             return;
         }
 
@@ -137,7 +139,9 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authenticationPost(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest) {
+        if (!$mvcEvent->getRequest() instanceof HttpRequest
+            || $mvcEvent->getRequest()->isOptions()
+        ) {
             return;
         }
 

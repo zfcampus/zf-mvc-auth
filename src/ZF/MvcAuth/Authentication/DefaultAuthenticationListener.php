@@ -61,7 +61,9 @@ class DefaultAuthenticationListener
         $request  = $mvcEvent->getRequest();
         $response = $mvcEvent->getResponse();
 
-        if (!$request instanceof HttpRequest) {
+        if (!$request instanceof HttpRequest
+            || $request->isOptions()
+        ) {
             return;
         }
 
