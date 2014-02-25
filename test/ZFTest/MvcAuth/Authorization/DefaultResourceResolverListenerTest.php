@@ -77,7 +77,7 @@ class DefaultResourceResolverListenerTest extends TestCase
         $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
         $routeMatch->setParam('session_id', 'foo');
         $request    = $mvcEvent->getRequest();
-        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::resource', $this->listener->buildResourceString($routeMatch, $request));
+        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::entity', $this->listener->buildResourceString($routeMatch, $request));
     }
 
     public function testBuildResourceStringReturnsControllerNameAndResourceIfIdentifierInQueryString()
@@ -87,6 +87,6 @@ class DefaultResourceResolverListenerTest extends TestCase
         $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
         $request    = $mvcEvent->getRequest();
         $request->getQuery()->set('session_id', 'bar');
-        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::resource', $this->listener->buildResourceString($routeMatch, $request));
+        $this->assertEquals('ZendCon\V1\Rest\Session\Controller::entity', $this->listener->buildResourceString($routeMatch, $request));
     }
 }

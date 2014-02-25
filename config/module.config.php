@@ -55,10 +55,10 @@ return array(
              * Keys are controller service names.
              *
              * Values are arrays with either the key "actions" and/or one or
-             * more of the keys "collection" and "resource".
+             * more of the keys "collection" and "entity".
              *
              * The "actions" key will be a set of action name/method pairs.
-             * The "collection" and "resource" keys will have method values.
+             * The "collection" and "entity" keys will have method values.
              *
              * Method values are arrays of HTTP method/boolean pairs. By
              * default, if an HTTP method is not present in the list, it is
@@ -81,7 +81,7 @@ return array(
                     'POST' => boolean,
                     // etc.
                 ),
-                'resource' => array(
+                'entity' => array(
                     'default' => boolean,
                     'GET' => boolean,
                     'POST' => boolean,
