@@ -103,7 +103,7 @@ class AclAuthorizationFactory implements FactoryInterface
 
         if (isset($privileges['resource'])) {
             $aclConfig[] = array(
-                'resource'   => sprintf('%s::resource', $controllerService),
+                'resource'   => sprintf('%s::entity', $controllerService),
                 'privileges' => $this->createPrivilegesFromMethods($privileges['resource']),
             );
         }

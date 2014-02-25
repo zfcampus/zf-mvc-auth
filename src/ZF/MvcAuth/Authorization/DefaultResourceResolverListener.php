@@ -57,7 +57,7 @@ class DefaultResourceResolverListener
      *
      * For REST services (those passed to the constructor), it returns one of:
      *
-     * - <controller service name>::resource
+     * - <controller service name>::entity
      * - <controller service name>::collection
      *
      * For all others, it uses the "action" route match parameter:
@@ -92,7 +92,7 @@ class DefaultResourceResolverListener
         $identifierName = $this->restControllers[$controller];
         $id = $this->getIdentifier($identifierName, $routeMatch, $request);
         if ($id) {
-            return sprintf('%s::resource', $controller);
+            return sprintf('%s::entity', $controller);
         }
         return sprintf('%s::collection', $controller);
     }

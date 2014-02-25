@@ -15,7 +15,7 @@ class AclAuthorizationFactoryTest extends TestCase
                 'privileges' => array('POST'),
             ),
             array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
+                'resource' => 'ZendCon\V1\Rest\Session\Controller::entity',
                 'privileges' => array('PATCH', 'DELETE'),
             ),
             array(
@@ -41,12 +41,12 @@ class AclAuthorizationFactoryTest extends TestCase
         $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
 
         // Test access to a resource that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'DELETE'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'DELETE'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
+        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::entity', 'PATCH'));
+        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::entity', 'PATCH'));
+        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::entity', 'DELETE'));
+        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::entity', 'DELETE'));
+        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::entity', 'GET'));
+        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::entity', 'GET'));
 
         // Test access to an RPC service that has ACLs in place
         $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
@@ -62,7 +62,7 @@ class AclAuthorizationFactoryTest extends TestCase
                 'privileges' => array('GET'),
             ),
             array(
-                'resource' => 'ZendCon\V1\Rest\Session\Controller::resource',
+                'resource' => 'ZendCon\V1\Rest\Session\Controller::entity',
                 'privileges' => array('GET'),
             ),
             array(
@@ -88,10 +88,10 @@ class AclAuthorizationFactoryTest extends TestCase
         $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::collection', 'GET'));
 
         // Test access to a resource that has ACLs in place
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'PATCH'));
-        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
-        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'POST'));
-        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::resource', 'GET'));
+        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::entity', 'PATCH'));
+        $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rest\Session\Controller::entity', 'GET'));
+        $this->assertFalse($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::entity', 'POST'));
+        $this->assertTrue($acl->isAllowed('guest', 'ZendCon\V1\Rest\Session\Controller::entity', 'GET'));
 
         // Test access to an RPC service that has ACLs in place
         $this->assertTrue($acl->isAllowed('authenticated', 'ZendCon\V1\Rpc\Message\Controller::message', 'POST'));
