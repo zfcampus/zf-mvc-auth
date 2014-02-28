@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2013 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth;
@@ -122,8 +122,8 @@ class MvcRouteListener extends AbstractListenerAggregate
         if ($identity instanceof Identity\IdentityInterface) {
             $mvcAuthEvent->setIdentity($identity);
             return;
-        } 
-        
+        }
+
         if ($identity !== null) {
             // identity found in authentication; we can assume we're authenticated
             $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
