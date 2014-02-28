@@ -122,8 +122,8 @@ class MvcRouteListener extends AbstractListenerAggregate
         if ($identity instanceof Identity\IdentityInterface) {
             $mvcAuthEvent->setIdentity($identity);
             return;
-        } 
-        
+        }
+
         if ($identity !== null) {
             // identity found in authentication; we can assume we're authenticated
             $mvcAuthEvent->setIdentity(new Identity\AuthenticatedIdentity($identity));
