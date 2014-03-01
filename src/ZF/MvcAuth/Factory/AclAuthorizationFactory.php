@@ -31,7 +31,7 @@ class AclAuthorizationFactory implements FactoryInterface
      * Create the DefaultAuthorizationListener
      *
      * @param ServiceLocatorInterface $services
-     * @return DefaultAuthorizationListener
+     * @return \ZF\MvcAuth\Authorization\AuthorizationInterface
      */
     public function createService(ServiceLocatorInterface $services)
     {
@@ -77,7 +77,7 @@ class AclAuthorizationFactory implements FactoryInterface
      * Creates ACL configuration based on the privileges configured
      *
      * - Extracts a privilege per action
-     * - Extracts privileges for each of "collection" and "resource" configured
+     * - Extracts privileges for each of "collection" and "entity" configured
      *
      * @param string $controllerService
      * @param array $privileges
@@ -101,10 +101,10 @@ class AclAuthorizationFactory implements FactoryInterface
             );
         }
 
-        if (isset($privileges['resource'])) {
+        if (isset($privileges['entity'])) {
             $aclConfig[] = array(
                 'resource'   => sprintf('%s::entity', $controllerService),
-                'privileges' => $this->createPrivilegesFromMethods($privileges['resource']),
+                'privileges' => $this->createPrivilegesFromMethods($privileges['entity']),
             );
         }
     }
