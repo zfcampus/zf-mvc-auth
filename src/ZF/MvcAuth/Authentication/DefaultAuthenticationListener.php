@@ -77,14 +77,18 @@ class DefaultAuthenticationListener
             if ($this->httpAdapter instanceof HttpAuth) {
                 $this->httpAdapter->challengeClient();
             }
-            return new Identity\GuestIdentity();
+            $identity = new Identity\GuestIdentity();
+            $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+            return $identity;
         }
 
         $headerContent = trim($authHeader->getFieldValue());
 
         // we only support headers in the format: Authorization: xxx yyyyy
         if (strpos($headerContent, ' ') === false) {
-            return new Identity\GuestIdentity();
+            $identity = new Identity\GuestIdentity();
+            $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+            return $identity;
         }
 
         list($type, $credential) = preg_split('# #', $headerContent, 2);
@@ -94,7 +98,9 @@ class DefaultAuthenticationListener
             case 'digest':
 
                 if (!$this->httpAdapter instanceof HttpAuth) {
-                    return new Identity\GuestIdentity();
+                    $identity = new Identity\GuestIdentity();
+                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+                    return $identity;
                 }
 
                 $auth   = $mvcAuthEvent->getAuthenticationService();
@@ -104,17 +110,21 @@ class DefaultAuthenticationListener
                 if ($result->isValid()) {
                     $identity = new Identity\AuthenticatedIdentity($result->getIdentity());
                     $identity->setName($result->getIdentity());
+                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                     return $identity;
                 }
 
                 $identity = new Identity\GuestIdentity();
+                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                 return $identity;
 
             case 'oauth2':
             case 'bearer':
 
                 if (!$this->oauth2Server instanceof OAuth2Server) {
-                    return new Identity\GuestIdentity();
+                    $identity = new Identity\GuestIdentity();
+                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+                    return $identity;
                 }
 
                 $content       = $request->getContent();
@@ -124,10 +134,12 @@ class DefaultAuthenticationListener
                     $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
                     $identity = new Identity\AuthenticatedIdentity($token['user_id']);
                     $identity->setName($token['user_id']);
+                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                     return $identity;
                 }
 
                 $identity = new Identity\GuestIdentity();
+                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                 return $identity;
 
             case 'token':
