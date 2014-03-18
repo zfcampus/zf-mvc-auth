@@ -115,6 +115,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
         $this->assertEquals('user', $identity->getRoleId());
+        return array('identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent());
     }
 
     public function testInvokeForBasicAuthSetsGuestIdentityWhenValid()
@@ -132,6 +133,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
         $this->assertEquals('guest', $identity->getRoleId());
+        return array('identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent());
     }
 
     public function testInvokeForBasicAuthHasNoIdentityWhenNotValid()
@@ -166,5 +168,29 @@ class DefaultAuthenticationListenerTest extends TestCase
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
         $this->assertRegexp('#^Digest realm="User Area", domain="/", nonce="[a-f0-9]{32}", opaque="e66aa41ca5bf6992a5479102cc787bc9", algorithm="MD5", qop="auth"$#', $authHeader->getFieldValue());
+    }
+
+    /**
+     * @depends testInvokeForBasicAuthSetsIdentityWhenValid
+     */
+    public function testListenerInjectsDiscoveredIdentityIntoMvcEvent($params)
+    {
+        $identity = $params['identity'];
+        $mvcEvent = $params['mvc_event'];
+
+        $received = $mvcEvent->getParam('ZF\MvcAuth\Identity', false);
+        $this->assertSame($identity, $received);
+    }
+
+    /**
+     * @depends testInvokeForBasicAuthSetsGuestIdentityWhenValid
+     */
+    public function testListenerInjectsGuestIdentityIntoMvcEvent($params)
+    {
+        $identity = $params['identity'];
+        $mvcEvent = $params['mvc_event'];
+
+        $received = $mvcEvent->getParam('ZF\MvcAuth\Identity', false);
+        $this->assertSame($identity, $received);
     }
 }
