@@ -9,6 +9,7 @@ namespace ZFTest\MvcAuth\Authentication;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\Result as AuthenticationResult;
 use Zend\Authentication\Storage\NonPersistent;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
@@ -192,5 +193,29 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $received = $mvcEvent->getParam('ZF\MvcAuth\Identity', false);
         $this->assertSame($identity, $received);
+    }
+
+    /**
+     * @group 23
+     */
+    public function testListenerPullsDigestUsernameFromAuthenticationIdentityWhenCreatingAuthenticatedIdentityInstance()
+    {
+        $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, array(
+            'username' => 'user',
+            'realm' => 'User Area',
+        ));
+        $httpAuth->expects($this->once())
+            ->method('authenticate')
+            ->will($this->returnValue($resultIdentity));
+
+        $this->listener->setHttpAdapter($httpAuth);
+        $this->request->getHeaders()->addHeaderLine('Authorization: Digest username="user", realm="User Area", nonce="AB10BC99", uri="/", qop="auth", nc="AB10BC99", cnonce="AB10BC99", response="b19adb0300f4bd21baef59b0b4814898", opaque=""');
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertEquals('user', $identity->getRoleId());
     }
 }
