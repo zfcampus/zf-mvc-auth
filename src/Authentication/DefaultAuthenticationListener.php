@@ -108,8 +108,21 @@ class DefaultAuthenticationListener
                 $mvcAuthEvent->setAuthenticationResult($result);
 
                 if ($result->isValid()) {
-                    $identity = new Identity\AuthenticatedIdentity($result->getIdentity());
-                    $identity->setName($result->getIdentity());
+                    $resultIdentity = $result->getIdentity();
+
+                    // Pass full discovered identity to AuthenticatedIdentity object
+                    $identity = new Identity\AuthenticatedIdentity($resultIdentity);
+
+                    // But determine name separately
+                    $name = $resultIdentity;
+                    if (is_array($resultIdentity)) {
+                        $name = isset($resultIdentity['username'])
+                            ? $resultIdentity['username']
+                            : (string) $resultIdentity;
+                    }
+                    $identity->setName($name);
+
+                    // Set in MvcEvent
                     $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                     return $identity;
                 }
