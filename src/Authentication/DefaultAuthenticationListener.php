@@ -145,7 +145,7 @@ class DefaultAuthenticationListener
 
                 if ($this->oauth2Server->verifyResourceRequest($oauth2request)) {
                     $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
-                    $identity = new Identity\AuthenticatedIdentity($token['user_id']);
+                    $identity = new Identity\AuthenticatedIdentity($token);
                     $identity->setName($token['user_id']);
                     $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
                     return $identity;

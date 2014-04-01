@@ -218,4 +218,28 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
         $this->assertEquals('user', $identity->getRoleId());
     }
+
+    public function testListenerInjectsOAuthIdentityIntoAuthenticatedIdentityOnSuccess()
+    {
+        $server = $this->getMockBuilder('OAuth2\Server')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $server->expects($this->any())
+            ->method('verifyResourceRequest')
+            ->will($this->returnValue(true));
+        $token = array(
+            'user_id' => 'test',
+        );
+        $server->expects($this->any())
+            ->method('getAccessTokenData')
+            ->will($this->returnValue($token));
+        $this->listener->setOauth2Server($server);
+
+
+        $this->request->getHeaders()->addHeaderLine('Authorization: Bearer this-is-the-token');
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertEquals($token['user_id'], $identity->getRoleId());
+        $this->assertEquals($token, $identity->getAuthenticationIdentity());
+    }
 }
