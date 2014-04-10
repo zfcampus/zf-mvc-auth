@@ -24,11 +24,6 @@ return array(
             'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
         ),
     ),
-    'controllers' => array(
-        'invokables' => array(
-            'ZF\MvcAuth\Auth' => 'ZF\MvcAuth\AuthController',
-        ),
-    ),
     'zf-mvc-auth' => array(
         'authentication' => array(
             /**
