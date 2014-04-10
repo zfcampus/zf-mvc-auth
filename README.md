@@ -9,13 +9,12 @@ Introduction
 `zf-mvc-auth` is a ZF2 module that adds services, events, and configuration that extends the base
 ZF2 MVC lifecycle to handle authentication and authorization.
 
-For authentication, 3 primary methods are supported out of the box: http basic authentication,
-http digest authentication, and OAuth2 (this requires Brent Shaffers 3rd party library OAuth2
-Server).
+For authentication, 3 primary methods are supported out of the box: HTTP Basic authentication,
+HTTP Digest authentication, and OAuth2 (this requires Brent Shaffer's [OAuth2
+Server](https://github.com/bshaffer/oauth2-server-php)).
 
 For authorization, this particular module delivers a pre-dispatch time listener that will
-identify if the given route-match, along with the HTTP method, is authorized to be dispatched.
-
+identify if the given route match, along with the HTTP method, is authorized to be dispatched.
 
 Installation
 ------------
@@ -51,7 +50,6 @@ return array(
 );
 ```
 
-
 Configuration
 -------------
 
@@ -63,27 +61,29 @@ key, there are two sub-keys, one for `authentication` and the other for `authori
 #### Key: `authentication`
 
 The `authentication` key is used for any configuration that is related to the process of
-authentication, or the process of validating an identity is who they say they are.
+authentication, or the process of validating an identity.
 
 ##### Sub-key: `http`
 
-The `http` sub-key is utilized for configuration an HTTP based authentication scheme.  These schemes
-utilize ZF2's `Zend\Authentication\Adapter\Http` adapter.  This adapter implements both HTTP
-basic and HTTP digest authentication.  To accomplish this, the HTTP adapter uses a file based
-"resolver" in order to check usernames and passwords against.  These implementation nusances can be
+The `http` sub-key is utilized for configuring an HTTP-based authentication scheme.  These schemes
+utilize ZF2's `Zend\Authentication\Adapter\Http` adapter, which implements both HTTP
+Basic and HTTP Digest authentication.  To accomplish this, the HTTP adapter uses a file based
+"resolver" in order to resolve the file containing credentials.  These implementation nuances can be
 explored in the [Authentication portion of the ZF2 manual](http://framework.zend.com/manual/2.0/en/modules/zend.authentication.adapter.http.html).
 
 The `http` sub-key has several fields:
 
-- `accept_schemes`: *required*; an array of configured schemes; one or both of `basic` and `digest`
-- `realm`: *required*; this is typically a string that identifies the HTTP realm, like "My Site"
-- `digest_domains`: *required* if digest; this is the relative uri for the protected area, typically `/`
-- `nonce_timeout`: *required* is digest; a number of seconds to expire the digest nonce, typically `3600`
+- `accept_schemes`: *required*; an array of configured schemes; one or both of `basic` and `digest`.
+- `realm`: *required*; this is typically a string that identifies the HTTP realm; e.g., "My Site".
+- `digest_domains`: *required* for HTTP Digest; this is the relative URI for the protected area,
+  typically `/`.
+- `nonce_timeout`: *required* for HTTP Digest; the number of seconds in which to expire the digest
+  nonce, typically `3600`.
 
 Beyond those configuration options, one or both of the following resolver configurations is required:
 
-- `htpasswd`: the path to a file created in the htpasswd file format
-- `htdigest`: the path to a file created in the htdigest file format
+- `htpasswd`: the path to a file created in the `htpasswd` file format
+- `htdigest`: the path to a file created in the `htdigest` file format
 
 An example might look like the following:
 
@@ -93,8 +93,8 @@ An example might look like the following:
     'realm' => 'My Web Site',
     'digest_domains' => '/',
     'nonce_timeout' => 3600,
-    'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
-    'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+    'htpasswd' => APPLICATION_PATH . '/data/htpasswd', // htpasswd tool generated
+    'htdigest' => APPLICATION_PATH . '/data/htdigest', // @see http://www.askapache.com/online-tools/htpasswd-generator/
 ),
 ```
 
@@ -102,10 +102,10 @@ An example might look like the following:
 
 #### Sub-Key: `deny_by_default`
 
-`deny_by_default` toggles the default behavior for the `Zend\Permission\Acl` implementation.  The
-default value is `false`, which means that if no other rule applies to a particular
-`isAuthorized()` query with an unauthenticated user, then the given identity will be allowed.
-Change this setting to `true` to ensure that authenticated identities are required by default.
+`deny_by_default` toggles the default behavior for the `Zend\Permissions\Acl` implementation.  The
+default value is `false`, which means that if no authenticated user is present, and no permissions
+rule applies for the current resource, then access is allowed. Change this setting to `true` to
+require authenticated identities by default.
 
 Example:
 
@@ -120,16 +120,17 @@ configuration settings.  The structure of these arrays depends on the type of th
 service that you're attempting to grant or restrict access to.
 
 For the typical ZF2 based action controller, this array is keyed with `actions`.  Under this
-key, each action name for the given controller service with an associated *permission array*.
+key, each action name for the given controller service is associated with a *permission array*.
 
-For `zf-rest` based controllers, a top level key of either `collection` or `entity` is
-used.  Under each of these keys will be an associated *permission array*.
+For [zf-rest](https://github.com/zfcampus/zf-rest)-based controllers, a top level key of either
+`collection` or `entity` is used.  Under each of these keys will be an associated *permission
+array*.
 
-A permission array consists of a keyed array of either `default` or an HTTP method.  The
+A **permission array** consists of a keyed array of either `default` or an HTTP method.  The
 values for each of these will be a boolean value where `true` means _an authenticated user
 is required_ and where `false` means _an authenticated user is *not* required_.  If an action
 or HTTP method is not idendified, the `default` value will be assumed.  If there is no default,
-the behavior of `deny_by_default` upper level key will be assumed.
+the behavior of the `deny_by_default` key (discussed above) will be assumed.
 
 Below is an example:
 
@@ -157,7 +158,8 @@ Below is an example:
             // etc.
         ),
     ),
-)
+),
+```
 
 ### System Configuration
 
@@ -230,13 +232,14 @@ or authorization event is triggered.  It persists the following:
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION` event.  It is primarily
 responsible for preforming any authentication and ensuring that an authenticated
-identity is persisted in the `MvcAuthEvent` object.
+identity is persisted in both the `MvcAuthEvent` and `MvcEvent` objects (the latter under the event
+parameter `ZF\MvcAuth\Identity`).
 
 #### `ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener`
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION_POST` event.  It is primarily
 responsible for determining if an unsuccessful authentication was preformed, and in that case
-it will attempt to set a 401 Unauthorized status on the MvcEvent's response object.
+it will attempt to set a `401 Unauthorized` status on the `MvcEvent`'s response object.
 
 #### `ZF\MvcAuth\Authorization\DefaultAuthorizationListener`
 
@@ -247,14 +250,14 @@ responsible for executing the `isAuthorized()` method on the configured authoriz
 
 This listener is attached to the `MvcAuth::EVENT_AUTHORIZATION_POST` event.  It is primarily
 responsible for determining if the current request is authorized.   In the case where the current
-request is not authorized, it will attempt to set a 403 Forbidden status on the MvcEvent's
+request is not authorized, it will attempt to set a `403 Forbidden` status on the `MvcEvent`'s
 response object.
 
 #### `ZF\MvcAuth\Authorization\DefaultResourceResolverListener`
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION_POST` with a priority of `-1`.
 It is primarily responsible for creating and persisting a special name in the current event
-for REST based controllers when used in conjunction with `zf-rest` module.
+for zf-rest-based controllers when used in conjunction with `zf-rest` module.
 
 ZF2 Services
 ------------
@@ -281,4 +284,3 @@ This is an instance of `Zend\Authentication\Adapter\Http`.
 
 This is an instance of `ZF\MvcAuth\Authorization\AclAuthorization`, which in turn is an extension
 of `Zend\Permissions\Acl\Acl`.
-
