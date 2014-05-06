@@ -6,11 +6,9 @@
 
 namespace ZF\MvcAuth\Factory;
 
-use Zend\Http\Request;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use ZF\MvcAuth\Authorization\AclFactory;
 use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
 
 /**

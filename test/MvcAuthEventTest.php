@@ -4,13 +4,7 @@ namespace ZFTest\MvcAuth;
 
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result;
-use Zend\EventManager\EventManager;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Http\PhpEnvironment\Response;
-use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
-use Zend\ServiceManager\Config;
-use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
 use Zend\Permissions\Acl\Acl;

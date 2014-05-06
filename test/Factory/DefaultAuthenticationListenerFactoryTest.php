@@ -7,7 +7,6 @@
 namespace ZFTest\MvcAuth\Factory;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory;
