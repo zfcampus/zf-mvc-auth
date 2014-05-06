@@ -10,11 +10,8 @@ before_script:
   - composer install --dev --prefer-source
 
 script:
-  - ./vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
-  - ./bin/check-cs.sh
-  
-after_script:
-  - php ./vendor/bin/coveralls -v
+  - ./vendor/bin/phpunit
+  - ./vendor/bin/php-cs-fixer -v fix . --dry-run --config-file ./.php_cs
 
 notifications:
   irc: "irc.freenode.org#apigility-dev"
