@@ -16,6 +16,11 @@ Server](https://github.com/bshaffer/oauth2-server-php)).
 For authorization, this particular module delivers a pre-dispatch time listener that will
 identify if the given route match, along with the HTTP method, is authorized to be dispatched.
 
+Requirements
+------------
+  
+Please see the [composer.json](composer.json) file.
+
 Installation
 ------------
 
