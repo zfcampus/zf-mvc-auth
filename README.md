@@ -118,6 +118,31 @@ Example:
 'deny_by_default' => false,
 ```
 
+> ##### deny_by_default with zf-oauth2
+>
+> When using `deny_by_default => true` with > [zf-oauth2](https://github.com/zfcampus/zf-oauth2),
+> you will need to explicitly allow POST on the OAuth2 controller in order for Authentication
+> requests to be made.
+> 
+> As an example:
+>
+> ```php
+> `authorization` => array(
+>     'deny_by_default' => true,
+>     'ZF\\OAuth2\\Controller\\Auth' => array(
+>         'actions' => array(
+>             'token' => array(
+>                 'GET'    => false,
+>                 'POST'   => true,   // <-----
+>                 'PATCH'  => false,
+>                 'PUT'    => false,
+>                 'DELETE' => false,
+>             ),
+>         ),
+>     ),
+> ),
+> ```
+
 #### Sub-Key: Controller Service Name
 
 Under the `authorization` key is an array of _controller service name_ keyed authorization
