@@ -31,8 +31,8 @@ class Http extends HttpAuthBase
 	 * @return \ZF\MvcAuth\Authentication\Adapter\Http
 	 */
 	public function setBasicHeader($basicHeader) {
-		$this->basicHeader = $basicHeader;
-		return $this;
+        $this->basicHeader = $basicHeader;
+        return $this;
 	}
 
 	/**
@@ -42,8 +42,8 @@ class Http extends HttpAuthBase
 	 * @return \ZF\MvcAuth\Authentication\Adapter\Http
 	 */
 	public function setDigestHeader($digestHeader) {
-		$this->digestHeader = $digestHeader;
-		return $this;
+        $this->digestHeader = $digestHeader;
+        return $this;
 	}
 	
 	/**
@@ -52,7 +52,7 @@ class Http extends HttpAuthBase
 	 * @return string
 	 */
 	public function getBasicHeader() {
-		return $this->basicHeader;
+        return $this->basicHeader;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ class Http extends HttpAuthBase
 	 * @return string
 	 */
 	public function getDigestHeader() {
-		return $this->digestHeader;
+        return $this->digestHeader;
 	}
 	
 	/**

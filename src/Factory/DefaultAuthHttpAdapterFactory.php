@@ -63,11 +63,11 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
         ));
         
         if (isset($httpConfig['basic_header'])) {
-        	$httpAdapter->setBasicHeader($httpConfig['basic_header']);
+            $httpAdapter->setBasicHeader($httpConfig['basic_header']);
         }
 
         if (isset($httpConfig['digest_header'])) {
-        	$httpAdapter->setDigestHeader($httpConfig['digest_header']);
+            $httpAdapter->setDigestHeader($httpConfig['digest_header']);
         }        
 
         if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
