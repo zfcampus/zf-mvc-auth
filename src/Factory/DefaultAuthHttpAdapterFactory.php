@@ -6,7 +6,7 @@
 
 namespace ZF\MvcAuth\Factory;
 
-use Zend\Authentication\Adapter\Http as HttpAuth;
+use ZF\MvcAuth\Authentication\Adapter\Http as HttpAuth;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -59,6 +59,14 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
                 'accept_schemes' => implode(' ', $httpConfig['accept_schemes'])
             )
         ));
+        
+        if (isset($httpConfig['basic_header'])) {
+        	$httpAdapter->setBasicHeader($httpConfig['basic_header']);
+        }
+
+        if (isset($httpConfig['digest_header'])) {
+        	$httpAdapter->setDigestHeader($httpConfig['digest_header']);
+        }        
 
         if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
             $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
