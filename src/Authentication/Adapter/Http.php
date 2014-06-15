@@ -12,7 +12,7 @@ use Zend\Authentication\Adapter\Http as HttpAuthBase;
 /**
  * Http Auth Adapter
  */
-class Http implements HttpAuthBase
+class Http extends HttpAuthBase
 {
 	/**
 	 * @var string
