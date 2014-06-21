@@ -75,7 +75,7 @@ class DefaultAuthenticationListener
             $this->httpAdapter->setResponse($response);
         }
 
-        if ($token = $request->getQuery('access_token')){
+        if ($token = $request->getQuery('access_token')) {
             $type = 'oauth2';
         }
 
@@ -86,7 +86,7 @@ class DefaultAuthenticationListener
             $type = 'oauth2';
         }
 
-        if ($authHeader){
+        if ($authHeader) {
             $headerContent = trim($authHeader->getFieldValue());
 
             // we only support headers in the format: Authorization: xxx yyyyy
