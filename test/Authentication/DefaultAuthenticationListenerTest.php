@@ -219,27 +219,70 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->assertEquals('user', $identity->getRoleId());
     }
 
-    public function testListenerInjectsOAuthIdentityIntoAuthenticatedIdentityOnSuccess()
+    public function testBearerTypeProxiesOAuthServer()
+    {
+        $token = array(
+            'user_id' => 'test',
+        );
+
+        $this->setupMockOAuth2Server($token);
+        $this->request->getHeaders()->addHeaderLine('Authorization', 'Bearer TOKEN');
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+
+        $this->assertIdentityMatchesToken($token, $identity);
+    }
+
+    public function testQueryAccessTokenProxiesOAuthServer()
+    {
+        $token = array(
+            'user_id' => 'test',
+        );
+
+        $this->setupMockOAuth2Server($token);
+        $this->request->getQuery()->set('access_token', 'TOKEN');
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+
+        $this->assertIdentityMatchesToken($token, $identity);
+    }
+
+    public function testBodyAccessTokenProxiesOAuthServer()
+    {
+        $token = array(
+            'user_id' => 'test',
+        );
+
+        $this->setupMockOAuth2Server($token);
+        $this->request->getHeaders()->addHeaderLine('Content-Type', 'application/x-www-form-urlencoded');
+        $this->request->getPost()->set('access_token', 'TOKEN');
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+
+        $this->assertIdentityMatchesToken($token, $identity);
+    }
+
+    protected function setupMockOAuth2Server($token)
     {
         $server = $this->getMockBuilder('OAuth2\Server')
             ->disableOriginalConstructor()
             ->getMock();
-        $server->expects($this->any())
+        $server->expects($this->atLeastOnce())
             ->method('verifyResourceRequest')
             ->will($this->returnValue(true));
-        $token = array(
-            'user_id' => 'test',
-        );
-        $server->expects($this->any())
+
+        $server->expects($this->atLeastOnce())
             ->method('getAccessTokenData')
             ->will($this->returnValue($token));
+
         $this->listener->setOauth2Server($server);
+    }
 
+    public static function assertIdentityMatchesToken($token, $identity, $message = '')
+    {
+        self::assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity, $message);
+        self::assertEquals($token['user_id'], $identity->getRoleId());
+        self::assertEquals($token, $identity->getAuthenticationIdentity());
 
-        $this->request->getHeaders()->addHeaderLine('Authorization: Bearer this-is-the-token');
-        $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
-        $this->assertEquals($token['user_id'], $identity->getRoleId());
-        $this->assertEquals($token, $identity->getAuthenticationIdentity());
     }
 }

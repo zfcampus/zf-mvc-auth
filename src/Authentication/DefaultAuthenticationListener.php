@@ -67,13 +67,39 @@ class DefaultAuthenticationListener
             return;
         }
 
+        $type = false;
+
         $authHeader = $request->getHeader('Authorization');
         if ($this->httpAdapter instanceof HttpAuth) {
             $this->httpAdapter->setRequest($request);
             $this->httpAdapter->setResponse($response);
         }
 
-        if ($authHeader === false) {
+        if ($token = $request->getQuery('access_token')) {
+            $type = 'oauth2';
+        }
+
+        if ($request->getHeaders()->has('Content-Type')
+            && $request->getHeaders()->get('Content-Type')->getFieldValue() == 'application/x-www-form-urlencoded'
+            && $request->getPost('access_token')
+        ) {
+            $type = 'oauth2';
+        }
+
+        if ($authHeader) {
+            $headerContent = trim($authHeader->getFieldValue());
+
+            // we only support headers in the format: Authorization: xxx yyyyy
+            if (strpos($headerContent, ' ') === false) {
+                $identity = new Identity\GuestIdentity();
+                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+                return $identity;
+            }
+
+            list($type, $credential) = preg_split('# #', $headerContent, 2);
+        }
+
+        if (!$type) {
             if ($this->httpAdapter instanceof HttpAuth) {
                 $this->httpAdapter->challengeClient();
             }
@@ -81,17 +107,6 @@ class DefaultAuthenticationListener
             $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
             return $identity;
         }
-
-        $headerContent = trim($authHeader->getFieldValue());
-
-        // we only support headers in the format: Authorization: xxx yyyyy
-        if (strpos($headerContent, ' ') === false) {
-            $identity = new Identity\GuestIdentity();
-            $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-            return $identity;
-        }
-
-        list($type, $credential) = preg_split('# #', $headerContent, 2);
 
         switch (strtolower($type)) {
             case 'basic':
