@@ -26,6 +26,17 @@ class DefaultAuthenticationListener
     protected $oauth2Server;
 
     /**
+     * Request methods that will not have request bodies
+     *
+     * @var array
+     */
+    protected $requestsWithoutBodies = array(
+        'GET',
+        'HEAD',
+        'OPTIONS',
+    );
+
+    /**
      * Set the HTTP authentication adapter
      *
      * @param HttpAuth $httpAdapter
@@ -67,13 +78,41 @@ class DefaultAuthenticationListener
             return;
         }
 
-        $authHeader = $request->getHeader('Authorization');
+        $type = false;
+
         if ($this->httpAdapter instanceof HttpAuth) {
             $this->httpAdapter->setRequest($request);
             $this->httpAdapter->setResponse($response);
         }
 
-        if ($authHeader === false) {
+        $authHeader = $request->getHeader('Authorization');
+        if ($authHeader) {
+            $headerContent = trim($authHeader->getFieldValue());
+
+            // we only support headers in the format: Authorization: xxx yyyyy
+            if (strpos($headerContent, ' ') === false) {
+                $identity = new Identity\GuestIdentity();
+                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+                return $identity;
+            }
+
+            list($type, $credential) = preg_split('# #', $headerContent, 2);
+        }
+
+        if (! $type
+            && ! in_array($request->getMethod(), $this->requestsWithoutBodies)
+            && $request->getHeaders()->has('Content-Type')
+            && $request->getHeaders()->get('Content-Type')->match('application/x-www-form-urlencoded')
+            && $request->getPost('access_token')
+        ) {
+            $type = 'oauth2';
+        }
+
+        if (! $type && null !== $request->getQuery('access_token')) {
+            $type = 'oauth2';
+        }
+
+        if (! $type) {
             if ($this->httpAdapter instanceof HttpAuth) {
                 $this->httpAdapter->challengeClient();
             }
@@ -81,17 +120,6 @@ class DefaultAuthenticationListener
             $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
             return $identity;
         }
-
-        $headerContent = trim($authHeader->getFieldValue());
-
-        // we only support headers in the format: Authorization: xxx yyyyy
-        if (strpos($headerContent, ' ') === false) {
-            $identity = new Identity\GuestIdentity();
-            $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-            return $identity;
-        }
-
-        list($type, $credential) = preg_split('# #', $headerContent, 2);
 
         switch (strtolower($type)) {
             case 'basic':
