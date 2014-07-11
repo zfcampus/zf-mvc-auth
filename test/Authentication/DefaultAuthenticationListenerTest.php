@@ -247,13 +247,27 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->assertIdentityMatchesToken($token, $identity);
     }
 
-    public function testBodyAccessTokenProxiesOAuthServer()
+    public function requestMethodsWithRequestBodies()
+    {
+        return array(
+            array('DELETE'),
+            array('PATCH'),
+            array('POST'),
+            array('PUT'),
+        );
+    }
+
+    /**
+     * @dataProvider requestMethodsWithRequestBodies
+     */
+    public function testBodyAccessTokenProxiesOAuthServer($method)
     {
         $token = array(
             'user_id' => 'test',
         );
 
         $this->setupMockOAuth2Server($token);
+        $this->request->setMethod($method);
         $this->request->getHeaders()->addHeaderLine('Content-Type', 'application/x-www-form-urlencoded');
         $this->request->getPost()->set('access_token', 'TOKEN');
 
