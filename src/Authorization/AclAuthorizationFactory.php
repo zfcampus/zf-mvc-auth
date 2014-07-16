@@ -12,7 +12,7 @@ abstract class AclAuthorizationFactory
     {
         // Determine whether we are whitelisting or blacklisting
         $denyByDefault = false;
-        if (isset($config['deny_by_default'])) {
+        if (array_key_exists('deny_by_default', $config)) {
             $denyByDefault = (bool) $config['deny_by_default'];
             unset($config['deny_by_default']);
         }
@@ -29,7 +29,7 @@ abstract class AclAuthorizationFactory
         }
 
         foreach ($config as $set) {
-            if (!is_array($set) || !isset($set['resource'])) {
+            if (! is_array($set) || ! isset($set['resource'])) {
                 continue;
             }
 
