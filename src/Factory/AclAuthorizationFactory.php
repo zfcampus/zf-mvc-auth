@@ -53,7 +53,8 @@ class AclAuthorizationFactory implements FactoryInterface
      */
     protected function createAclFromConfig(array $config)
     {
-        $aclConfig = array();
+        $aclConfig     = array();
+        $denyByDefault = false;
 
         if (isset($config['zf-mvc-auth'])
             && isset($config['zf-mvc-auth']['authorization'])
@@ -61,12 +62,12 @@ class AclAuthorizationFactory implements FactoryInterface
             $config = $config['zf-mvc-auth']['authorization'];
 
             if (array_key_exists('deny_by_default', $config)) {
-                $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
+                $denyByDefault = $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
                 unset($config['deny_by_default']);
             }
 
             foreach ($config as $controllerService => $privileges) {
-                $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig);
+                $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig, $denyByDefault);
             }
         }
 
@@ -82,14 +83,15 @@ class AclAuthorizationFactory implements FactoryInterface
      * @param string $controllerService
      * @param array $privileges
      * @param array $aclConfig
+     * @param bool $denyByDefault
      */
-    protected function createAclConfigFromPrivileges($controllerService, array $privileges, &$aclConfig)
+    protected function createAclConfigFromPrivileges($controllerService, array $privileges, &$aclConfig, $denyByDefault)
     {
         if (isset($privileges['actions'])) {
             foreach ($privileges['actions'] as $action => $methods) {
                 $aclConfig[] = array(
                     'resource'   => sprintf('%s::%s', $controllerService, $action),
-                    'privileges' => $this->createPrivilegesFromMethods($methods),
+                    'privileges' => $this->createPrivilegesFromMethods($methods, $denyByDefault),
                 );
             }
         }
@@ -97,14 +99,14 @@ class AclAuthorizationFactory implements FactoryInterface
         if (isset($privileges['collection'])) {
             $aclConfig[] = array(
                 'resource'   => sprintf('%s::collection', $controllerService),
-                'privileges' => $this->createPrivilegesFromMethods($privileges['collection']),
+                'privileges' => $this->createPrivilegesFromMethods($privileges['collection'], $denyByDefault),
             );
         }
 
         if (isset($privileges['entity'])) {
             $aclConfig[] = array(
                 'resource'   => sprintf('%s::entity', $controllerService),
-                'privileges' => $this->createPrivilegesFromMethods($privileges['entity']),
+                'privileges' => $this->createPrivilegesFromMethods($privileges['entity'], $denyByDefault),
             );
         }
     }
@@ -113,9 +115,10 @@ class AclAuthorizationFactory implements FactoryInterface
      * Create the list of HTTP methods defining privileges
      *
      * @param array $methods
+     * @param bool $denyByDefault
      * @return array|null
      */
-    protected function createPrivilegesFromMethods(array $methods)
+    protected function createPrivilegesFromMethods(array $methods, $denyByDefault)
     {
         $privileges = array();
 
@@ -125,12 +128,19 @@ class AclAuthorizationFactory implements FactoryInterface
         }
 
         foreach ($methods as $method => $flag) {
-            if (!$flag) {
+            // If the flag evaluates true and we're denying by default, OR
+            // if the flag evaluates false and we're allowing by default,
+            // THEN no rule needs to be added
+            if (( $denyByDefault && $flag)
+                || (! $denyByDefault && ! $flag)
+            ) {
                 if (isset($privileges[$method])) {
                     unset($privileges[$method]);
                 }
                 continue;
             }
+
+            // Otherwise, we need to add a rule
             $privileges[$method] = true;
         }
 
