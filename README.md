@@ -225,27 +225,27 @@ ZF2 Events
 
 ### Events
 
-#### `ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHENTICATION` (a.k.a `authentication`)
+#### ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHENTICATION (a.k.a "authentication")
 
 This event is triggered in relation to `MvcEvent::EVENT_ROUTE` at `500` priority.  It is registered
 via the `ZF\MvcAuth\MvcRouteListener` event listener aggregate.
 
-#### `ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHENTICATION_POST` (a.k.a `authentication.post`)
+#### ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHENTICATION_POST (a.k.a "authentication.post")
 
 This event is triggered in relation to `MvcEvent::EVENT_ROUTE` at `499` priority.  It is
 registered via the `ZF\MvcAuth\MvcRouteListener` event listener aggregate.
 
-#### `ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHORIZATION` (a.k.a `authorization`)
+#### ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHORIZATION (a.k.a "authorization")
 
 This event is triggered in relation to `MvcEvent::EVENT_ROUTE` at `-600` priority.  It is
 registered via the `ZF\MvcAuth\MvcRouteListener` event listener aggregate.
 
-#### `ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHORIZATION_POST` (a.k.a `authorization.post`)
+#### ZF\MvcAuth\MvcAuthEvent::EVENT_AUTHORIZATION_POST (a.k.a "authorization.post")
 
 This event is triggered in relation to `MvcEvent::EVENT_ROUTE` at `-601` priority.  It is
 registered via the `ZF\MvcAuth\MvcRouteListener` event listener aggregate.
 
-#### `ZF\MvcAuth\MvcAuthEvent` object
+#### ZF\MvcAuth\MvcAuthEvent object
 
 The `MvcAuthEvent` object provides contextual information when any authentication
 or authorization event is triggered.  It persists the following:
@@ -258,32 +258,32 @@ or authorization event is triggered.  It persists the following:
 
 ### Listeners
 
-#### `ZF\MvcAuth\Authentication\DefaultAuthenticationListener`
+#### ZF\MvcAuth\Authentication\DefaultAuthenticationListener
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION` event.  It is primarily
 responsible for preforming any authentication and ensuring that an authenticated
 identity is persisted in both the `MvcAuthEvent` and `MvcEvent` objects (the latter under the event
 parameter `ZF\MvcAuth\Identity`).
 
-#### `ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener`
+#### ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION_POST` event.  It is primarily
 responsible for determining if an unsuccessful authentication was preformed, and in that case
 it will attempt to set a `401 Unauthorized` status on the `MvcEvent`'s response object.
 
-#### `ZF\MvcAuth\Authorization\DefaultAuthorizationListener`
+#### ZF\MvcAuth\Authorization\DefaultAuthorizationListener
 
 This listener is attached to the `MvcAuth::EVENT_AUTHORIZATION` event.  It is primarily
 responsible for executing the `isAuthorized()` method on the configured authorization service.
 
-#### `ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener`
+#### ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener
 
 This listener is attached to the `MvcAuth::EVENT_AUTHORIZATION_POST` event.  It is primarily
 responsible for determining if the current request is authorized.   In the case where the current
 request is not authorized, it will attempt to set a `403 Forbidden` status on the `MvcEvent`'s
 response object.
 
-#### `ZF\MvcAuth\Authorization\DefaultResourceResolverListener`
+#### ZF\MvcAuth\Authorization\DefaultResourceResolverListener
 
 This listener is attached to the `MvcAuth::EVENT_AUTHENTICATION_POST` with a priority of `-1`.
 It is primarily responsible for creating and persisting a special name in the current event
@@ -302,15 +302,15 @@ The following services are provided and serve as event listeners:
 - `ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener`
 - `ZF\MvcAuth\Authorization\DefaultResourceResolverListener`
 
-#### `ZF\MvcAuth\Authentication` (a.k.a `authentication`)
+#### ZF\MvcAuth\Authentication (a.k.a "authentication")
 
 This is an instance of `Zend\Authentication\AuthenticationService`.
 
-#### `ZF\MvcAuth\Authentication\AuthHttpAdapter`
+#### ZF\MvcAuth\Authentication\AuthHttpAdapter
 
 This is an instance of `Zend\Authentication\Adapter\Http`.
 
-#### `ZF\MvcAuth\Authorization\AclAuthorization` (a.k.a `authorization`, `ZF\MvcAuth\Authorization\AuthorizationInterface`)
+#### ZF\MvcAuth\Authorization\AclAuthorization (a.k.a "authorization", "ZF\MvcAuth\Authorization\AuthorizationInterface")
 
 This is an instance of `ZF\MvcAuth\Authorization\AclAuthorization`, which in turn is an extension
 of `Zend\Permissions\Acl\Acl`.
