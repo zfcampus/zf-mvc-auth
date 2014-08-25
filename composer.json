@@ -34,7 +34,8 @@
     "require-dev": {
         "fabpot/php-cs-fixer": "*@dev",
         "phpunit/PHPUnit": "3.7.*",
-        "zendframework/zend-loader": "~2.3"
+        "zendframework/zend-loader": "~2.3",
+        "zendframework/zend-session": "~2.3"
     },
     "autoload": {
         "psr-4": {
