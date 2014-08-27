@@ -79,6 +79,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
             'zf-mvc-auth' => array(
                 'authentication' => array(
                     'http' => array(
+                        'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+                        'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
                         'accept_schemes' => array('basic'),
                         'realm' => 'test',
                     ),
@@ -96,6 +98,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
             'zf-mvc-auth' => array(
                 'authentication' => array(
                     'http' => array(
+                        'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+                        'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
                         'accept_schemes' => array('digest'),
                         'realm' => 'test',
                         'digest_domains' => '/',
@@ -115,6 +119,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
             'zf-mvc-auth' => array(
                 'authentication' => array(
                     'http' => array(
+                        'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+                        'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
                         'accept_schemes' => array('basic'),
                         'realm' => 'My Web Site',
                         'digest_domains' => '/',
@@ -135,6 +141,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
             'zf-mvc-auth' => array(
                 'authentication' => array(
                     'http' => array(
+                        'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+                        'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
                         'accept_schemes' => array('digest'),
                         'realm' => 'User Area',
                         'digest_domains' => '/',
