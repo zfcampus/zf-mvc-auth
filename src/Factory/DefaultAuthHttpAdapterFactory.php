@@ -61,11 +61,13 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
         ));
 
         if (in_array('basic', $httpConfig['accept_schemes']) && isset($httpConfig['htpasswd'])) {
-            $httpAdapter->setBasicResolver(new HttpAuth\ApacheResolver($httpConfig['htpasswd']));
+            $basicResolverClass = $httpConfig['basic_resolver_class'];
+            $httpAdapter->setBasicResolver(new $basicResolverClass($httpConfig['htpasswd']));
         }
 
         if (in_array('digest', $httpConfig['accept_schemes']) && isset($httpConfig['htdigest'])) {
-            $httpAdapter->setDigestResolver(new HttpAuth\FileResolver($httpConfig['htdigest']));
+            $digestResolverClass = $httpConfig['digest_resolver_class'];
+            $httpAdapter->setDigestResolver(new $digestResolverClass($httpConfig['htdigest']));
         }
 
         return $httpAdapter;

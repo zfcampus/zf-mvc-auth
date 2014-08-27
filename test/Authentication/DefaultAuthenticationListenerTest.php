@@ -86,6 +86,8 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testInvokeForBasicAuthAddsAuthorizationHeader()
     {
         $httpAuth = new HttpAuth(array(
+            'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+            'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
@@ -104,6 +106,8 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testInvokeForBasicAuthSetsIdentityWhenValid()
     {
         $httpAuth = new HttpAuth(array(
+            'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+            'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
@@ -122,6 +126,8 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testInvokeForBasicAuthSetsGuestIdentityWhenValid()
     {
         $httpAuth = new HttpAuth(array(
+            'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+            'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
@@ -140,6 +146,8 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testInvokeForBasicAuthHasNoIdentityWhenNotValid()
     {
         $httpAuth = new HttpAuth(array(
+            'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+            'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
@@ -156,6 +164,8 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testInvokeForDigestAuthAddsAuthorizationHeader()
     {
         $httpAuth = new HttpAuth(array(
+            'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+            'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
             'accept_schemes' => 'digest',
             'realm' => 'User Area',
             'digest_domains' => '/',

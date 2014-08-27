@@ -26,17 +26,18 @@ return array(
     ),
     'zf-mvc-auth' => array(
         'authentication' => array(
-            /**
-             *
             'http' => array(
+                'basic_resolver_class'  => '\\Zend\\Authentication\\Adapter\\Http\\ApacheResolver',
+                'digest_resolver_class' => '\\Zend\\Authentication\\Adapter\\Http\\FileResolver',
+                /**
                 'accept_schemes' => array('basic', 'digest'),
                 'realm' => 'My Web Site',
                 'digest_domains' => '/',
                 'nonce_timeout' => 3600,
-                'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
-                'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+                'htpasswd' => APPLICATION_PATH . '/data/htpasswd', // htpasswd tool generated
+                'htdigest' => APPLICATION_PATH . '/data/htdigest', // @see http://www.askapache.com/online-tools/htpasswd-generator/
+                 */
             ),
-             */
         ),
         'authorization' => array(
             // Toggle the following to true to change the ACL creation to
