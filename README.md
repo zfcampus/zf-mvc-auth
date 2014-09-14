@@ -205,6 +205,8 @@ function:
     ),
     'factories' => array(
         'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
+        'ZF\MvcAuth\ApacheResolver' => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
+        'ZF\MvcAuth\FileResolver' => 'ZF\MvcAuth\Factory\FileResolverFactory',
         'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
         'ZF\MvcAuth\Authentication\AuthHttpAdapter' => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
         'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
@@ -314,3 +316,14 @@ This is an instance of `Zend\Authentication\Adapter\Http`.
 
 This is an instance of `ZF\MvcAuth\Authorization\AclAuthorization`, which in turn is an extension
 of `Zend\Permissions\Acl\Acl`.
+
+
+#### ZF\MvcAuth\ApacheResolver
+
+This is an instance of `Zend\Authentication\Adapter\Http\ApacheResolver`. 
+You can override the ApacheResolver with your own resolver by providing a custom factory. 
+
+#### ZF\MvcAuth\FileResolver
+
+This is an instance of `Zend\Authentication\Adapter\Http\FileResolver`.
+You can override the FileResolver with your own resolver by providing a custom factory.
