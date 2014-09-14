@@ -63,6 +63,10 @@ class Module
 
     public function onAuthenticationPost(MvcAuthEvent $e)
     {
+        if ($this->services->has('api-identity')) {
+            return;
+        }
+
         $this->services->setService('api-identity', $e->getIdentity());
     }
 }
