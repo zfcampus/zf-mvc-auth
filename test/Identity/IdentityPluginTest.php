@@ -13,10 +13,12 @@ class IdentityPluginTest extends TestCase
     {
         $this->event = $event = new MvcEvent();
 
-        $controller = $this->getMockForAbstractClass('Zend\Mvc\Controller\AbstractController');
+        $controller = $this->getMock('Zend\Mvc\Controller\AbstractController');
         $controller->expects($this->any())
             ->method('getEvent')
-            ->will($this->returnValue($event));
+            ->will($this->returnCallback(function () use ($event) {
+                return $event;
+            }));
 
         $this->plugin = new IdentityPlugin();
         $this->plugin->setController($controller);
