@@ -168,7 +168,14 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
-        $this->assertRegexp('#^Digest realm="User Area", domain="/", nonce="[a-f0-9]{32}", opaque="e66aa41ca5bf6992a5479102cc787bc9", algorithm="MD5", qop="auth"$#', $authHeader->getFieldValue());
+        $this->assertRegexp(
+            '#^Digest realm="User Area", domain="/", '
+            . 'nonce="[a-f0-9]{32}", '
+            . 'opaque="e66aa41ca5bf6992a5479102cc787bc9", '
+            . 'algorithm="MD5", '
+            . 'qop="auth"$#',
+            $authHeader->getFieldValue()
+        );
     }
 
     /**
@@ -212,7 +219,17 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->will($this->returnValue($resultIdentity));
 
         $this->listener->setHttpAdapter($httpAuth);
-        $this->request->getHeaders()->addHeaderLine('Authorization: Digest username="user", realm="User Area", nonce="AB10BC99", uri="/", qop="auth", nc="AB10BC99", cnonce="AB10BC99", response="b19adb0300f4bd21baef59b0b4814898", opaque=""');
+        $this->request->getHeaders()->addHeaderLine(
+            'Authorization: Digest username="user", '
+            . 'realm="User Area", '
+            . 'nonce="AB10BC99", '
+            . 'uri="/", '
+            . 'qop="auth", '
+            . 'nc="AB10BC99", '
+            . 'cnonce="AB10BC99", '
+            . 'response="b19adb0300f4bd21baef59b0b4814898", '
+            . 'opaque=""'
+        );
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);

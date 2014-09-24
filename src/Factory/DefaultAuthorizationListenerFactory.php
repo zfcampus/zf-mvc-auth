@@ -26,7 +26,8 @@ class DefaultAuthorizationListenerFactory implements FactoryInterface
     {
         if (!$services->has('ZF\MvcAuth\Authorization\AuthorizationInterface')) {
             throw new ServiceNotCreatedException(
-                'Cannot create DefaultAuthorizationListener service; no ZF\MvcAuth\Authorization\AuthorizationInterface service available!'
+                'Cannot create DefaultAuthorizationListener service; '
+                . 'no ZF\MvcAuth\Authorization\AuthorizationInterface service available!'
             );
         }
 
