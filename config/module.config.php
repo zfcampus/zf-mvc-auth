@@ -40,6 +40,8 @@ return array(
                 'nonce_timeout' => 3600,
                 'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
                 'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+                'basic_header' => 'Basic',
+                'digest_header' => 'Digest',
             ),
              */
         ),
