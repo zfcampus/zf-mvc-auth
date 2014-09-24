@@ -292,6 +292,15 @@ for zf-rest-based controllers when used in conjunction with `zf-rest` module.
 ZF2 Services
 ------------
 
+#### Controller Plugins
+
+This module exposes the controller plugin `getIdentity()`, mapping to
+`ZF\MvcAuth\Identity\IdentityPlugin`. This plugin will return the identity discovered during
+authentication as injected into the `Zend\Mvc\MvcEvent`'s `ZF\MvcAuth\Identity` parameter. If no
+identity is present in the `MvcEvent`, or the identity present is not an instance of
+`ZF\MvcAuth\Identity\IdentityInterface`, an instance of `ZF\MvcAuth\Identity\GuestIdentity` will be
+returned.
+
 #### Event Listener Services
 
 The following services are provided and serve as event listeners:
