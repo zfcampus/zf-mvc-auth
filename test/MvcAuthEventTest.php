@@ -26,7 +26,10 @@ class MvcAuthEventTest extends TestCase
 
     public function testGetAuthenticationService()
     {
-        $this->assertInstanceOf('Zend\Authentication\AuthenticationService', $this->mvcAuthEvent->getAuthenticationService());
+        $this->assertInstanceOf(
+            'Zend\Authentication\AuthenticationService',
+            $this->mvcAuthEvent->getAuthenticationService()
+        );
     }
 
     public function testHasAuthenticationResult()
@@ -38,7 +41,10 @@ class MvcAuthEventTest extends TestCase
 
     public function testSetAuthenticationResult()
     {
-        $this->assertSame($this->mvcAuthEvent, $this->mvcAuthEvent->setAuthenticationResult(new Result('success', 'foobar')));
+        $this->assertSame(
+            $this->mvcAuthEvent,
+            $this->mvcAuthEvent->setAuthenticationResult(new Result('success', 'foobar'))
+        );
     }
 
     public function testGetAuthenticationResult()

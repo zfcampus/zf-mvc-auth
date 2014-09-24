@@ -16,7 +16,10 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
     public function setUp()
     {
         $this->services = new ServiceManager();
-        $this->services->setFactory('ZF\MvcAuth\Authentication\AuthHttpAdapter', 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory');
+        $this->services->setFactory(
+            'ZF\MvcAuth\Authentication\AuthHttpAdapter',
+            'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory'
+        );
         $this->factory  = new DefaultAuthenticationListenerFactory();
     }
 
@@ -68,7 +71,16 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithConfigMissingAcceptSchemesRaisesException()
     {
-        $this->services->setService('config', array('zf-mvc-auth' => array('authentication' => array('http' => array()))));
+        $this->services->setService(
+            'config',
+            array(
+                'zf-mvc-auth' => array(
+                    'authentication' => array(
+                        'http' => array(),
+                    ),
+                ),
+            )
+        );
         $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException');
         $listener = $this->factory->createService($this->services);
     }
