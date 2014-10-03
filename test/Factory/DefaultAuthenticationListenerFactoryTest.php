@@ -70,7 +70,16 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithConfigMissingAcceptSchemesRaisesException()
     {
-        $this->services->setService('config', array('zf-mvc-auth' => array('authentication' => array('http' => array()))));
+        $this->services->setService(
+            'config',
+            array(
+                'zf-mvc-auth' => array(
+                    'authentication' => array(
+                        'http' => array(),
+                    ),
+                ),
+            )
+        );
         $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException');
         $listener = $this->factory->createService($this->services);
     }

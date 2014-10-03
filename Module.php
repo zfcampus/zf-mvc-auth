@@ -52,13 +52,33 @@ class Module
             $authentication
         );
 
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION, $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $this->services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'), 1000);
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION, $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener'));
-        $events->attach(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener'));
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHENTICATION,
+            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
+        );
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHENTICATION_POST,
+            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
+        );
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHORIZATION,
+            $this->services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
+            1000
+        );
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHORIZATION,
+            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
+        );
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHORIZATION_POST,
+            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
+        );
 
-        $events->attach(MvcAuthEvent::EVENT_AUTHENTICATION_POST, array($this, 'onAuthenticationPost'), -1);
+        $events->attach(
+            MvcAuthEvent::EVENT_AUTHENTICATION_POST,
+            array($this, 'onAuthenticationPost'),
+            -1
+        );
     }
 
     public function onAuthenticationPost(MvcAuthEvent $e)

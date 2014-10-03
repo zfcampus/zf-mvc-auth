@@ -38,7 +38,9 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
         $httpConfig = $config['zf-mvc-auth']['authentication']['http'];
 
         if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-            throw new ServiceNotCreatedException('"accept_schemes" is required when configuring an HTTP authentication adapter');
+            throw new ServiceNotCreatedException(
+                '"accept_schemes" is required when configuring an HTTP authentication adapter'
+            );
         }
 
         if (!isset($httpConfig['realm'])) {
@@ -49,7 +51,10 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
             if (!isset($httpConfig['digest_domains'])
                 || !isset($httpConfig['nonce_timeout'])
             ) {
-                throw new ServiceNotCreatedException('Both "digest_domains" and "nonce_timeout" are required when configuring an HTTP digest authentication adapter');
+                throw new ServiceNotCreatedException(
+                    'Both "digest_domains" and "nonce_timeout" are required '
+                    . 'when configuring an HTTP digest authentication adapter'
+                );
             }
         }
 

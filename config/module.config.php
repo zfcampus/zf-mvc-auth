@@ -5,6 +5,11 @@
  */
 
 return array(
+    'controller_plugins' => array(
+        'invokables' => array(
+            'getidentity' => 'ZF\MvcAuth\Identity\IdentityPlugin',
+        ),
+    ),
     'service_manager' => array(
         'aliases' => array(
             'authentication' => 'ZF\MvcAuth\Authentication',

@@ -64,6 +64,7 @@ class AclAuthorizationFactoryTest extends TestCase
                         $assertion = 'assert' . ($expected ? 'False' : 'True');
                         $this->$assertion($acl->isAllowed('guest', $resource . '::entity', $method));
                     }
+                    break;
                 case (array_key_exists('collection', $rules)):
                     foreach ($rules['collection'] as $method => $expected) {
                         $assertion = 'assert' . ($expected ? 'False' : 'True');
@@ -130,6 +131,7 @@ class AclAuthorizationFactoryTest extends TestCase
                         $assertion = 'assert' . ($expected ? 'False' : 'True');
                         $this->$assertion($acl->isAllowed('guest', $resource . '::entity', $method));
                     }
+                    break;
                 case (array_key_exists('collection', $rules)):
                     foreach ($rules['collection'] as $method => $expected) {
                         $assertion = 'assert' . ($expected ? 'False' : 'True');
