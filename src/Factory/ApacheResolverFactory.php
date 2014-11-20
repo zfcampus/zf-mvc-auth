@@ -6,7 +6,7 @@
 
 namespace ZF\MvcAuth\Factory;
 
-use \Zend\Authentication\Adapter\Http\ApacheResolver;
+use Zend\Authentication\Adapter\Http\ApacheResolver;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
