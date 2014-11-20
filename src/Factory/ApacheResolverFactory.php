@@ -26,10 +26,6 @@ class ApacheResolverFactory implements FactoryInterface
 
         $config = $serviceLocator->get('config');
 
-        if (!isset($config['zf-mvc-auth']['authentication']['http'])) {
-            return false;
-        }
-
         if (!isset($config['zf-mvc-auth']['authentication']['http']['htpasswd'])) {
             return false;
         }
