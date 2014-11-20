@@ -18,6 +18,8 @@ return array(
         ),
         'factories' => array(
             'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
+            'ZF\MvcAuth\ApacheResolver' => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
+            'ZF\MvcAuth\FileResolver' => 'ZF\MvcAuth\Factory\FileResolverFactory',
             'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
             'ZF\MvcAuth\Authentication\AuthHttpAdapter' => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
             'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
