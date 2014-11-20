@@ -16,9 +16,18 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
     public function setUp()
     {
         $this->services = new ServiceManager();
-        $this->services->setFactory('ZF\MvcAuth\Authentication\AuthHttpAdapter', 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory');
-        $this->services->setFactory('ZF\MvcAuth\ApacheResolver', 'ZF\MvcAuth\Factory\ApacheResolverFactory');
-        $this->services->setFactory('ZF\MvcAuth\FileResolver', 'ZF\MvcAuth\Factory\FileResolverFactory');
+        $this->services->setFactory(
+            'ZF\MvcAuth\Authentication\AuthHttpAdapter',
+            'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory'
+        );
+        $this->services->setFactory(
+            'ZF\MvcAuth\ApacheResolver',
+            'ZF\MvcAuth\Factory\ApacheResolverFactory'
+        );
+        $this->services->setFactory(
+            'ZF\MvcAuth\FileResolver',
+            'ZF\MvcAuth\Factory\FileResolverFactory'
+        );
         $this->factory  = new DefaultAuthenticationListenerFactory();
     }
 
