@@ -68,13 +68,19 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
         if (in_array('basic', $httpConfig['accept_schemes'])
             && $services->has('ZF\MvcAuth\ApacheResolver')
         ) {
-            $httpAdapter->setBasicResolver($services->get('ZF\MvcAuth\ApacheResolver'));
+            $resolver = $services->get('ZF\MvcAuth\ApacheResolver');
+            if ($resolver !== false) {
+                $httpAdapter->setBasicResolver($resolver);
+            }
         }
 
         if (in_array('digest', $httpConfig['accept_schemes'])
             && $services->has('ZF\MvcAuth\FileResolver')
         ) {
-            $httpAdapter->setDigestResolver($services->get('ZF\MvcAuth\FileResolver'));
+            $resolver = $services->get('ZF\MvcAuth\FileResolver');
+            if ($resolver !== false) {
+                $httpAdapter->setDigestResolver($resolver);
+            }
         }
 
         return $httpAdapter;
