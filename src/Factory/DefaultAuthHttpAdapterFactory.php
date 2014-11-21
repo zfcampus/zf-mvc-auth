@@ -19,7 +19,7 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
     /**
      * @param ServiceLocatorInterface $services
      * @throws ServiceNotCreatedException
-     * @return false|HttpAuthAdapter
+     * @return false|HttpAuth
      */
     public function createService(ServiceLocatorInterface $services)
     {
