@@ -33,7 +33,10 @@ return array(
     ),
     'zf-mvc-auth' => array(
         'authentication' => array(
-            /**
+            /* First, we define authentication configuration types. These have
+             * the keys:
+             * - http
+             * - oauth2
              *
             'http' => array(
                 'accept_schemes' => array('basic', 'digest'),
@@ -42,6 +45,12 @@ return array(
                 'nonce_timeout' => 3600,
                 'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
                 'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+            ),
+             *
+             * Next, we also have a "map", which maps an API module to a given
+             * configuration type:
+            'map' => array(
+                'ApiModuleName' => 'http|oauth2',
             ),
              */
         ),
