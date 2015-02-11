@@ -9,7 +9,6 @@ namespace ZF\MvcAuth\Authorization;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
-use Zend\Permissions\Acl\Acl;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZF\MvcAuth\Identity\IdentityInterface;
 
@@ -21,20 +20,11 @@ class DefaultAuthorizationListener
     protected $authorization;
 
     /**
-     * Array of controller_service_name/identifier_name pairs
-     *
-     * @var array
-     */
-    protected $restControllers;
-
-    /**
      * @param AuthorizationInterface $authorization
-     * @param array $restControllers
      */
-    public function __construct(AuthorizationInterface $authorization, array $restControllers = array())
+    public function __construct(AuthorizationInterface $authorization)
     {
-        $this->authorization   = $authorization;
-        $this->restControllers = $restControllers;
+        $this->authorization = $authorization;
     }
 
     /**
