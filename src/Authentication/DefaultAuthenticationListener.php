@@ -110,7 +110,7 @@ class DefaultAuthenticationListener
         }
 
         $type = $type ?: $this->getTypeFromRequest($request);
-        if ($type === false) {
+        if (false === $type) {
             if ($this->httpAdapter instanceof HttpAuth) {
                 $this->httpAdapter->setRequest($request);
                 $this->httpAdapter->setResponse($response);
