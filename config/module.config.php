@@ -47,10 +47,13 @@ return array(
                 'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
             ),
              *
-             * Next, we also have a "map", which maps an API module to a given
-             * configuration type:
+             * Next, we also have a "map", which maps an API module (with
+             * optional version) to a given authentication type (one of basic,
+             * digest, or oauth2):
             'map' => array(
-                'ApiModuleName' => 'http|oauth2',
+                'ApiModuleName' => 'oauth2',
+                'OtherApi\V2' => 'basic',
+                'AnotherApi\V1' => 'digest',
             ),
              */
         ),
