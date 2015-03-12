@@ -17,6 +17,7 @@ use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Request;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\HttpAdapter;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListenerTest extends TestCase
@@ -99,6 +100,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
+        $this->assertInstanceOf('Zend\Http\Header\HeaderInterface', $authHeader);
         $this->assertEquals('Basic realm="My Web Site"', $authHeader->getFieldValue());
     }
 
@@ -169,6 +171,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
+        $this->assertInstanceOf('Zend\Http\Header\HeaderInterface', $authHeader);
         $this->assertRegexp(
             '#^Digest realm="User Area", domain="/", '
             . 'nonce="[a-f0-9]{32}", '
@@ -215,6 +218,12 @@ class DefaultAuthenticationListenerTest extends TestCase
             'username' => 'user',
             'realm' => 'User Area',
         ));
+        $httpAuth->expects($this->any())
+            ->method('getBasicResolver')
+            ->will($this->returnValue(false));
+        $httpAuth->expects($this->any())
+            ->method('getDigestResolver')
+            ->will($this->returnValue(true));
         $httpAuth->expects($this->once())
             ->method('authenticate')
             ->will($this->returnValue($resultIdentity));
@@ -339,6 +348,9 @@ class DefaultAuthenticationListenerTest extends TestCase
             'username' => 'user',
             'realm' => 'User Area',
         ));
+        $httpAuth->expects($this->any())
+            ->method('getDigestResolver')
+            ->will($this->returnValue(true));
         $httpAuth->expects($this->once())
             ->method('authenticate')
             ->will($this->returnValue($resultIdentity));
@@ -584,5 +596,158 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+    }
+
+    public function testAllowsAttachingAdapters()
+    {
+        $types = array('foo');
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $this->listener->attach($adapter);
+    }
+
+    public function testCanRetrieveSupportedAuthenticationTypes()
+    {
+        $types = array('foo');
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $this->listener->attach($adapter);
+        $this->assertEquals($types, $this->listener->getAuthenticationTypes());
+    }
+
+    public function testAdapterPreAuthIsTriggeredWhenNoTypeMatchedInRequest()
+    {
+        $map = array(
+            'Foo\V2' => 'oauth2',
+            'Bar\V1' => 'basic',
+            'Baz\V3' => 'digest',
+        );
+        $this->listener->setAuthMap($map);
+        $request    = new HttpRequest();
+        $routeMatch = new RouteMatch(array('controller' => 'Foo\V1\Rest\Test\TestController'));
+        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
+        $mvcEvent
+            ->setRequest($request)
+            ->setRouteMatch($routeMatch);
+
+        $types = array('foo');
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $adapter->expects($this->once())
+            ->method('getTypeFromRequest')
+            ->with($this->equalTo($request))
+            ->will($this->returnValue(false));
+        $adapter->expects($this->once())
+            ->method('preAuth')
+            ->with($this->equalTo($request), $this->equalTo($this->response))
+            ->will($this->returnValue(null));
+
+        $this->listener->attach($adapter);
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+    }
+
+    public function testMatchedAdapterIsAuthenticatedAgainst()
+    {
+        $map = array(
+            'Foo\V2' => 'oauth2',
+            'Bar\V1' => 'basic',
+            'Baz\V3' => 'digest',
+        );
+        $this->listener->setAuthMap($map);
+        $request    = new HttpRequest();
+        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
+        $mvcEvent
+            ->setRequest($request)
+            ->setRouteMatch($routeMatch);
+
+        $types = array('oauth2');
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $adapter->expects($this->any())
+            ->method('getTypeFromRequest')
+            ->with($this->equalTo($request))
+            ->will($this->returnValue('oauth2'));
+        $expected = $this->getMockBuilder('ZF\MvcAuth\Identity\AuthenticatedIdentity')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->once())
+            ->method('authenticate')
+            ->with($this->equalTo($request), $this->equalTo($this->response))
+            ->will($this->returnValue($expected));
+        $this->listener->attach($adapter);
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertSame($expected, $identity);
+    }
+
+    public function testFirstAdapterProvidingTypeIsAuthenticatedAgainst()
+    {
+        $map = array(
+            'Foo\V2' => 'oauth2',
+            'Bar\V1' => 'basic',
+            'Baz\V3' => 'digest',
+        );
+        $this->listener->setAuthMap($map);
+        $request    = new HttpRequest();
+        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
+        $mvcEvent
+            ->setRequest($request)
+            ->setRouteMatch($routeMatch);
+
+        $types = array('oauth2');
+        $adapter1 = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter1->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $adapter1->expects($this->any())
+            ->method('getTypeFromRequest')
+            ->with($this->equalTo($request))
+            ->will($this->returnValue('oauth2'));
+        $expected = $this->getMockBuilder('ZF\MvcAuth\Identity\AuthenticatedIdentity')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter1->expects($this->once())
+            ->method('authenticate')
+            ->with($this->equalTo($request), $this->equalTo($this->response))
+            ->will($this->returnValue($expected));
+
+        $adapter2 = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter2->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $adapter2->expects($this->any())
+            ->method('getTypeFromRequest')
+            ->with($this->equalTo($request))
+            ->will($this->returnValue('oauth2'));
+
+        $this->listener->attach($adapter1);
+        $this->listener->attach($adapter2);
+
+        $identity = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertSame($expected, $identity);
     }
 }

@@ -9,6 +9,7 @@ namespace ZF\MvcAuth\Authentication;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use ZF\MvcAuth\Identity\IdentityInterface;
+use ZF\MvcAuth\MvcAuthEvent;
 
 interface AdapterInterface
 {
@@ -44,8 +45,9 @@ interface AdapterInterface
      *
      * @param Request $request
      * @param Response $response
+     * @param MvcAuthEvent $mvcAuthEvent
      * @return false|IdentityInterface False on failure, IdentityInterface
      *     otherwise
      */
-    public function authenticate(Request $request, Response $response);
+    public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent);
 }

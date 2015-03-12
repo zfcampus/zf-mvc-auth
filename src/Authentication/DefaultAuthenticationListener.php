@@ -12,11 +12,26 @@ use RuntimeException;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Mvc\Router\RouteMatch;
 use Zend\Http\Request as HttpRequest;
+use Zend\Http\Response as HttpResponse;
 use ZF\MvcAuth\Identity;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListener
 {
+    /**
+     * Attached authentication adapters
+     * 
+     * @var AdapterInterface[]
+     */
+    private $adapters = array();
+
+    /**
+     * Supported authentication types
+     * 
+     * @var array
+     */
+    private $authenticationTypes = array();
+
     /**
      * Map of API/version to authentication type pairs
      * 
@@ -25,29 +40,57 @@ class DefaultAuthenticationListener
     private $authMap = array();
 
     /**
-     * @var HttpAuth
+     * Legacy reasons only: HttpAuth instance
+     *
+     * On invocation, this will be munged to an HttpAdapter instance, and this
+     * property nullified.
+     *
+     * @deprecated
+     * @var null|HttpAuth
      */
     protected $httpAdapter;
 
     /**
-     * @var OAuth2Server
+     * Attach an authentication adapter
+     *
+     * Adds the authentication adapter, and updates the list of supported
+     * authentication types based on what the adapter provides.
+     * 
+     * @param AdapterInterface $adapter 
      */
-    protected $oauth2Server;
+    public function attach(AdapterInterface $adapter)
+    {
+        $this->adapters[] = $adapter;
+        $this->authenticationTypes = array_unique(array_merge($this->authenticationTypes, $adapter->provides()));
+    }
 
     /**
-     * Request methods that will not have request bodies
-     *
-     * @var array
+     * Retrieve the supported authentication types
+     * 
+     * @return array
      */
-    protected $requestsWithoutBodies = array(
-        'GET',
-        'HEAD',
-        'OPTIONS',
-    );
+    public function getAuthenticationTypes()
+    {
+        if ($this->httpAdapter instanceof HttpAuth) {
+            // Legacy purposes only. We cannot munge the actual HttpAdapter instance
+            // until we have the MvcAuthEvent (and thus the AuthenticationService),
+            // so if an HttpAuth instance was directly attached, and this method is
+            // queried before invocation, we report both basic and digest as being
+            // available.
+            return array_unique(array_merge(
+                $this->authenticationTypes,
+                array('basic', 'digest')
+            ));
+        }
+        return $this->authenticationTypes;
+    }
 
     /**
      * Set the HTTP authentication adapter
      *
+     * This method is deprecated; create and attach an HttpAdapter instead.
+     *
+     * @deprecated
      * @param HttpAuth $httpAdapter
      * @return self
      */
@@ -60,12 +103,15 @@ class DefaultAuthenticationListener
     /**
      * Set the OAuth2 server
      *
+     * This method is deprecated; create and attach an OAuth2Adapter instead.
+     *
+     * @deprecated
      * @param  OAuth2Server $oauth2Server
      * @return self
      */
     public function setOauth2Server(OAuth2Server $oauth2Server)
     {
-        $this->oauth2Server = $oauth2Server;
+        $this->attach(new OAuth2Adapter($oauth2Server));
         return $this;
     }
 
@@ -83,10 +129,12 @@ class DefaultAuthenticationListener
      * Listen to the authentication event
      *
      * @param MvcAuthEvent $mvcAuthEvent
-     * @return mixed
+     * @return null|Identity\IdentityInterface
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
+        $this->attachHttpAdapter($mvcAuthEvent);
+
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
         $request  = $mvcEvent->getRequest();
         $response = $mvcEvent->getResponse();
@@ -98,12 +146,9 @@ class DefaultAuthenticationListener
         }
 
         $type = $this->getTypeFromMap($mvcEvent->getRouteMatch());
-        if (false === $type
-            && $this->httpAdapter instanceof HttpAuth
-            && $this->oauth2Server instanceof OAuth2Server
-        ) {
+        if (false === $type && count($this->adapters) > 1) {
             // Ambiguous situation; no matching type in map, but multiple
-            // authentication methods; do nothing.
+            // authentication adapters; return a guest identity.
             $identity = new Identity\GuestIdentity();
             $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
             return $identity;
@@ -111,84 +156,24 @@ class DefaultAuthenticationListener
 
         $type = $type ?: $this->getTypeFromRequest($request);
         if (false === $type) {
-            if ($this->httpAdapter instanceof HttpAuth) {
-                $this->httpAdapter->setRequest($request);
-                $this->httpAdapter->setResponse($response);
-                $this->httpAdapter->challengeClient();
-            }
+            // No authentication type known; trigger any pre-flight actions,
+            // and return a guest identity.
+            $this->triggerAdapterPreAuth($request, $response);
             $identity = new Identity\GuestIdentity();
             $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
             return $identity;
         }
 
-        switch ($type) {
-            case 'basic':
-            case 'digest':
+        // Authenticate against first matching adapter
+        $identity = $this->authenticate($type, $request, $response, $mvcAuthEvent);
 
-                if (! $this->httpAdapter instanceof HttpAuth) {
-                    $identity = new Identity\GuestIdentity();
-                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                    return $identity;
-                }
-
-                $this->httpAdapter->setRequest($request);
-                $this->httpAdapter->setResponse($response);
-
-                $auth   = $mvcAuthEvent->getAuthenticationService();
-                $result = $auth->authenticate($this->httpAdapter);
-                $mvcAuthEvent->setAuthenticationResult($result);
-
-                if (! $result->isValid()) {
-                    $identity = new Identity\GuestIdentity();
-                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                    return $identity;
-                }
-
-                $resultIdentity = $result->getIdentity();
-
-                // Pass full discovered identity to AuthenticatedIdentity object
-                $identity = new Identity\AuthenticatedIdentity($resultIdentity);
-
-                // But determine name separately
-                $name = $resultIdentity;
-                if (is_array($resultIdentity)) {
-                    $name = isset($resultIdentity['username'])
-                        ? $resultIdentity['username']
-                        : (string) $resultIdentity;
-                }
-                $identity->setName($name);
-
-                // Set in MvcEvent
-                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                return $identity;
-
-            case 'oauth2':
-            case 'bearer':
-
-                if (!$this->oauth2Server instanceof OAuth2Server) {
-                    $identity = new Identity\GuestIdentity();
-                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                    return $identity;
-                }
-
-                $content       = $request->getContent();
-                $oauth2request = new OAuth2Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER, $content);
-
-                if ($this->oauth2Server->verifyResourceRequest($oauth2request)) {
-                    $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
-                    $identity = new Identity\AuthenticatedIdentity($token);
-                    $identity->setName($token['user_id']);
-                    $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                    return $identity;
-                }
-
-                $identity = new Identity\GuestIdentity();
-                $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
-                return $identity;
-
-            case 'token':
-                throw new RuntimeException('zf-mvc-auth has not yet implemented a "token" authentication adapter');
+        // If no identity returned, create a guest identity
+        if (! $identity instanceof Identity\IdentityInterface) {
+            $identity = new Identity\GuestIdentity();
         }
+
+        $mvcEvent->setParam('ZF\MvcAuth\Identity', $identity);
+        return $identity;
     }
 
     /**
@@ -231,53 +216,69 @@ class DefaultAuthenticationListener
      */
     private function getTypeFromRequest(HttpRequest $request)
     {
-        $type       = false;
-        $authHeader = $request->getHeader('Authorization');
-
-        if ($authHeader) {
-            $type = $this->getTypeFromAuthorizationHeader(trim($authHeader->getFieldValue()));
+        foreach ($this->adapters as $adapter) {
+            $type = $adapter->getTypeFromRequest($request);
+            if (false !== $type) {
+                return $type;
+            }
         }
-
-        if (! $type
-            && ! in_array($request->getMethod(), $this->requestsWithoutBodies)
-            && $request->getHeaders()->has('Content-Type')
-            && $request->getHeaders()->get('Content-Type')->match('application/x-www-form-urlencoded')
-            && $request->getPost('access_token')
-        ) {
-            return 'oauth2';
-        }
-
-        if (! $type && null !== $request->getQuery('access_token')) {
-            return 'oauth2';
-        }
-
-        return $type;
+        return false;
     }
 
     /**
-     * Determine the authentication type from the authorization header contents
+     * Trigger the preAuth routine of each adapter
+     *
+     * This method is triggered if no authentication type was discovered in the
+     * request.
      * 
-     * @param string $header 
-     * @return false|string
+     * @param HttpRequest $request 
+     * @param HttpResponse $response 
      */
-    private function getTypeFromAuthorizationHeader($header)
+    private function triggerAdapterPreAuth(HttpRequest $request, HttpResponse $response)
     {
-        // we only support headers in the format: Authorization: xxx yyyyy
-        if (strpos($header, ' ') === false) {
-            return false;
+        foreach ($this->adapters as $adapter) {
+            $adapter->preAuth($request, $response);
+        }
+    }
+
+    /**
+     * Invoke the adapter matching the given $type in order to peform authentication
+     * 
+     * @param string $type 
+     * @param HttpRequest $request 
+     * @param HttpResponse $response 
+     * @param MvcAuthEvent $mvcAuthEvent 
+     * @return false|Identity\IdentityInterface
+     */
+    private function authenticate($type, HttpRequest $request, HttpResponse $response, MvcAuthEvent $mvcAuthEvent)
+    {
+        foreach ($this->adapters as $adapter) {
+            if (! in_array($type, $adapter->provides(), true)) {
+                continue;
+            }
+
+            return $adapter->authenticate($request, $response, $mvcAuthEvent);
         }
 
-        list($type, $credential) = preg_split('# #', $header, 2);
+        return false;
+    }
 
-        switch (strtolower($type)) {
-            case 'basic':
-                return 'basic';
-            case 'digest':
-                return 'digest';
-            case 'bearer':
-                return 'oauth2';
-            default:
-                return false;
+    /**
+     * Attach the $httpAdapter as a proper adapter
+     *
+     * This is to allow using the setHttpAdapter() method along with the 
+     * AdapterInterface system, and will be removed in a future version.
+     * 
+     * @deprecated
+     * @param MvcAuthEvent $mvcAuthEvent 
+     */
+    private function attachHttpAdapter(MvcAuthEvent $mvcAuthEvent)
+    {
+        if (! $this->httpAdapter instanceof HttpAuth) {
+            return;
         }
+
+        $this->attach(new HttpAdapter($this->httpAdapter, $mvcAuthEvent->getAuthenticationService()));
+        $this->httpAdapter = null;
     }
 }
