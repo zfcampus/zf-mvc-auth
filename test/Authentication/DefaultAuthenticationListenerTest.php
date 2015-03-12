@@ -437,7 +437,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testAuthenticationUsesMapByToChooseAuthenticationMethod(
         $controller,
         $authType,
-        callable $requestProvider
+        $requestProvider
     ) {
         $this->setupMappedAuthenticatingListener($authType, $controller, $requestProvider());
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
@@ -451,7 +451,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testGuestIdentityIsReturnedWhenNoAuthSchemesArePresent(
         $controller,
         $authType,
-        callable $requestProvider
+        $requestProvider
     ) {
         $map = array(
             'Foo\V2' => 'oauth2',
@@ -475,7 +475,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testUsesDefaultAuthenticationWhenNoAuthMapIsPresent(
         $controller,
         $authType,
-        callable $requestProvider
+        $requestProvider
     ) {
         switch ($authType) {
             case 'basic':
@@ -507,7 +507,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testDoesNotPerformAuthenticationWhenNoAuthMapPresentAndMultipleAuthSchemesAreDefined(
         $controller,
         $authType,
-        callable $requestProvider
+        $requestProvider
     ) {
         $this->setupHttpBasicAuth();
         // Minimal OAuth2 server mock, as we are not expecting any method calls
