@@ -7,7 +7,7 @@
 namespace ZF\MvcAuth\Authentication;
 
 use Zend\Authentication\Adapter\Http as HttpAuth;
-use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\AuthenticationServiceInterface;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use ZF\MvcAuth\Identity;
@@ -16,7 +16,7 @@ use ZF\MvcAuth\MvcAuthEvent;
 class HttpAdapter extends AbstractAdapter
 {
     /**
-     * @var AuthenticationService
+     * @var AuthenticationServiceInterface
      */
     private $authenticationService;
 
@@ -27,9 +27,9 @@ class HttpAdapter extends AbstractAdapter
 
     /**
      * @param HttpAuth $httpAuth
-     * @param AuthenticationService $authenticationService
+     * @param AuthenticationServiceInterface $authenticationService
      */
-    public function __construct(HttpAuth $httpAuth, AuthenticationService $authenticationService)
+    public function __construct(HttpAuth $httpAuth, AuthenticationServiceInterface $authenticationService)
     {
         $this->httpAuth = $httpAuth;
         $this->authenticationService = $authenticationService;

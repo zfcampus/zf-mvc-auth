@@ -11,6 +11,8 @@ use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use OAuth2\Server as OAuth2Server;
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\AuthorizationCode;
@@ -30,12 +32,12 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
 
         $httpAdapter = $this->retrieveHttpAdapter($services);
         if ($httpAdapter) {
-            $listener->setHttpAdapter($httpAdapter);
+            $listener->attach($httpAdapter);
         }
 
         $oauth2Server = $this->createOAuth2Server($services);
         if ($oauth2Server) {
-            $listener->setOauth2Server($oauth2Server);
+            $listener->attach($oauth2Server);
         }
 
         return $listener;
@@ -44,7 +46,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     /**
      * @param  ServiceLocatorInterface $services
      * @throws ServiceNotCreatedException
-     * @return false|HttpAuth
+     * @return false|HttpAdapter
      */
     protected function retrieveHttpAdapter(ServiceLocatorInterface $services)
     {
@@ -62,7 +64,8 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             return false;
         }
 
-        return $httpAdapter;
+        $authService = $services->get('authentication');
+        return new HttpAdapter($httpAdapter, $authService);
     }
 
     /**
@@ -70,7 +73,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      *
      * @param  ServiceLocatorInterface $services
      * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
-     * @return false|OAuth2Server
+     * @return false|OAuth2Adapter
      */
     protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
@@ -97,6 +100,6 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         // Add the "Authorization Code" grant type
         $oauth2Server->addGrantType(new AuthorizationCode($storage));
 
-        return $oauth2Server;
+        return new OAuth2Adapter($oauth2Server);
     }
 }
