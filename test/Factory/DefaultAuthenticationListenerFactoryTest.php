@@ -172,4 +172,29 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
         $this->assertContains('digest', $listener->getAuthenticationTypes());
     }
+
+    public function testCallingFactoryWithCustomAuthenticatinTypesReturnsListenerComposingThem()
+    {
+        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $this->services->setService('authentication', $authenticationService);
+        $this->services->setService('config', array(
+            'zf-mvc-auth' => array(
+                'authentication' => array(
+                    'http' => array(
+                        'accept_schemes' => array('digest'),
+                        'realm' => 'User Area',
+                        'digest_domains' => '/',
+                        'nonce_timeout' => 3600,
+                        'htdigest' => __DIR__ . '/../TestAsset/htdigest'
+                    ),
+                    'types' => array(
+                        'token',
+                    ),
+                ),
+            ),
+        ));
+        $listener = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertEquals(array('digest', 'token'), $listener->getAuthenticationTypes());
+    }
 }

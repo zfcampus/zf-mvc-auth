@@ -40,6 +40,11 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             $listener->attach($oauth2Server);
         }
 
+        $authenticationTypes = $this->getAuthenticationTypes($services);
+        if ($authenticationTypes) {
+            $listener->addAuthenticationTypes($authenticationTypes);
+        }
+
         return $listener;
     }
 
@@ -101,5 +106,27 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         $oauth2Server->addGrantType(new AuthorizationCode($storage));
 
         return new OAuth2Adapter($oauth2Server);
+    }
+
+    /**
+     * Retrieve custom authentication types
+     * 
+     * @param ServiceLocatorInterface $services 
+     * @return false|array
+     */
+    protected function getAuthenticationTypes(ServiceLocatorInterface $services)
+    {
+        if (! $services->has('config')) {
+            return false;
+        }
+
+        $config = $services->get('config');
+        if (! isset($config['zf-mvc-auth']['authentication']['types'])
+            || ! is_array($config['zf-mvc-auth']['authentication']['types'])
+        ) {
+            return false;
+        }
+
+        return $config['zf-mvc-auth']['authentication']['types'];
     }
 }
