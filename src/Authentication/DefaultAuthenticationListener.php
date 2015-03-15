@@ -65,6 +65,25 @@ class DefaultAuthenticationListener
     }
 
     /**
+     * Add custom authentication types.
+     *
+     * This method allows specifiying additional authentication types, outside
+     * of adapters, that your application supports. The values provided are
+     * merged with any types already discovered.
+     * 
+     * @param array $types 
+     */
+    public function addAuthenticationTypes(array $types)
+    {
+        $this->authenticationTypes = array_unique(
+            array_merge(
+                $this->authenticationTypes,
+                $types
+            )
+        );
+    }
+
+    /**
      * Retrieve the supported authentication types
      * 
      * @return array

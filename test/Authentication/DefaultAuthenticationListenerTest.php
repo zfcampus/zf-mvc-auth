@@ -750,4 +750,29 @@ class DefaultAuthenticationListenerTest extends TestCase
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertSame($expected, $identity);
     }
+
+    public function testListsProvidedNonAdapterAuthenticationTypes()
+    {
+        $types = array('foo');
+        $this->listener->addAuthenticationTypes($types);
+        $this->assertEquals($types, $this->listener->getAuthenticationTypes());
+    }
+
+    public function testListsCombinedAuthenticationTypes()
+    {
+        $types = array('foo');
+        $customTypes = array('bar');
+        $this->listener->addAuthenticationTypes($customTypes);
+
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $this->listener->attach($adapter);
+
+        // Order of merge matters, unfortunately
+        $this->assertEquals(array_merge($customTypes, $types), $this->listener->getAuthenticationTypes());
+    }
 }
