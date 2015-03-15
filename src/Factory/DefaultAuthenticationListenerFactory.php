@@ -63,8 +63,8 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         }
 
         // We must abort if no resolver was provided
-        if (!$httpAdapter->getBasicResolver()
-            && !$httpAdapter->getDigestResolver()
+        if (! $httpAdapter->getBasicResolver()
+            && ! $httpAdapter->getDigestResolver()
         ) {
             return false;
         }
@@ -82,14 +82,14 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      */
     protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
-        if (!$services->has('config')) {
+        if (! $services->has('config')) {
             return false;
         }
 
         $config = $services->get('config');
-        if (!isset($config['zf-oauth2']['storage'])
-            || !is_string($config['zf-oauth2']['storage'])
-            || !$services->has($config['zf-oauth2']['storage'])
+        if (! isset($config['zf-oauth2']['storage'])
+            || ! is_string($config['zf-oauth2']['storage'])
+            || ! $services->has($config['zf-oauth2']['storage'])
         ) {
             return false;
         }
