@@ -11,6 +11,8 @@ use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use OAuth2\Server as OAuth2Server;
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\AuthorizationCode;
@@ -30,12 +32,17 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
 
         $httpAdapter = $this->retrieveHttpAdapter($services);
         if ($httpAdapter) {
-            $listener->setHttpAdapter($httpAdapter);
+            $listener->attach($httpAdapter);
         }
 
         $oauth2Server = $this->createOAuth2Server($services);
         if ($oauth2Server) {
-            $listener->setOauth2Server($oauth2Server);
+            $listener->attach($oauth2Server);
+        }
+
+        $authenticationTypes = $this->getAuthenticationTypes($services);
+        if ($authenticationTypes) {
+            $listener->addAuthenticationTypes($authenticationTypes);
         }
 
         return $listener;
@@ -44,7 +51,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     /**
      * @param  ServiceLocatorInterface $services
      * @throws ServiceNotCreatedException
-     * @return false|HttpAuth
+     * @return false|HttpAdapter
      */
     protected function retrieveHttpAdapter(ServiceLocatorInterface $services)
     {
@@ -56,13 +63,14 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         }
 
         // We must abort if no resolver was provided
-        if (!$httpAdapter->getBasicResolver()
-            && !$httpAdapter->getDigestResolver()
+        if (! $httpAdapter->getBasicResolver()
+            && ! $httpAdapter->getDigestResolver()
         ) {
             return false;
         }
 
-        return $httpAdapter;
+        $authService = $services->get('authentication');
+        return new HttpAdapter($httpAdapter, $authService);
     }
 
     /**
@@ -70,18 +78,18 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      *
      * @param  ServiceLocatorInterface $services
      * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
-     * @return false|OAuth2Server
+     * @return false|OAuth2Adapter
      */
     protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
-        if (!$services->has('config')) {
+        if (! $services->has('config')) {
             return false;
         }
 
         $config = $services->get('config');
-        if (!isset($config['zf-oauth2']['storage'])
-            || !is_string($config['zf-oauth2']['storage'])
-            || !$services->has($config['zf-oauth2']['storage'])
+        if (! isset($config['zf-oauth2']['storage'])
+            || ! is_string($config['zf-oauth2']['storage'])
+            || ! $services->has($config['zf-oauth2']['storage'])
         ) {
             return false;
         }
@@ -97,6 +105,28 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         // Add the "Authorization Code" grant type
         $oauth2Server->addGrantType(new AuthorizationCode($storage));
 
-        return $oauth2Server;
+        return new OAuth2Adapter($oauth2Server);
+    }
+
+    /**
+     * Retrieve custom authentication types
+     * 
+     * @param ServiceLocatorInterface $services 
+     * @return false|array
+     */
+    protected function getAuthenticationTypes(ServiceLocatorInterface $services)
+    {
+        if (! $services->has('config')) {
+            return false;
+        }
+
+        $config = $services->get('config');
+        if (! isset($config['zf-mvc-auth']['authentication']['types'])
+            || ! is_array($config['zf-mvc-auth']['authentication']['types'])
+        ) {
+            return false;
+        }
+
+        return $config['zf-mvc-auth']['authentication']['types'];
     }
 }

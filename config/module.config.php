@@ -33,7 +33,10 @@ return array(
     ),
     'zf-mvc-auth' => array(
         'authentication' => array(
-            /**
+            /* First, we define authentication configuration types. These have
+             * the keys:
+             * - http
+             * - oauth2
              *
             'http' => array(
                 'accept_schemes' => array('basic', 'digest'),
@@ -43,6 +46,25 @@ return array(
                 'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
                 'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
             ),
+             *
+             * Next, we also have a "map", which maps an API module (with
+             * optional version) to a given authentication type (one of basic,
+             * digest, or oauth2):
+            'map' => array(
+                'ApiModuleName' => 'oauth2',
+                'OtherApi\V2' => 'basic',
+                'AnotherApi\V1' => 'digest',
+            ),
+             *
+             * We also allow you to specify custom authentication types that you
+             * support via listeners; by adding them to the configuration, you
+             * ensure that they will be available for mapping modules to
+             * authentication types in the Admin.
+            'types' => array(
+                'token',
+                'key',
+                'etc',
+            )
              */
         ),
         'authorization' => array(
