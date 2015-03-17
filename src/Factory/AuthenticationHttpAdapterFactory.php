@@ -5,6 +5,7 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 
@@ -34,7 +35,7 @@ final class AuthenticationHttpAdapterFactory
             );
         }
 
-        if (! isset($config['options']) && ! is_array($config['options'])) {
+        if (! isset($config['options']) || ! is_array($config['options'])) {
             throw new ServiceNotCreatedException(
                 'Cannot create HTTP authentication adapter; missing options'
             );
