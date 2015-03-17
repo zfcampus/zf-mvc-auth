@@ -11,6 +11,13 @@ use Zend\Http\Request;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
+     * Authorization token types this adapter can fulfill.
+     * 
+     * @var array
+     */
+    protected $authorizationTokenTypes = array();
+
+    /**
      * Determine if the incoming request provides either basic or digest
      * credentials
      *
@@ -28,7 +35,7 @@ abstract class AbstractAdapter implements AdapterInterface
         $authorization = trim($authorization->getFieldValue());
         $type = $this->getTypeFromAuthorizationHeader($authorization);
 
-        if (! in_array($type, $this->provides())) {
+        if (! in_array($type, $this->authorizationTokenTypes)) {
             return false;
         }
 

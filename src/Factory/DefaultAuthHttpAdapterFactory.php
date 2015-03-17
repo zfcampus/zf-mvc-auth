@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2015 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
@@ -35,54 +35,6 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
             return false;
         }
 
-        $httpConfig = $config['zf-mvc-auth']['authentication']['http'];
-
-        if (!isset($httpConfig['accept_schemes']) || !is_array($httpConfig['accept_schemes'])) {
-            throw new ServiceNotCreatedException(
-                '"accept_schemes" is required when configuring an HTTP authentication adapter'
-            );
-        }
-
-        if (!isset($httpConfig['realm'])) {
-            throw new ServiceNotCreatedException('"realm" is required when configuring an HTTP authentication adapter');
-        }
-
-        if (in_array('digest', $httpConfig['accept_schemes'])) {
-            if (!isset($httpConfig['digest_domains'])
-                || !isset($httpConfig['nonce_timeout'])
-            ) {
-                throw new ServiceNotCreatedException(
-                    'Both "digest_domains" and "nonce_timeout" are required '
-                    . 'when configuring an HTTP digest authentication adapter'
-                );
-            }
-        }
-
-        $httpAdapter = new HttpAuth(array_merge(
-            $httpConfig,
-            array(
-                'accept_schemes' => implode(' ', $httpConfig['accept_schemes'])
-            )
-        ));
-
-        if (in_array('basic', $httpConfig['accept_schemes'])
-            && $services->has('ZF\MvcAuth\ApacheResolver')
-        ) {
-            $resolver = $services->get('ZF\MvcAuth\ApacheResolver');
-            if ($resolver !== false) {
-                $httpAdapter->setBasicResolver($resolver);
-            }
-        }
-
-        if (in_array('digest', $httpConfig['accept_schemes'])
-            && $services->has('ZF\MvcAuth\FileResolver')
-        ) {
-            $resolver = $services->get('ZF\MvcAuth\FileResolver');
-            if ($resolver !== false) {
-                $httpAdapter->setDigestResolver($resolver);
-            }
-        }
-
-        return $httpAdapter;
+        return HttpAdapterFactory::factory($config['zf-mvc-auth']['authentication']['http']);
     }
 }
