@@ -479,11 +479,83 @@ identity will be used for the duration of the request.
 Adapters are attached to the `DefaultAuthenticationListener`. To attach your
 custom adapter, you will need to do one of the following:
 
+- Define named HTTP and/or OAuth2 adapters via configuration.
 - During an event listener, pull your adapter and the
   `DefaultAuthenticationListener` services, and attach your adapter to the
   latter.
 - Create a `DelegatorFactory` for the `DefaultAuthenticationListener` that
   attaches your custom adapter before returning the listener.
+
+#### Defining named HTTP and/or OAuth2 adapters
+
+Since HTTP and OAuth2 support is built-in, `zf-mvc-auth` provides a
+configuration-driven approach for creating named adapters of these types. Each
+requires a unique key under the `zf-mvc-auth.authentication.adapters`
+configuration, and each type has its own format.
+
+```php
+return array(
+    /* ... */
+    'zf-mvc-auth' => array(
+        'authentication' => array(
+            'adapters' => array(
+                'api' => array(
+                    // This defines an HTTP adapter that can satisfy both
+                    // basic and digest.
+                    'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
+                    'options' => array(
+                        'accept_schemes' => array('basic', 'digest'),
+                        'realm' => 'api',
+                        'digest_domains' => 'https://example.com',
+                        'nonce_timeout' => 3600,
+                        'htpasswd' => 'data/htpasswd',
+                        'htdigest' => 'data/htdigest',
+                    ),
+                ),
+                'user' => array(
+                    // This defines an OAuth2 adapter backed by PDO.
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'pdo',
+                        'dsn' => 'mysql:host=localhost;dbname=oauth2',
+                        'username' => 'username',
+                        'password' => 'password',
+                        'options' => aray(
+                            1002 => 'SET NAMES utf8', // PDO::MYSQL_ATTR_INIT_COMMAND
+                        ),
+                    ),
+                ),
+                'client' => array(
+                    // This defines an OAuth2 adapter backed by Mongo.
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'mongo',
+                        'locator_name' => 'SomeServiceName', // If provided, pulls the given service
+                        'dsn' => 'mongodb://localhost',
+                        'database' => 'oauth2',
+                        'options' => array(
+                            'username' => 'username',
+                            'password' => 'password',
+                            'connectTimeoutMS' => 500,
+                        ),
+                    ),
+                ),
+            ),
+            /* ... */
+        ),
+        /* ... */
+    ),
+    /* ... */
+);
+```
+
+The above configuration would provide the authentication types
+`array('api-basic', 'api-digest', 'user', 'client')` to your application, which
+can each them be associated in the authentication type map.
+
+If you use `zf-apigility-admin`'s Admin API and/or the Apigility UI to
+configure authentication adapters, the above configuration will be created for
+you.
 
 #### Attaching an adapter during an event listener
 
