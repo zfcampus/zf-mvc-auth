@@ -167,6 +167,71 @@ return array(
 
 This key and its contents **must** be created manually.
 
+##### Sub-key: `adapters`
+
+- Since 1.1.0.
+
+Starting in 1.1.0, with the introduction of adapters, you can also configure
+named HTTP and OAuth2 adapters. The name provided will be used as the
+authentication type for purposes of mapping APIs to an authentication adapter.
+
+The format for the `adapters` key is a key/value pair, with the key acting as
+the type, and the value as configuration for providing a
+`ZF\MvcAuth\Authentication\HttpAdapter` or
+`ZF\MvcAuth\Authentication\OAuth2Adapter` instance, as follows:
+
+```php
+return array(
+    'zf-mvc-auth' => array(
+        'authentication' => array(
+            'adapters' => array(
+                'api' => array(
+                    // This defines an HTTP adapter that can satisfy both
+                    // basic and digest.
+                    'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
+                    'options' => array(
+                        'accept_schemes' => array('basic', 'digest'),
+                        'realm' => 'api',
+                        'digest_domains' => 'https://example.com',
+                        'nonce_timeout' => 3600,
+                        'htpasswd' => 'data/htpasswd',
+                        'htdigest' => 'data/htdigest',
+                    ),
+                ),
+                'user' => array(
+                    // This defines an OAuth2 adapter backed by PDO.
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'pdo',
+                        'dsn' => 'mysql:host=localhost;dbname=oauth2',
+                        'username' => 'username',
+                        'password' => 'password',
+                        'options' => aray(
+                            1002 => 'SET NAMES utf8', // PDO::MYSQL_ATTR_INIT_COMMAND
+                        ),
+                    ),
+                ),
+                'client' => array(
+                    // This defines an OAuth2 adapter backed by Mongo.
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'mongo',
+                        'locator_name' => 'SomeServiceName', // If provided, pulls the given service
+                        'dsn' => 'mongodb://localhost',
+                        'database' => 'oauth2',
+                        'options' => array(
+                            'username' => 'username',
+                            'password' => 'password',
+                            'connectTimeoutMS' => 500,
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    ),
+);
+```
+
 #### Key: `authorization`
 
 #### Sub-Key: `deny_by_default`
