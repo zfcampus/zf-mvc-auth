@@ -16,9 +16,23 @@ use ZF\MvcAuth\MvcAuthEvent;
 class OAuth2Adapter extends AbstractAdapter
 {
     /**
+     * Authorization header token types this adapter can fulfill.
+     * 
+     * @var array
+     */
+    protected $authorizationTokenTypes = array('bearer');
+
+    /**
      * @var OAuth2Server
      */
     private $oauth2Server;
+
+    /**
+     * Authentication types this adapter provides.
+     * 
+     * @var array
+     */
+    private $providesTypes = array('oauth2');
 
     /**
      * Request methods that will not have request bodies
@@ -34,9 +48,17 @@ class OAuth2Adapter extends AbstractAdapter
     /**
      * @param OAuth2Server $oauth2Server
      */
-    public function __construct(OAuth2Server $oauth2Server)
+    public function __construct(OAuth2Server $oauth2Server, $types = null)
     {
         $this->oauth2Server = $oauth2Server;
+
+        if (is_string($types) && ! empty($types)) {
+            $types = array($types);
+        }
+
+        if (is_array($types)) {
+            $this->providesTypes = $types;
+        }
     }
 
     /**
@@ -44,7 +66,7 @@ class OAuth2Adapter extends AbstractAdapter
      */
     public function provides()
     {
-        return array('oauth2', 'bearer');
+        return $this->providesTypes;
     }
 
     /**

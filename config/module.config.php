@@ -16,6 +16,11 @@ return array(
             'authorization' => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
             'ZF\MvcAuth\Authorization\AuthorizationInterface' => 'ZF\MvcAuth\Authorization\AclAuthorization',
         ),
+        'delegator_factories' => array(
+            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => array(
+                'ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory',
+            ),
+        ),
         'factories' => array(
             'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
             'ZF\MvcAuth\ApacheResolver' => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
@@ -38,6 +43,8 @@ return array(
              * - http
              * - oauth2
              *
+             * Note: as of 1.1, these are deprecated.
+             *
             'http' => array(
                 'accept_schemes' => array('basic', 'digest'),
                 'realm' => 'My Web Site',
@@ -45,6 +52,49 @@ return array(
                 'nonce_timeout' => 3600,
                 'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
                 'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
+            ),
+             *
+             * Starting in 1.1, we have an "adapters" key, which is a key/value
+             * pair of adapter name -> adapter configuration information. This
+             * looks like the following for the HTTP basic/digest and OAuth2
+             * adapters:
+            'adapters' => array
+                'api' => array(
+                    'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
+                    'options' => array(
+                        'accept_schemes' => array('basic', 'digest'),
+                        'realm' => 'api',
+                        'digest_domains' => 'https://example.com',
+                        'nonce_timeout' => 3600,
+                        'htpasswd' => 'data/htpasswd',
+                        'htdigest' => 'data/htdigest',
+                    ),
+                ),
+                'user' => array(
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'pdo',
+                        'dsn' => 'mysql:host=localhost;dbname=oauth2',
+                        'username' => 'username',
+                        'password' => 'password',
+                        'options' => aray(
+                            1002 => 'SET NAMES utf8', // PDO::MYSQL_ATTR_INIT_COMMAND
+                        ),
+                    ),
+                ),
+                'client' => array(
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'mongo',
+                        'dsn' => 'mongodb://localhost',
+                        'database' => 'oauth2',
+                        'options' => array(
+                            'username' => 'username',
+                            'password' => 'password',
+                            'connectTimeoutMS' => 500,
+                        ),
+                    ),
+                ),
             ),
              *
              * Next, we also have a "map", which maps an API module (with

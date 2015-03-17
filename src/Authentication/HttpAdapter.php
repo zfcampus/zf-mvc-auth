@@ -21,33 +21,63 @@ class HttpAdapter extends AbstractAdapter
     private $authenticationService;
 
     /**
+     * Authorization header token types this adapter can fulfill.
+     * 
+     * @var array
+     */
+    protected $authorizationTokenTypes = array('basic', 'digest');
+
+    /**
      * @var HttpAuth
      */
     private $httpAuth;
 
     /**
+     * Base to use when prefixing "provides" strings
+     * 
+     * @var null|string
+     */
+    private $providesBase;
+
+    /**
      * @param HttpAuth $httpAuth
      * @param AuthenticationServiceInterface $authenticationService
+     * @param null|string $providesBase
      */
-    public function __construct(HttpAuth $httpAuth, AuthenticationServiceInterface $authenticationService)
-    {
+    public function __construct(
+        HttpAuth $httpAuth,
+        AuthenticationServiceInterface $authenticationService,
+        $providesBase = null
+    ) {
         $this->httpAuth = $httpAuth;
         $this->authenticationService = $authenticationService;
+
+        if (is_string($providesBase) && ! empty($providesBase)) {
+            $this->providesBase = $providesBase;
+        }
     }
 
     /**
+     * Returns the "types" this adapter can handle.
+     *
+     * If no $providesBase is present, returns "basic" and/or "digest" in the
+     * array, based on what resolvers are present in the adapter; if
+     * $providesBase is present, the same strings are returned, only with the
+     * $providesBase prefixed, along with a "-" separator.
+     *
      * @return array Array of types this adapter can handle.
      */
     public function provides()
     {
-        $provides = array();
+        $providesBase = $this->providesBase ? $this->providesBase . '-' : '';
+        $provides     = array();
 
         if ($this->httpAuth->getBasicResolver()) {
-            $provides[] = 'basic';
+            $provides[] = $providesBase . 'basic';
         }
 
         if ($this->httpAuth->getDigestResolver()) {
-            $provides[] = 'digest';
+            $provides[] = $providesBase . 'digest';
         }
 
         return $provides;
