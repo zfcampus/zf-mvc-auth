@@ -86,6 +86,7 @@ return array(
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
                     'storage' => array(
                         'adapter' => 'mongo',
+                        'locator_name' => 'SomeServiceName', // If provided, pulls the given service
                         'dsn' => 'mongodb://localhost',
                         'database' => 'oauth2',
                         'options' => array(
