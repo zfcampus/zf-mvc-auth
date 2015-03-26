@@ -94,6 +94,12 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             return false;
         }
 
+        // If the service locator already has a pre-configured OAuth2 server, use it
+        if ($services->has('ZF\OAuth2\Service\OAuth2Server')) {
+            return $services->get('ZF\OAuth2\Service\OAuth2Server');
+        }
+
+        // There is no preconfigured OAuth2 server, so we must construct our own
         $storage = $services->get($config['zf-oauth2']['storage']);
 
         // Pass a storage object or array of storage objects to the OAuth2 server class
