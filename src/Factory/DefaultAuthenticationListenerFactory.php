@@ -6,16 +6,19 @@
 
 namespace ZF\MvcAuth\Factory;
 
+use OAuth2\Server as OAuth2Server;
+use OAuth2\GrantType\ClientCredentials;
+use OAuth2\GrantType\AuthorizationCode;
+use RuntimeException;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 use ZF\MvcAuth\Authentication\OAuth2Adapter;
-use OAuth2\Server as OAuth2Server;
-use OAuth2\GrantType\ClientCredentials;
-use OAuth2\GrantType\AuthorizationCode;
+use ZF\OAuth2\Factory\OAuth2ServerFactory as ZFOAuth2ServerFactory;
 
 /**
  * Factory for creating the DefaultAuthenticationListener from configuration
@@ -82,36 +85,37 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      */
     protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
-        // If the service locator already has a pre-configured OAuth2 server, use it
         if ($services->has('ZF\OAuth2\Service\OAuth2Server')) {
+            // If the service locator already has a pre-configured OAuth2 server, use it.
             return new OAuth2Adapter($services->get('ZF\OAuth2\Service\OAuth2Server'));
         }
 
-        if (! $services->has('config')) {
+        if (! $services->has('Config')) {
+            // If we don't have configuration, we cannot create an OAuth2 server.
             return false;
         }
 
-        $config = $services->get('config');
-        if (! isset($config['zf-oauth2']['storage'])
-            || ! is_string($config['zf-oauth2']['storage'])
-            || ! $services->has($config['zf-oauth2']['storage'])
-        ) {
-            return false;
+        $factory = new ZFOAuth2ServerFactory();
+
+        try {
+            $server = $factory->createService($services);
+        } catch (RuntimeException $e) {
+            // These are exceptions specifically thrown from the
+            // ZF\OAuth2\Factory\OAuth2ServerFactory when essential
+            // configuration is missing.
+            switch (true) {
+                case strpos($e->getMessage(), 'missing'):
+                    return false;
+                case strpos($e->getMessage(), 'string or array'):
+                    return false;
+                default:
+                    // Any other RuntimeException at this point we don't know
+                    // about and need to re-throw.
+                    throw $e;
+            }
         }
 
-        // There is no preconfigured OAuth2 server, so we must construct our own
-        $storage = $services->get($config['zf-oauth2']['storage']);
-
-        // Pass a storage object or array of storage objects to the OAuth2 server class
-        $oauth2Server = new OAuth2Server($storage);
-
-        // Add the "Client Credentials" grant type (it is the simplest of the grant types)
-        $oauth2Server->addGrantType(new ClientCredentials($storage));
-
-        // Add the "Authorization Code" grant type
-        $oauth2Server->addGrantType(new AuthorizationCode($storage));
-
-        return new OAuth2Adapter($oauth2Server);
+        return new OAuth2Adapter($server);
     }
 
     /**
