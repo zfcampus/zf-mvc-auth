@@ -59,7 +59,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
                             'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
                             'storage' => array(
                                 'adapter' => 'pdo',
-                                'dsn' => 'sqlite:memory:',
+                                'dsn' => 'sqlite::memory:',
                             ),
                         ),
                         'baz' => array(

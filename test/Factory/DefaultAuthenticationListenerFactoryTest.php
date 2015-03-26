@@ -7,6 +7,7 @@
 namespace ZFTest\MvcAuth\Factory;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionProperty;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory;
@@ -215,6 +216,12 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         
         $listener = $this->factory->createService($this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeSame($oauth2Server, 'oauth2Server', $listener);
+
+        $r = new ReflectionProperty($listener, 'adapters');
+        $r->setAccessible(true);
+        $adapters = $r->getValue($listener);
+        $adapter = array_shift($adapters);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
+        $this->assertAttributeSame($oauth2Server, 'oauth2Server', $adapter);
     }
 }
