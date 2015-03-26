@@ -45,7 +45,7 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
             'adapter' => 'pdo',
             'storage' => array(
                 'adapter' => 'pdo',
-                'dsn' => 'sqlite:memory:',
+                'dsn' => 'sqlite::memory:',
             ),
         );
         $adapter = AuthenticationOAuth2AdapterFactory::factory('foo', $config, $this->services);

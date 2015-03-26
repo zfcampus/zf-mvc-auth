@@ -7,6 +7,7 @@
 namespace ZFTest\MvcAuth\Factory;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionProperty;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory;
@@ -196,5 +197,31 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $listener = $this->factory->createService($this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
         $this->assertEquals(array('digest', 'token'), $listener->getAuthenticationTypes());
+    }
+
+    public function testFactoryWillUsePreconfiguredOAuth2ServerInstanceProvidedByZfOAuth2()
+    {
+        // Configure mock OAuth2 Server
+        $oauth2Server = $this->getMockBuilder('OAuth2\Server')->disableOriginalConstructor()->getMock();
+        $this->services->setService('ZF\OAuth2\Service\OAuth2Server', $oauth2Server);
+        
+        // Configure mock OAuth2 Server storage adapter
+        $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
+        $this->services->setService('TestAdapter', $adapter);
+        $this->services->setService('config', array(
+            'zf-oauth2' => array(
+                'storage' => 'TestAdapter'
+            )
+        ));
+        
+        $listener = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+
+        $r = new ReflectionProperty($listener, 'adapters');
+        $r->setAccessible(true);
+        $adapters = $r->getValue($listener);
+        $adapter = array_shift($adapters);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
+        $this->assertAttributeSame($oauth2Server, 'oauth2Server', $adapter);
     }
 }

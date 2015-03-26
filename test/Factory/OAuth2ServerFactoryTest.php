@@ -16,7 +16,7 @@ class OAuth2ServerFactoryTest extends TestCase
         $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'storage adapter');
         $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
         $config = array(
-            'dsn' => 'sqlite:memory:',
+            'dsn' => 'sqlite::memory:',
         );
         $server = OAuth2ServerFactory::factory($config, $services);
     }
@@ -39,7 +39,7 @@ class OAuth2ServerFactoryTest extends TestCase
         $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
         $config = array(
             'adapter' => 'pdo',
-            'dsn' => 'sqlite:memory:',
+            'dsn' => 'sqlite::memory:',
         );
         $server = OAuth2ServerFactory::factory($config, $services);
         $this->assertInstanceOf('OAuth2\Server', $server);
