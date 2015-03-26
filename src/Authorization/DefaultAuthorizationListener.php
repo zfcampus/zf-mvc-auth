@@ -28,7 +28,7 @@ class DefaultAuthorizationListener
     protected $restControllers;
 
     /**
-     * @param Acl $acl
+     * @param AuthorizationInterface $authorization
      * @param array $restControllers
      */
     public function __construct(AuthorizationInterface $authorization, array $restControllers = array())
