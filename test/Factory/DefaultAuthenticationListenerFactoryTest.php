@@ -168,4 +168,24 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
         $this->assertAttributeInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
     }
+
+    public function testFactoryWillUsePreconfiguredOAuth2ServerInstanceProvidedByZfOAuth2()
+    {
+        // Configure mock OAuth2 Server
+        $oauth2Server = $this->getMockBuilder('OAuth2\Server')->disableOriginalConstructor()->getMock();
+        $this->services->setService('ZF\OAuth2\Service\OAuth2Server', $oauth2Server);
+        
+        // Configure mock OAuth2 Server storage adapter
+        $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
+        $this->services->setService('TestAdapter', $adapter);
+        $this->services->setService('config', array(
+            'zf-oauth2' => array(
+                'storage' => 'TestAdapter'
+            )
+        ));
+        
+        $listener = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertAttributeSame($oauth2Server, 'oauth2Server', $listener);
+    }
 }
