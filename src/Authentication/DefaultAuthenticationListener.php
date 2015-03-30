@@ -169,7 +169,17 @@ class DefaultAuthenticationListener
                 }
 
                 $content       = $request->getContent();
-                $oauth2request = new OAuth2Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER, $content);
+                $headers       = $request->getHeaders()->toArray();
+                $oauth2request = new OAuth2Request(
+                    $_GET,
+                    $_POST,
+                    array(),
+                    $_COOKIE,
+                    $_FILES,
+                    $_SERVER,
+                    $content,
+                    $headers
+                );
 
                 if ($this->oauth2Server->verifyResourceRequest($oauth2request)) {
                     $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
