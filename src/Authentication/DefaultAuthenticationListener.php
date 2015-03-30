@@ -6,7 +6,6 @@
 
 namespace ZF\MvcAuth\Authentication;
 
-use OAuth2\Request as OAuth2Request;
 use OAuth2\Server as OAuth2Server;
 use RuntimeException;
 use Zend\Authentication\Adapter\Http as HttpAuth;

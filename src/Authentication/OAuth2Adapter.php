@@ -122,7 +122,16 @@ class OAuth2Adapter extends AbstractAdapter
     public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent)
     {
         $content       = $request->getContent();
-        $oauth2request = new OAuth2Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER, $content);
+        $oauth2request = new OAuth2Request(
+            $_GET,
+            $_POST,
+            array(),
+            $_COOKIE,
+            $_FILES,
+            $_SERVER,
+            $content,
+            $request->getHeaders()->toArray()
+        );
 
         if (! $this->oauth2Server->verifyResourceRequest($oauth2request)) {
             return false;

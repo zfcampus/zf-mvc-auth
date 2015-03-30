@@ -7,6 +7,7 @@
 namespace ZFTest\MvcAuth\Authentication;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use OAuth2\Request as OAuth2Request;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result as AuthenticationResult;
@@ -18,6 +19,7 @@ use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Request;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultAuthenticationListenerTest extends TestCase
@@ -774,5 +776,23 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         // Order of merge matters, unfortunately
         $this->assertEquals(array_merge($customTypes, $types), $this->listener->getAuthenticationTypes());
+    }
+
+    public function testOauth2RequestIncludesHeaders()
+    {
+        $this->request->getHeaders()->addHeaderLine('Authorization', 'Bearer TOKEN');
+
+        $server = $this->getMockBuilder('OAuth2\Server')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $server->expects($this->atLeastOnce())
+            ->method('verifyResourceRequest')
+            ->with($this->callback(function (OAuth2Request $request) {
+                return $request->headers('Authorization') === 'Bearer TOKEN';
+            }));
+
+        $this->listener->attach(new OAuth2Adapter($server));
+        $this->listener->__invoke($this->mvcAuthEvent);
     }
 }
