@@ -17,6 +17,9 @@ class DefaultResourceResolverListener
      */
     protected $restControllers;
 
+    /**
+     * @param array $restControllers
+     */
     public function __construct(array $restControllers = array())
     {
         $this->restControllers = $restControllers;
