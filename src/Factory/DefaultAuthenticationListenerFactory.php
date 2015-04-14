@@ -85,14 +85,21 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
      */
     protected function createOAuth2Server(ServiceLocatorInterface $services)
     {
-        if ($services->has('ZF\OAuth2\Service\OAuth2Server')) {
-            // If the service locator already has a pre-configured OAuth2 server, use it.
-            return new OAuth2Adapter($services->get('ZF\OAuth2\Service\OAuth2Server'));
-        }
-
         if (! $services->has('Config')) {
             // If we don't have configuration, we cannot create an OAuth2 server.
             return false;
+        }
+
+        $config = $services->get('config');
+        if (!isset($config['zf-oauth2']['storage'])
+            || !is_string($config['zf-oauth2']['storage'])
+            || !$services->has($config['zf-oauth2']['storage'])) {
+              return false;
+        }
+
+        if ($services->has('ZF\OAuth2\Service\OAuth2Server')) {
+            // If the service locator already has a pre-configured OAuth2 server, use it.
+            return new OAuth2Adapter($services->get('ZF\OAuth2\Service\OAuth2Server'));
         }
 
         $factory = new ZFOAuth2ServerFactory();
@@ -120,8 +127,8 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
 
     /**
      * Retrieve custom authentication types
-     * 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param ServiceLocatorInterface $services
      * @return false|array
      */
     protected function getAuthenticationTypes(ServiceLocatorInterface $services)
