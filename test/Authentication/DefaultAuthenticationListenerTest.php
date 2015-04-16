@@ -688,6 +688,10 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->method('getTypeFromRequest')
             ->with($this->equalTo($request))
             ->will($this->returnValue('oauth2'));
+        $adapter->expects($this->any())
+            ->method('matches')
+            ->with($this->equalTo('oauth2'))
+            ->will($this->returnValue(true));
         $expected = $this->getMockBuilder('ZF\MvcAuth\Identity\AuthenticatedIdentity')
             ->disableOriginalConstructor()
             ->getMock();
@@ -723,6 +727,10 @@ class DefaultAuthenticationListenerTest extends TestCase
         $adapter1->expects($this->atLeastOnce())
             ->method('provides')
             ->will($this->returnValue($types));
+        $adapter1->expects($this->any())
+            ->method('matches')
+            ->with($this->equalTo('oauth2'))
+            ->will($this->returnValue(true));
         $adapter1->expects($this->any())
             ->method('getTypeFromRequest')
             ->with($this->equalTo($request))

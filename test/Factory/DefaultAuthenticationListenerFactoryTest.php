@@ -174,7 +174,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->assertContains('digest', $listener->getAuthenticationTypes());
     }
 
-    public function testCallingFactoryWithCustomAuthenticatinTypesReturnsListenerComposingThem()
+    public function testCallingFactoryWithCustomAuthenticationTypesReturnsListenerComposingThem()
     {
         $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
         $this->services->setService('authentication', $authenticationService);
@@ -223,5 +223,23 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $adapter = array_shift($adapters);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
         $this->assertAttributeSame($oauth2Server, 'oauth2Server', $adapter);
+    }
+
+    public function testCallingFactoryWithAuthenticationMapReturnsListenerComposingMap()
+    {
+        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $this->services->setService('authentication', $authenticationService);
+        $this->services->setService('config', array(
+            'zf-mvc-auth' => array(
+                'authentication' => array(
+                    'map' => array(
+                        'Testing\V1' => 'oauth2',
+                    ),
+                ),
+            ),
+        ));
+        $listener = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertAttributeEquals(array('Testing\V1' => 'oauth2'), 'authMap', $listener);
     }
 }

@@ -490,6 +490,15 @@ interface AdapterInterface
     public function provides();
 
     /**
+     * Attempt to match a requested authentication type
+     * against what the adapter provides.
+     *
+     * @param string $type
+     * @return bool
+     */
+    public function matches($type);
+
+    /**
      * Attempt to retrieve the authentication type based on the request.
      *
      * Allows an adapter to have custom logic for detecting if a request
@@ -527,6 +536,10 @@ interface AdapterInterface
 The `provides()` method should return an array of strings, each an
 authentication "type" that this adapter provides; as an example, the provided
 `ZF\MvcAuth\Authentication\HttpAdapter` can provide `basic` and/or `digest`.
+
+The `matches($type)` should test the given `$type` against what the adapter
+provides to determine if it can handle an authentication request. Typically,
+this can be done with `return in_array($type, $this->provides(), true);`
 
 The `getTypeFromRequest()` method can be used to match an incoming request to
 the authentication type it resolves, if any. Examples might be deconstructing
