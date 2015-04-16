@@ -22,7 +22,7 @@ class HttpAdapter extends AbstractAdapter
 
     /**
      * Authorization header token types this adapter can fulfill.
-     * 
+     *
      * @var array
      */
     protected $authorizationTokenTypes = array('basic', 'digest');
@@ -34,7 +34,7 @@ class HttpAdapter extends AbstractAdapter
 
     /**
      * Base to use when prefixing "provides" strings
-     * 
+     *
      * @var null|string
      */
     private $providesBase;
@@ -81,6 +81,17 @@ class HttpAdapter extends AbstractAdapter
         }
 
         return $provides;
+    }
+
+    /**
+     * Match the requested authentication type against what we provide.
+     *
+     * @param string $type
+     * @return bool
+     */
+    public function matches($type)
+    {
+        return ($this->providesBase === $type || in_array($type, $this->provides(), true));
     }
 
     /**

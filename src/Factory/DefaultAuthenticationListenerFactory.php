@@ -48,6 +48,8 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             $listener->addAuthenticationTypes($authenticationTypes);
         }
 
+        $listener->setAuthMap($this->getAuthenticationMap($services));
+
         return $listener;
     }
 
@@ -145,5 +147,21 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         }
 
         return $config['zf-mvc-auth']['authentication']['types'];
+    }
+
+    protected function getAuthenticationMap(ServiceLocatorInterface $services)
+    {
+        if (! $services->has('config')) {
+            return array();
+        }
+
+        $config = $services->get('config');
+        if (! isset($config['zf-mvc-auth']['authentication']['map'])
+            || ! is_array($config['zf-mvc-auth']['authentication']['map'])
+        ) {
+            return array();
+        }
+
+        return $config['zf-mvc-auth']['authentication']['map'];
     }
 }

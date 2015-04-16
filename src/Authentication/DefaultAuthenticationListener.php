@@ -19,21 +19,21 @@ class DefaultAuthenticationListener
 {
     /**
      * Attached authentication adapters
-     * 
+     *
      * @var AdapterInterface[]
      */
     private $adapters = array();
 
     /**
      * Supported authentication types
-     * 
+     *
      * @var array
      */
     private $authenticationTypes = array();
 
     /**
      * Map of API/version to authentication type pairs
-     * 
+     *
      * @var array
      */
     private $authMap = array();
@@ -54,8 +54,8 @@ class DefaultAuthenticationListener
      *
      * Adds the authentication adapter, and updates the list of supported
      * authentication types based on what the adapter provides.
-     * 
-     * @param AdapterInterface $adapter 
+     *
+     * @param AdapterInterface $adapter
      */
     public function attach(AdapterInterface $adapter)
     {
@@ -69,8 +69,8 @@ class DefaultAuthenticationListener
      * This method allows specifiying additional authentication types, outside
      * of adapters, that your application supports. The values provided are
      * merged with any types already discovered.
-     * 
-     * @param array $types 
+     *
+     * @param array $types
      */
     public function addAuthenticationTypes(array $types)
     {
@@ -84,7 +84,7 @@ class DefaultAuthenticationListener
 
     /**
      * Retrieve the supported authentication types
-     * 
+     *
      * @return array
      */
     public function getAuthenticationTypes()
@@ -135,8 +135,8 @@ class DefaultAuthenticationListener
 
     /**
      * Set the API/version to authentication type map.
-     * 
-     * @param array $map 
+     *
+     * @param array $map
      */
     public function setAuthMap(array $map)
     {
@@ -195,10 +195,10 @@ class DefaultAuthenticationListener
     }
 
     /**
-     * Match the controller to an authentication type, based on the API to 
+     * Match the controller to an authentication type, based on the API to
      * which the controller belongs.
-     * 
-     * @param null|RouteMatch $routeMatch 
+     *
+     * @param null|RouteMatch $routeMatch
      * @return string|false
      */
     private function getTypeFromMap(RouteMatch $routeMatch = null)
@@ -228,8 +228,8 @@ class DefaultAuthenticationListener
 
     /**
      * Determine the authentication type based on request information
-     * 
-     * @param HttpRequest $request 
+     *
+     * @param HttpRequest $request
      * @return false|string
      */
     private function getTypeFromRequest(HttpRequest $request)
@@ -248,9 +248,9 @@ class DefaultAuthenticationListener
      *
      * This method is triggered if no authentication type was discovered in the
      * request.
-     * 
-     * @param HttpRequest $request 
-     * @param HttpResponse $response 
+     *
+     * @param HttpRequest $request
+     * @param HttpResponse $response
      */
     private function triggerAdapterPreAuth(HttpRequest $request, HttpResponse $response)
     {
@@ -261,17 +261,17 @@ class DefaultAuthenticationListener
 
     /**
      * Invoke the adapter matching the given $type in order to peform authentication
-     * 
-     * @param string $type 
-     * @param HttpRequest $request 
-     * @param HttpResponse $response 
-     * @param MvcAuthEvent $mvcAuthEvent 
+     *
+     * @param string $type
+     * @param HttpRequest $request
+     * @param HttpResponse $response
+     * @param MvcAuthEvent $mvcAuthEvent
      * @return false|Identity\IdentityInterface
      */
     private function authenticate($type, HttpRequest $request, HttpResponse $response, MvcAuthEvent $mvcAuthEvent)
     {
         foreach ($this->adapters as $adapter) {
-            if (! in_array($type, $adapter->provides(), true)) {
+            if (! $adapter->matches($type)) {
                 continue;
             }
 
@@ -284,11 +284,11 @@ class DefaultAuthenticationListener
     /**
      * Attach the $httpAdapter as a proper adapter
      *
-     * This is to allow using the setHttpAdapter() method along with the 
+     * This is to allow using the setHttpAdapter() method along with the
      * AdapterInterface system, and will be removed in a future version.
-     * 
+     *
      * @deprecated
-     * @param MvcAuthEvent $mvcAuthEvent 
+     * @param MvcAuthEvent $mvcAuthEvent
      */
     private function attachHttpAdapter(MvcAuthEvent $mvcAuthEvent)
     {

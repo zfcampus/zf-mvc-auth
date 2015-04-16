@@ -17,7 +17,7 @@ class OAuth2Adapter extends AbstractAdapter
 {
     /**
      * Authorization header token types this adapter can fulfill.
-     * 
+     *
      * @var array
      */
     protected $authorizationTokenTypes = array('bearer');
@@ -29,7 +29,7 @@ class OAuth2Adapter extends AbstractAdapter
 
     /**
      * Authentication types this adapter provides.
-     * 
+     *
      * @var array
      */
     private $providesTypes = array('oauth2');
@@ -67,6 +67,18 @@ class OAuth2Adapter extends AbstractAdapter
     public function provides()
     {
         return $this->providesTypes;
+    }
+
+    /**
+     * Attempt to match a requested authentication type
+     * against what the adapter provides.
+     *
+     * @param string $type
+     * @return bool
+     */
+    public function matches($type)
+    {
+        return in_array($type, $this->providesTypes, true);
     }
 
     /**

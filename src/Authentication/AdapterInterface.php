@@ -19,6 +19,15 @@ interface AdapterInterface
     public function provides();
 
     /**
+     * Attempt to match a requested authentication type
+     * against what the adapter provides.
+     *
+     * @param string $type
+     * @return bool
+     */
+    public function matches($type);
+
+    /**
      * Attempt to retrieve the authentication type based on the request.
      *
      * Allows an adapter to have custom logic for detecting if a request
