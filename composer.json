@@ -13,8 +13,8 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev",
-            "dev-develop": "1.1-dev"
+            "dev-master": "1.1-dev",
+            "dev-develop": "1.2-dev"
         }
     },
     "require": {
@@ -29,7 +29,7 @@
         "zendframework/zend-stdlib": "~2.3",
         "zfcampus/zf-api-problem": "~1.0",
         "zfcampus/zf-content-negotiation": "~1.0",
-        "zfcampus/zf-oauth2": "~1.0"
+        "zfcampus/zf-oauth2": "~1.1"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*",
