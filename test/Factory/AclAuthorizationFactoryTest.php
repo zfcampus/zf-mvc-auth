@@ -204,4 +204,26 @@ class AclAuthorizationFactoryTest extends TestCase
         $this->assertTrue($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'PATCH'));
         $this->assertTrue($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'DELETE'));
     }
+
+    public function testRpcActionsAreNormalizedWhenCreatingAcl()
+    {
+        $config = array('zf-mvc-auth' => array('authorization' => array(
+            'Foo\Bar\RpcController' => array(
+                'actions' => array(
+                    'Do' => array(
+                        'GET'    => false,
+                        'POST'   => true,
+                        'PUT'    => false,
+                        'PATCH'  => false,
+                        'DELETE' => false,
+                    ),
+                ),
+            ),
+        )));
+        $this->services->setService('config', $config);
+
+        $acl = $this->factory->createService($this->services);
+        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
+        $this->assertFalse($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'POST'));
+    }
 }
