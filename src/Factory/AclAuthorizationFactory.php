@@ -89,6 +89,7 @@ class AclAuthorizationFactory implements FactoryInterface
     {
         if (isset($privileges['actions'])) {
             foreach ($privileges['actions'] as $action => $methods) {
+                $action = lcfirst($action);
                 $aclConfig[] = array(
                     'resource'   => sprintf('%s::%s', $controllerService, $action),
                     'privileges' => $this->createPrivilegesFromMethods($methods, $denyByDefault),
