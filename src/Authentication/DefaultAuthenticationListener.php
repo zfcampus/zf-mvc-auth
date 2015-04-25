@@ -214,7 +214,7 @@ class DefaultAuthenticationListener
 
         foreach ($this->authMap as $api => $type) {
             $api = rtrim($api, '\\') . '\\';
-            if (strlen($api > $controller)) {
+            if (strlen($api) > strlen($controller)) {
                 continue;
             }
 

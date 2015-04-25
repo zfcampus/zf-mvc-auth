@@ -101,13 +101,14 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
 
         if ($services->has('ZF\OAuth2\Service\OAuth2Server')) {
             // If the service locator already has a pre-configured OAuth2 server, use it.
-            return new OAuth2Adapter($services->get('ZF\OAuth2\Service\OAuth2Server'));
+            $factory = $services->get('ZF\OAuth2\Service\OAuth2Server');
+            return new OAuth2Adapter($factory());
         }
 
         $factory = new ZFOAuth2ServerFactory();
 
         try {
-            $server = $factory->createService($services);
+            $serverFactory = $factory->createService($services);
         } catch (RuntimeException $e) {
             // These are exceptions specifically thrown from the
             // ZF\OAuth2\Factory\OAuth2ServerFactory when essential
@@ -124,7 +125,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
             }
         }
 
-        return new OAuth2Adapter($server);
+        return new OAuth2Adapter($serverFactory(null));
     }
 
     /**

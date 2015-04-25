@@ -8,13 +8,36 @@ namespace ZFTest\MvcAuth\Factory;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use ZF\MvcAuth\Factory\OAuth2ServerFactory;
+use Zend\ServiceManager\ServiceManager;
 
 class OAuth2ServerFactoryTest extends TestCase
 {
+    protected function getOAuth2Options()
+    {
+        return array(
+            'zf-oauth2' => array(
+                'grant_types' => array(
+                    'client_credentials' => true,
+                    'authorization_code' => true,
+                    'password'           => true,
+                    'refresh_token'      => true,
+                    'jwt'                => true,
+                ),
+                'api_problem_error_response' => true,
+            ),
+        );
+    }
+
+    protected function mockConfig($services)
+    {
+        $services->setService('Config', $this->getOAuth2Options());
+        return $services;
+    }
+
     public function testRaisesExceptionIfAdapterIsMissing()
     {
         $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'storage adapter');
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $services = $this->mockConfig(new ServiceManager());
         $config = array(
             'dsn' => 'sqlite::memory:',
         );
@@ -24,7 +47,7 @@ class OAuth2ServerFactoryTest extends TestCase
     public function testRaisesExceptionCreatingPdoBackedServerIfDsnIsMissing()
     {
         $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'Missing DSN');
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $services = $this->mockConfig(new ServiceManager());
         $config = array(
             'adapter' => 'pdo',
             'username' => 'username',
@@ -36,7 +59,7 @@ class OAuth2ServerFactoryTest extends TestCase
 
     public function testCanCreatePdoAdapterBackedServer()
     {
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $services = $this->mockConfig(new ServiceManager());
         $config = array(
             'adapter' => 'pdo',
             'dsn' => 'sqlite::memory:',
@@ -51,18 +74,11 @@ class OAuth2ServerFactoryTest extends TestCase
             $this->markTestSkipped('Mongo extension is required for this test');
         }
 
+        $services = $this->mockConfig(new ServiceManager());
         $mongoClient = $this->getMockBuilder('MongoDB')
             ->disableOriginalConstructor(true)
             ->getMock();
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->expects($this->atLeastOnce())
-            ->method('has')
-            ->with($this->equalTo('MongoService'))
-            ->will($this->returnValue(true));
-        $services->expects($this->atLeastOnce())
-            ->method('get')
-            ->with($this->equalTo('MongoService'))
-            ->will($this->returnValue($mongoClient));
+        $services->setService('MongoService', $mongoClient);
 
         $config = array(
             'adapter' => 'mongo',
@@ -74,7 +90,7 @@ class OAuth2ServerFactoryTest extends TestCase
 
     public function testRaisesExceptionCreatingMongoBackedServerIfDatabaseIsMissing()
     {
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $services = $this->mockConfig(new ServiceManager());
         $config = array(
             'adapter' => 'mongo',
         );
@@ -89,7 +105,7 @@ class OAuth2ServerFactoryTest extends TestCase
             $this->markTestSkipped('Mongo extension is required for this test');
         }
 
-        $services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $services = $this->mockConfig(new ServiceManager());
         $config = array(
             'adapter' => 'mongo',
             'database' => 'zf-mvc-auth-test',

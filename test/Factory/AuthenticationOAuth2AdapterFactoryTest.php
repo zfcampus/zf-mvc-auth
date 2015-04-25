@@ -48,6 +48,23 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
                 'dsn' => 'sqlite::memory:',
             ),
         );
+
+        $this->services->expects($this->any())
+            ->method('get')
+            ->with($this->stringContains('Config'))
+            ->will($this->returnValue(array(
+                'zf-oauth2' => array(
+                    'grant_types' => array(
+                        'client_credentials' => true,
+                        'authorization_code' => true,
+                        'password'           => true,
+                        'refresh_token'      => true,
+                        'jwt'                => true,
+                    ),
+                    'api_problem_error_response' => true,
+                ),
+            )));
+
         $adapter = AuthenticationOAuth2AdapterFactory::factory('foo', $config, $this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
         $this->assertEquals(array('foo'), $adapter->provides());
