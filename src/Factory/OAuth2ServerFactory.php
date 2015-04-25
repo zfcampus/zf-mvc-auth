@@ -8,6 +8,9 @@ namespace ZF\MvcAuth\Factory;
 use MongoClient;
 use OAuth2\GrantType\AuthorizationCode;
 use OAuth2\GrantType\ClientCredentials;
+use OAuth2\GrantType\RefreshToken;
+use OAuth2\GrantType\UserCredentials;
+use OAuth2\GrantType\JwtBearer;
 use OAuth2\Server as OAuth2Server;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -25,33 +28,32 @@ final class OAuth2ServerFactory
 
     /**
      * Create and return a fully configured OAuth2 server instance.
-     * 
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return OAuth2Server
      * @throws ServiceNotCreatedException when missing details necessary to
      *     create instance and/or dependencies.
      */
     public static function factory(array $config, ServiceLocatorInterface $services)
     {
-        $storage = self::createStorage($config, $services);
+        $allConfig    = $services->get('Config');
+        $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : array();
+        $options      = self::marshalOptions($oauth2Config);
 
-        $oauth2Server = new OAuth2Server(self::createStorage($config, $services));
+        $oauth2Server = new OAuth2Server(
+            self::createStorage($config, $services),
+            $options
+        );
 
-        // Add the "Client Credentials" grant type (it is the simplest of the grant types)
-        $oauth2Server->addGrantType(new ClientCredentials($storage));
-
-        // Add the "Authorization Code" grant type
-        $oauth2Server->addGrantType(new AuthorizationCode($storage));
-
-        return $oauth2Server;
+        return self::injectGrantTypes($oauth2Server, $oauth2Config['grant_types'], $options);
     }
 
     /**
      * Create and return an OAuth2 storage adapter instance.
-     * 
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return PdoAdapter|MongoAdapter
      */
     private static function createStorage(array $config, ServiceLocatorInterface $services)
@@ -74,8 +76,8 @@ final class OAuth2ServerFactory
 
     /**
      * Create and return an OAuth2 PDO adapter.
-     * 
-     * @param array $config 
+     *
+     * @param array $config
      * @return PdoAdapter
      */
     private static function createPdoAdapter(array $config)
@@ -88,9 +90,9 @@ final class OAuth2ServerFactory
 
     /**
      * Create and return an OAuth2 Mongo adapter.
-     * 
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return MongoAdapter
      */
     private static function createMongoAdapter(array $config, ServiceLocatorInterface $services)
@@ -103,8 +105,8 @@ final class OAuth2ServerFactory
 
     /**
      * Create and return the configuration needed to create a PDO instance.
-     * 
-     * @param array $config 
+     *
+     * @param array $config
      * @return array
      */
     private static function createPdoConfig(array $config)
@@ -129,9 +131,9 @@ final class OAuth2ServerFactory
 
     /**
      * Create and return a Mongo database instance.
-     * 
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return \MongoDB
      */
     private static function createMongoDatabase(array $config, ServiceLocatorInterface $services)
@@ -170,5 +172,89 @@ final class OAuth2ServerFactory
         }
 
         return $oauth2ServerConfig;
+    }
+
+    /**
+     * Marshal OAuth2\Server options from zf-oauth2 configuration.
+     *
+     * @param array $config
+     * @return array
+     */
+    private static function marshalOptions(array $config)
+    {
+        $enforceState   = isset($config['enforce_state'])
+            ? $config['enforce_state']
+            : true;
+        $allowImplicit  = isset($config['allow_implicit'])
+            ? $config['allow_implicit']
+            : false;
+        $accessLifetime = isset($config['access_lifetime'])
+            ? $config['access_lifetime']
+            : 3600;
+        $audience = isset($config['audience'])
+            ? $config['audience']
+            : '';
+        $options        = isset($config['options'])
+            ? $config['options']
+            : array();
+
+        return  array_merge(array(
+            'access_lifetime' => $accessLifetime,
+            'allow_implicit'  => $allowImplicit,
+            'audience'        => $audience,
+            'enforce_state'   => $enforceState,
+        ), $options);
+    }
+
+    /**
+     * Inject grant types into the OAuth2\Server instance, based on zf-oauth2
+     * configuration.
+     *
+     * @param OAuth2Server $server
+     * @param array $availableGrantTypes
+     * @param array $options
+     * @return OAuth2Server
+     */
+    private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options)
+    {
+        if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
+            $clientOptions = array();
+            if (isset($options['allow_credentials_in_request_body'])) {
+                $clientOptions['allow_credentials_in_request_body'] = $options['allow_credentials_in_request_body'];
+            }
+
+            // Add the "Client Credentials" grant type (it is the simplest of the grant types)
+            $server->addGrantType(new ClientCredentials($server->getStorage('client_credentials'), $clientOptions));
+        }
+
+        if (isset($availableGrantTypes['authorization_code']) && $availableGrantTypes['authorization_code'] === true) {
+            // Add the "Authorization Code" grant type (this is where the oauth magic happens)
+            $server->addGrantType(new AuthorizationCode($server->getStorage('authorization_code')));
+        }
+
+        if (isset($availableGrantTypes['password']) && $availableGrantTypes['password'] === true) {
+            // Add the "User Credentials" grant type
+            $server->addGrantType(new UserCredentials($server->getStorage('user_credentials')));
+        }
+
+        if (isset($availableGrantTypes['jwt']) && $availableGrantTypes['jwt'] === true) {
+            // Add the "JWT Bearer" grant type
+            $server->addGrantType(new JwtBearer($server->getStorage('jwt_bearer'), $options['audience']));
+        }
+
+        if (isset($availableGrantTypes['refresh_token']) && $availableGrantTypes['refresh_token'] === true) {
+            $refreshOptions = array();
+            if (isset($options['always_issue_new_refresh_token'])) {
+                $refreshOptions['always_issue_new_refresh_token'] = $options['always_issue_new_refresh_token'];
+            }
+            if (isset($options['refresh_token_lifetime'])) {
+                $refreshOptions['refresh_token_lifetime'] = $options['refresh_token_lifetime'];
+            }
+
+            // Add the "Refresh Token" grant type
+            $server->addGrantType(new RefreshToken($server->getStorage('refresh_token'), $refreshOptions));
+        }
+
+        return $server;
     }
 }

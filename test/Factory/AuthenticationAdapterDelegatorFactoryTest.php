@@ -44,6 +44,17 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
     public function testReturnsListenerWithConfiguredAdapters()
     {
         $config = array(
+            // ensure top-level zf-oauth2 are available
+            'zf-oauth2' => array(
+                'grant_types' => array(
+                    'client_credentials' => true,
+                    'authorization_code' => true,
+                    'password'           => true,
+                    'refresh_token'      => true,
+                    'jwt'                => true,
+                ),
+                'api_problem_error_response' => true,
+            ),
             'zf-mvc-auth' => array(
                 'authentication' => array(
                     'adapters' => array(
