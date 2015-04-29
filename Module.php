@@ -6,6 +6,8 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\ModuleManager\ModuleEvent;
+use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
 
 class Module
@@ -32,6 +34,42 @@ class Module
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
+    }
+
+    /**
+     * Register a listener for the mergeConfig event.
+     *
+     * @param ModuleManager $moduleManager
+     */
+    public function init(ModuleManager $moduleManager)
+    {
+        $events = $moduleManager->getEventManager();
+        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, array($this, 'onMergeConfig'));
+    }
+
+    /**
+     * Override ZF\OAuth2\Service\OAuth2Server service
+     *
+     * If the ZF\OAuth2\Service\OAuth2Server is defined, and set to the
+     * default, override it with the NamedOAuth2ServerFactory.
+     *
+     * @param ModuleEvent $e
+     */
+    public function onMergeConfig(ModuleEvent $e)
+    {
+        $configListener = $e->getConfigListener();
+        $config         = $configListener->getMergedConfig(false);
+        $service        = 'ZF\OAuth2\Service\OAuth2Server';
+        $default        = 'ZF\OAuth2\Factory\OAuth2ServerFactory';
+
+        if (! isset($config['service_manager']['factories'][$service])
+            || $config['service_manager']['factories'][$service] !== $default
+        ) {
+            return;
+        }
+
+        $config['service_manager']['factories'][$service] = __NAMESPACE__ . '\Factory\NamedOAuth2ServerFactory';
+        $configListener->setMergedConfig($config);
     }
 
     public function onBootstrap(MvcEvent $mvcEvent)
