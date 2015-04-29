@@ -54,17 +54,35 @@ final class OAuth2ServerFactory
      *
      * @param array $config
      * @param ServiceLocatorInterface $services
-     * @return PdoAdapter|MongoAdapter
+     * @return PdoAdapter|MongoAdapter|array A PdoAdapter, MongoAdapter, or array of storage instances.
      */
     private static function createStorage(array $config, ServiceLocatorInterface $services)
     {
-        if (! isset($config['adapter']) || ! is_string($config['adapter'])) {
-            throw new ServiceNotCreatedException(
-                'Missing or invalid storage adapter information for OAuth2'
-            );
+        if (isset($config['adapter']) && is_string($config['adapter'])) {
+            return self::createStorageFromAdapter($config['adapter'], $config, $services);
         }
 
-        switch (strtolower($config['adapter'])) {
+        if (isset($config['storage'])
+            && (is_string($config['storage']) || is_array($config['storage']))
+        ) {
+            return self::createStorageFromServices($config['storage'], $services);
+        }
+
+        throw new ServiceNotCreatedException('Missing or invalid storage adapter information for OAuth2');
+    }
+
+    /**
+     * Create an OAuth2 storage instance based on the adapter specified.
+     * 
+     * @param string $adapter One of "pdo" or "mongo".
+     * @param array $config 
+     * @param ServiceLocatorInterface $services 
+     * @return PdoAdapter|MongoAdapter
+     * @throws ServiceNotCreatedException
+     */
+    private static function createStorageFromAdapter($adapter, array $config, ServiceLocatorInterface $services)
+    {
+        switch (strtolower($adapter)) {
             case 'pdo':
                 return self::createPdoAdapter($config);
             case 'mongo':
@@ -72,6 +90,30 @@ final class OAuth2ServerFactory
             default:
                 throw new ServiceNotCreatedException('Invalid storage adapter type for OAuth2');
         }
+    }
+
+    /**
+     * Creates the OAuth2 storage from services.
+     *
+     * @param string|string[] $storage A string or an array of strings; each MUST be a valid service.
+     * @param ServiceLocatorInterface $services 
+     * @return array
+     */
+    private static function createStorageFromServices($storage, ServiceLocatorInterface $services)
+    {
+        $storageServices = array();
+        if (is_string($storage)) {
+            $storageServices[] = $storage;
+        }
+        if (is_array($storage)) {
+            $storageServices = $storage;
+        }
+
+        $storage = array();
+        foreach ($storageServices as $key => $service) {
+            $storage[$key] = $services->get($service);
+        }
+        return $storage;
     }
 
     /**

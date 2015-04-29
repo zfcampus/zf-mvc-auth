@@ -27,11 +27,19 @@ class NamedOAuth2ServerFactory
             ? $config['zf-mvc-auth']['authentication']['adapters']
             : array();
 
-        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $services) {
+        $servers = (object) array('application' => null, 'api' => array());
+        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $services, $servers) {
             // Empty type == legacy configuration.
             if (empty($type)) {
+                if ($servers->application) {
+                    return $servers->application;
+                }
                 $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
-                return $factory();
+                return $servers->application = $factory();
+            }
+
+            if (isset($servers->api[$type])) {
+                return $servers->api[$type];
             }
 
             foreach ($mvcAuthConfig as $name => $adapterConfig) {
@@ -40,17 +48,25 @@ class NamedOAuth2ServerFactory
                     continue;
                 }
 
-                if ($type === $adapterConfig['storage']['route']) {
-                    // Found!
-                    return OAuth2ServerFactory::factory($adapterConfig['storage'], $services);
+                if ($type !== $adapterConfig['storage']['route']) {
+                    continue;
                 }
+
+                // Found!
+                return $servers->api[$type] = OAuth2ServerFactory::factory(
+                    $adapterConfig['storage'],
+                    $services
+                );
             }
 
             // At this point, a $type was specified, but no matching adapter
             // was found. Attempt to pull a global OAuth2 instance; if none is
             // present, this will raise an exception anyways.
+            if ($servers->application) {
+                return $servers->application;
+            }
             $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
-            return $factory();
+            return $servers->application = $factory();
         };
     }
 }
