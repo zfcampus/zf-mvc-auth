@@ -56,10 +56,30 @@ return array(
             ),
              *
              * Starting in 1.1, we have an "adapters" key, which is a key/value
-             * pair of adapter name -> adapter configuration information. This
-             * looks like the following for the HTTP basic/digest and OAuth2
+             * pair of adapter name -> adapter configuration information. Each
+             * adapter should name the ZF\MvcAuth\Authentication\AdapterInterface
+             * type in the 'adapter' key.
+             *
+             * For HttpAdapter cases, specify an 'options' key with the options
+             * to use to create the Zend\Authentication\Adapter\Http instance.
+             *
+             * For OAuth2Adapter instances, specify a 'storage' key, with options
+             * to use for matching the adapter and creating an OAuth2 storage 
+             * instance. The array MUST contain a `route' key, with the route
+             * at which the specific adapter will match authentication requests.
+             * To specify the storage instance, you may use one of two approaches:
+             *
+             * - Specify a "storage" subkey pointing to a named service or an array
+             *   of named services to use.
+             * - Specify an "adapter" subkey with the value "pdo" or "mongo", and
+             *   include additional subkeys for configuring a ZF\OAuth2\Adapter\PdoAdapter
+             *   or ZF\OAuth2\Adapter\MongoAdapter, accordingly. See the zf-oauth2
+             *   documentation for details.
+             *
+             * This looks like the following for the HTTP basic/digest and OAuth2
              * adapters:
             'adapters' => array
+                // HTTP adapter
                 'api' => array(
                     'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
                     'options' => array(
@@ -71,10 +91,12 @@ return array(
                         'htdigest' => 'data/htdigest',
                     ),
                 ),
+                // OAuth2 adapter, using an "adapter" type of "pdo"
                 'user' => array(
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
                     'storage' => array(
                         'adapter' => 'pdo',
+                        'route' => '/user',
                         'dsn' => 'mysql:host=localhost;dbname=oauth2',
                         'username' => 'username',
                         'password' => 'password',
@@ -83,10 +105,12 @@ return array(
                         ),
                     ),
                 ),
+                // OAuth2 adapter, using an "adapter" type of "mongo"
                 'client' => array(
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
                     'storage' => array(
                         'adapter' => 'mongo',
+                        'route' => '/client',
                         'locator_name' => 'SomeServiceName', // If provided, pulls the given service
                         'dsn' => 'mongodb://localhost',
                         'database' => 'oauth2',
@@ -95,6 +119,14 @@ return array(
                             'password' => 'password',
                             'connectTimeoutMS' => 500,
                         ),
+                    ),
+                ),
+                // OAuth2 adapter, using a named "storage" service
+                'named-storage' => array(
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'storage' => 'Name\Of\An\OAuth2\Storage\Service',
+                        'route' => '/named-storage',
                     ),
                 ),
             ),
