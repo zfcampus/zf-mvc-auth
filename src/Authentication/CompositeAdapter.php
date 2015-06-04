@@ -17,7 +17,17 @@ class CompositeAdapter implements AdapterInterface
     /**
      * @var AdapterInterface[]
      */
-    protected $adapters = array();
+    protected $adapters = [];
+
+    /**
+     * @param AdapterInterface[] $adapters
+     */
+    public function __construct(array $adapters = array())
+    {
+        foreach ($adapters as $adapter) {
+            $this->addAdapter($adapter);
+        }
+    }
 
     /**
      * Adds an adapter
@@ -54,7 +64,7 @@ class CompositeAdapter implements AdapterInterface
                 return $adapter !== $adapterOrType;
             });
 
-            $this->adapters = array();
+            $this->adapters = [];
             foreach ($adapters as $adapter) {
                 $this->addAdapter($adapter);
             }
