@@ -34,7 +34,7 @@ class CompositeAdapter implements AdapterInterface
 
         $types = $adapter->provides();
 
-        foreach($types as $type) {
+        foreach ($types as $type) {
             $this->adapters[$type] = $adapter;
         }
     }
@@ -50,7 +50,7 @@ class CompositeAdapter implements AdapterInterface
     public function removeAdapter($adapterOrType)
     {
         if ($adapterOrType instanceof AdapterInterface) {
-            $adapters = array_filter($this->adapters, function($adapter) use ($adapterOrType) {
+            $adapters = array_filter($this->adapters, function ($adapter) use ($adapterOrType) {
                 return $adapter !== $adapterOrType;
             });
 
