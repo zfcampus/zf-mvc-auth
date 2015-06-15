@@ -36,6 +36,9 @@ return array(
             'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => 'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener',
             'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
         ),
+        'abstract_factories' => array(
+            'ZF\MvcAuth\Factory\AdapterAbstractFactory',
+        ),
     ),
     'zf-mvc-auth' => array(
         'authentication' => array(
@@ -64,7 +67,7 @@ return array(
              * to use to create the Zend\Authentication\Adapter\Http instance.
              *
              * For OAuth2Adapter instances, specify a 'storage' key, with options
-             * to use for matching the adapter and creating an OAuth2 storage 
+             * to use for matching the adapter and creating an OAuth2 storage
              * instance. The array MUST contain a `route' key, with the route
              * at which the specific adapter will match authentication requests.
              * To specify the storage instance, you may use one of two approaches:
