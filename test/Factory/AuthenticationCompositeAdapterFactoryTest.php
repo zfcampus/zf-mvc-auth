@@ -41,7 +41,10 @@ class AuthenticationCompositeAdapterFactoryTest extends TestCase
      */
     public function testRaisesExceptionForMissingOrInvalidStorage(array $config)
     {
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'No adapters configured');
+        $this->setExpectedException(
+            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
+            'No adapters configured'
+        );
         AuthenticationCompositeAdapterFactory::factory('foo', $config, $this->serviceLocator);
     }
 
@@ -70,11 +73,11 @@ class AuthenticationCompositeAdapterFactoryTest extends TestCase
                 'zf-mvc-auth-authentication-adapters-foo',
                 'zf-mvc-auth-authentication-adapters-bar'
             ))
-            ->will($this->returnCallback(function($name) use ($fooAdapter, $barAdapter) {
+            ->will($this->returnCallback(function ($name) use ($fooAdapter, $barAdapter) {
                 switch($name) {
-                    case 'zf-mvc-auth-authentication-adapters-foo' :
+                    case 'zf-mvc-auth-authentication-adapters-foo':
                         return $fooAdapter;
-                    case 'zf-mvc-auth-authentication-adapters-bar' :
+                    case 'zf-mvc-auth-authentication-adapters-bar':
                         return $barAdapter;
                 }
             }));

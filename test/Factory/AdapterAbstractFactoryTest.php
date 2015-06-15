@@ -72,7 +72,10 @@ class AdapterAbstractFactoryTest extends TestCase
         );
 
         $this->serviceManager->setService('config', $config);
-        $this->serviceManager->setService('authentication', $this->getMock('Zend\Authentication\AuthenticationService'));
+        $this->serviceManager->setService(
+            'authentication',
+            $this->getMock('Zend\Authentication\AuthenticationService')
+        );
         $this->serviceManager->setService('CUSTOM', $this->getMock('ZF\MvcAuth\Authentication\AdapterInterface'));
         $this->serviceManager->addAbstractFactory($this->factory);
     }
