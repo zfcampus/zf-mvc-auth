@@ -1,8 +1,7 @@
 <?php
 /**
- * @author Stefano Torresi (http://stefanotorresi.it)
- * @license See the file LICENSE.txt for copying permission.
- * ************************************************
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\MvcAuth\Authentication;
@@ -103,7 +102,7 @@ class CompositeAdapterTest extends TestCase
             ->will($this->returnValue($mock2Provides))
         ;
 
-        $adapter = new CompositeAdapter([ $adapterMock1, $adapterMock2 ]);
+        $adapter = new CompositeAdapter(array($adapterMock1, $adapterMock2));
 
         $this->assertEquals(
             array_values(array_unique(array_merge($mock1Provides, $mock2Provides))),
@@ -380,5 +379,26 @@ class CompositeAdapterTest extends TestCase
         $this->adapter->addAdapter($adapterMock1);
         $this->adapter->addAdapter($adapterMock2);
         $this->assertSame($response, $this->adapter->preAuth($request, $response));
+    }
+
+    public function testCanBeInitializedWithName()
+    {
+
+        $adapterMock = $this->getMock('ZF\MvcAuth\Authentication\AdapterInterface');
+        $mockProvides = array('foo', 'bar');
+        $adapterMock
+            ->expects($this->any())
+            ->method('provides')
+            ->will($this->returnValue($mockProvides))
+        ;
+
+        $adapter = new CompositeAdapter(array($adapterMock), 'baz');
+
+        $this->assertContains('bar', $adapter->provides());
+        $this->assertContains('foo', $adapter->provides());
+        $this->assertContains('baz', $adapter->provides());
+        $this->assertTrue($adapter->matches('foo'));
+        $this->assertTrue($adapter->matches('bar'));
+        $this->assertTrue($adapter->matches('baz'));
     }
 }

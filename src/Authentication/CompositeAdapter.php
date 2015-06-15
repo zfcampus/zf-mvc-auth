@@ -1,8 +1,7 @@
 <?php
 /**
- * @author Stefano Torresi (http://stefanotorresi.it)
- * @license See the file LICENSE.txt for copying permission.
- * ************************************************
+ * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
+ * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Authentication;
@@ -17,16 +16,24 @@ class CompositeAdapter implements AdapterInterface
     /**
      * @var AdapterInterface[]
      */
-    protected $adapters = [];
+    protected $adapters = array();
+
+    /**
+     * @var string
+     */
+    protected $name;
 
     /**
      * @param AdapterInterface[] $adapters
+     * @param string             $name
      */
-    public function __construct(array $adapters = array())
+    public function __construct(array $adapters = array(), $name = null)
     {
         foreach ($adapters as $adapter) {
             $this->addAdapter($adapter);
         }
+
+        $this->name = (string) $name;
     }
 
     /**
@@ -64,7 +71,7 @@ class CompositeAdapter implements AdapterInterface
                 return $adapter !== $adapterOrType;
             });
 
-            $this->adapters = [];
+            $this->adapters = array();
             foreach ($adapters as $adapter) {
                 $this->addAdapter($adapter);
             }
@@ -84,7 +91,13 @@ class CompositeAdapter implements AdapterInterface
      */
     public function provides()
     {
-        return array_keys($this->adapters);
+        $result = array_keys($this->adapters);
+
+        if ($this->name) {
+            $result[] = $this->name;
+        }
+
+        return $result;
     }
 
     /**
@@ -92,7 +105,7 @@ class CompositeAdapter implements AdapterInterface
      */
     public function matches($type)
     {
-        return isset($this->adapters[$type]);
+        return isset($this->adapters[$type]) || ($type && $type === $this->name);
     }
 
     /**
