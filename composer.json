@@ -17,9 +17,6 @@
             "dev-develop": "1.2-dev"
         }
     },
-    "bin": [
-      "bin/zf-mvc-auth-oauth2-override.php"
-    ],
     "require": {
         "php": ">=5.3.23",
         "zendframework/zend-authentication": ">=2.3,<2.5",
