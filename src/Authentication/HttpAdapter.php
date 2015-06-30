@@ -115,7 +115,7 @@ class HttpAdapter extends AbstractAdapter
      * @param Request $request
      * @param Response $response
      * @param MvcAuthEvent $mvcAuthEvent
-     * @return false|IdentityInterface False on failure, IdentityInterface
+     * @return false|Identity\IdentityInterface False on failure, IdentityInterface
      *     otherwise
      */
     public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent)
