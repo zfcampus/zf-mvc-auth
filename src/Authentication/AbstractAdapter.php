@@ -12,7 +12,7 @@ abstract class AbstractAdapter implements AdapterInterface
 {
     /**
      * Authorization token types this adapter can fulfill.
-     * 
+     *
      * @var array
      */
     protected $authorizationTokenTypes = array();

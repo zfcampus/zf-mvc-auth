@@ -73,10 +73,10 @@ final class OAuth2ServerFactory
 
     /**
      * Create an OAuth2 storage instance based on the adapter specified.
-     * 
+     *
      * @param string $adapter One of "pdo" or "mongo".
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return PdoAdapter|MongoAdapter
      * @throws ServiceNotCreatedException
      */
@@ -96,7 +96,7 @@ final class OAuth2ServerFactory
      * Creates the OAuth2 storage from services.
      *
      * @param string|string[] $storage A string or an array of strings; each MUST be a valid service.
-     * @param ServiceLocatorInterface $services 
+     * @param ServiceLocatorInterface $services
      * @return array
      */
     private static function createStorageFromServices($storage, ServiceLocatorInterface $services)
