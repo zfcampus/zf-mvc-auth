@@ -21,10 +21,10 @@ final class AuthenticationHttpAdapterFactory
     /**
      * Create an instance of ZF\MvcAuth\Authentication\HttpAdapter based on
      * the configuration provided and the registered AuthenticationService.
-     * 
+     *
      * @param string $type The base "type" the adapter will provide
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return HttpAdapter
      */
     public static function factory($type, array $config, ServiceLocatorInterface $services)

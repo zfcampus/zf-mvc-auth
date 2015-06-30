@@ -25,8 +25,8 @@ final class HttpAdapterFactory
 
     /**
      * Create an HttpAuth instance based on the configuration passed.
-     * 
-     * @param array $config 
+     *
+     * @param array $config
      * @return HttpAuth
      * @throws ServiceNotCreatedException if any required elements are missing
      */
