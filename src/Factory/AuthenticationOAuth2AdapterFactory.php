@@ -21,10 +21,10 @@ final class AuthenticationOAuth2AdapterFactory
 
     /**
      * Create and return an OAuth2Adapter instance.
-     * 
-     * @param string|array $type 
-     * @param array $config 
-     * @param ServiceLocatorInterface $services 
+     *
+     * @param string|array $type
+     * @param array $config
+     * @param ServiceLocatorInterface $services
      * @return OAuth2Adapter
      * @throws ServiceNotCreatedException when missing details necessary to
      *     create instance and/or dependencies.

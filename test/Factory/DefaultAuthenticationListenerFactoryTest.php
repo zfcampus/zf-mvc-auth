@@ -215,7 +215,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $this->services->setService('ZF\OAuth2\Service\OAuth2Server', function () use ($oauth2Server) {
             return $oauth2Server;
         });
-        
+
         // Configure mock OAuth2 Server storage adapter
         $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
         $this->services->setService('TestAdapter', $adapter);
@@ -224,7 +224,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
                 'storage' => 'TestAdapter'
             )
         ));
-        
+
         $listener = $this->factory->createService($this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
 
