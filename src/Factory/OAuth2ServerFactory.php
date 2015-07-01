@@ -42,7 +42,7 @@ final class OAuth2ServerFactory
         $options      = self::marshalOptions($oauth2Config);
 
         $oauth2Server = new OAuth2Server(
-            self::createStorage($config, $services),
+            self::createStorage(array_merge($oauth2Config, $config), $services),
             $options
         );
 
