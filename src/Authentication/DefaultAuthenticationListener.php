@@ -185,6 +185,11 @@ class DefaultAuthenticationListener
         // Authenticate against first matching adapter
         $identity = $this->authenticate($type, $request, $response, $mvcAuthEvent);
 
+        // If the adapter returns a response instance, return it directly.
+        if ($identity instanceof HttpResponse) {
+            return $identity;
+        }
+
         // If no identity returned, create a guest identity
         if (! $identity instanceof Identity\IdentityInterface) {
             $identity = new Identity\GuestIdentity();
