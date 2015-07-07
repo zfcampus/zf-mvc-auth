@@ -798,7 +798,13 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->method('verifyResourceRequest')
             ->with($this->callback(function (OAuth2Request $request) {
                 return $request->headers('Authorization') === 'Bearer TOKEN';
-            }));
+            }))
+            ->willReturn(true);
+
+        $server->expects($this->atLeastOnce())
+            ->method('getAccessTokenData')
+            ->with($this->anything())
+            ->willReturn(array('user_id' => 'TOKEN'));
 
         $this->listener->attach(new OAuth2Adapter($server));
         $this->listener->__invoke($this->mvcAuthEvent);

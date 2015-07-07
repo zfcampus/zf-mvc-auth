@@ -7,6 +7,7 @@
 namespace ZF\MvcAuth\Authentication;
 
 use OAuth2\Request as OAuth2Request;
+use OAuth2\Response as OAuth2Response;
 use OAuth2\Server as OAuth2Server;
 use Zend\Http\Request;
 use Zend\Http\Response;
@@ -133,25 +134,72 @@ class OAuth2Adapter extends AbstractAdapter
      */
     public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent)
     {
-        $content       = $request->getContent();
         $oauth2request = new OAuth2Request(
-            $_GET,
-            $_POST,
+            $request->getQuery()->toArray(),
+            $request->getPost()->toArray(),
             array(),
-            $_COOKIE,
-            $_FILES,
-            $_SERVER,
-            $content,
+            ($request->getCookie() ? $request->getCookie()->getArrayCopy() : array()),
+            ($request->getFiles() ? $request->getFiles()->toArray() : array()),
+            (method_exists($request, 'getServer') ? $request->getServer()->toArray() : $_SERVER),
+            $request->getContent(),
             $request->getHeaders()->toArray()
         );
 
+        // Failure to validate
         if (! $this->oauth2Server->verifyResourceRequest($oauth2request)) {
-            return false;
+            $oauth2Response = $this->oauth2Server->getResponse();
+            $status = $oauth2Response->getStatusCode();
+
+            // 401 or 403 mean invalid credentials or unauthorized scopes; report those.
+            if (in_array($status, array(401, 403), true) && null !== $oauth2Response->getParameter('error')) {
+                return $this->mergeOAuth2Response($status, $response, $oauth2Response);
+            }
+
+            // Merge in any headers; typically sets a WWW-Authenticate header.
+            $this->mergeOAuth2ResponseHeaders($response, $oauth2Response->getHttpHeaders());
+
+            // Otherwise, no credentials were present at all, so we just return a guest identity.
+            return new Identity\GuestIdentity();
         }
 
         $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
         $identity = new Identity\AuthenticatedIdentity($token);
         $identity->setName($token['user_id']);
         return $identity;
+    }
+
+    /**
+     * Merge the OAuth2\Response instance's status and headers into the current Zend\Http\Response.
+     *
+     * @param int $status
+     * @param Response $response
+     * @param OAuth2Response $oauth2Response
+     * @return Response
+     */
+    private function mergeOAuth2Response($status, Response $response, OAuth2Response $oauth2Response)
+    {
+        $response->setStatusCode($status);
+        return $this->mergeOAuth2ResponseHeaders($response, $oauth2Response->getHttpHeaders());
+    }
+
+    /**
+     * Merge the OAuth2\Response headers into the current Zend\Http\Response.
+     *
+     * @param Response $response
+     * @param array $oauth2Headers
+     * @return Response
+     */
+    private function mergeOAuth2ResponseHeaders(Response $response, array $oauth2Headers)
+    {
+        if (empty($oauth2Headers)) {
+            return $response;
+        }
+
+        $headers = $response->getHeaders();
+        foreach ($oauth2Headers as $header => $value) {
+            $headers->addHeaderLine($header, $value);
+        }
+
+        return $response;
     }
 }
