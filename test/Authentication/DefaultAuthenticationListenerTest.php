@@ -803,4 +803,49 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->listener->attach(new OAuth2Adapter($server));
         $this->listener->__invoke($this->mvcAuthEvent);
     }
+
+    /**
+     * @group 83
+     */
+    public function testAllowsAdaptersToReturnResponsesAndReturnsThemDirectly()
+    {
+        $map = array(
+            'Foo\V2' => 'custom',
+        );
+        $this->listener->setAuthMap($map);
+        $request    = new HttpRequest();
+        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
+        $mvcEvent
+            ->setRequest($request)
+            ->setRouteMatch($routeMatch);
+
+        $types = array('custom');
+        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapter->expects($this->atLeastOnce())
+            ->method('provides')
+            ->will($this->returnValue($types));
+        $adapter->expects($this->any())
+            ->method('getTypeFromRequest')
+            ->with($this->equalTo($request))
+            ->will($this->returnValue('custom'));
+        $adapter->expects($this->any())
+            ->method('matches')
+            ->with($this->equalTo('custom'))
+            ->will($this->returnValue(true));
+
+        $response = new HttpResponse();
+        $response->setStatusCode(401);
+
+        $adapter->expects($this->once())
+            ->method('authenticate')
+            ->with($this->equalTo($request), $this->equalTo($this->response))
+            ->will($this->returnValue($response));
+        $this->listener->attach($adapter);
+
+        $result = $this->listener->__invoke($this->mvcAuthEvent);
+        $this->assertSame($response, $result);
+    }
 }
