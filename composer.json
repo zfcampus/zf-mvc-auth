@@ -29,7 +29,8 @@
         "zendframework/zend-stdlib": "~2.3",
         "zfcampus/zf-api-problem": "~1.0",
         "zfcampus/zf-content-negotiation": "~1.0",
-        "zfcampus/zf-oauth2": "^1.1.1"
+        "zfcampus/zf-oauth2": "^1.1.1",
+        "bshaffer/oauth2-server-php": "~1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.7",
