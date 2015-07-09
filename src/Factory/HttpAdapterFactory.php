@@ -9,6 +9,7 @@ use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\Adapter\Http\ApacheResolver;
 use Zend\Authentication\Adapter\Http\FileResolver;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Create and return a Zend\Authentication\Adapter\Http instance based on the
@@ -27,10 +28,11 @@ final class HttpAdapterFactory
      * Create an HttpAuth instance based on the configuration passed.
      *
      * @param array $config
+     * @param ServiceLocatorInterface $serviceLocator
      * @return HttpAuth
-     * @throws ServiceNotCreatedException if any required elements are missing
+     * @throws ServiceNotCreatedException
      */
-    public static function factory(array $config)
+    public static function factory(array $config, ServiceLocatorInterface $serviceLocator = null)
     {
         if (! isset($config['accept_schemes']) || ! is_array($config['accept_schemes'])) {
             throw new ServiceNotCreatedException(
@@ -62,18 +64,42 @@ final class HttpAdapterFactory
             )
         ));
 
-        if (in_array('basic', $config['accept_schemes'])
-            && isset($config['htpasswd'])
-        ) {
-            $httpAdapter->setBasicResolver(new ApacheResolver($config['htpasswd']));
+        if (in_array('basic', $config['accept_schemes'])) {
+            if (isset($config['basic_resolver_factory'])
+                && self::serviceLocatorHasKey($serviceLocator, $config['basic_resolver_factory'])
+            ) {
+                $httpAdapter->setBasicResolver($serviceLocator->get($config['basic_resolver_factory']));
+            } elseif (isset($config['htpasswd'])) {
+                $httpAdapter->setBasicResolver(new ApacheResolver($config['htpasswd']));
+            }
         }
 
-        if (in_array('digest', $config['accept_schemes'])
-            && isset($config['htdigest'])
-        ) {
-            $httpAdapter->setDigestResolver(new FileResolver($config['htdigest']));
+        if (in_array('digest', $config['accept_schemes'])) {
+            if (isset($config['digest_resolver_factory'])
+                && self::serviceLocatorHasKey($serviceLocator, $config['digest_resolver_factory'])
+            ) {
+                $httpAdapter->setDigestResolver($serviceLocator->get($config['digest_resolver_factory']));
+            } elseif (isset($config['htdigest'])) {
+                $httpAdapter->setDigestResolver(new FileResolver($config['htdigest']));
+            }
         }
 
         return $httpAdapter;
+    }
+
+    /**
+     * @param ServiceLocatorInterface|null $serviceLocator
+     * @param null $key
+     * @return bool
+     */
+    private static function serviceLocatorHasKey(ServiceLocatorInterface $serviceLocator = null, $key = null)
+    {
+        if (!$serviceLocator instanceof ServiceLocatorInterface) {
+            return false;
+        }
+        if (!is_string($key)) {
+            return false;
+        }
+        return $serviceLocator->has($key);
     }
 }

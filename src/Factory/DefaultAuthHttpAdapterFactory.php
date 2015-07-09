@@ -35,6 +35,6 @@ class DefaultAuthHttpAdapterFactory implements FactoryInterface
             return false;
         }
 
-        return HttpAdapterFactory::factory($config['zf-mvc-auth']['authentication']['http']);
+        return HttpAdapterFactory::factory($config['zf-mvc-auth']['authentication']['http'], $services);
     }
 }
