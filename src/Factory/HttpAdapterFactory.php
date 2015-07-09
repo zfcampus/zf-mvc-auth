@@ -30,7 +30,7 @@ final class HttpAdapterFactory
      * @param array $config
      * @param ServiceLocatorInterface $serviceLocator
      * @return HttpAuth
-     * @throws ServiceNotCreatedException
+     * @throws ServiceNotCreatedException if any required elements are missing
      */
     public static function factory(array $config, ServiceLocatorInterface $serviceLocator = null)
     {
