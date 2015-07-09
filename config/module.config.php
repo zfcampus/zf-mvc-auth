@@ -65,16 +65,22 @@ return array(
              * For HttpAdapter cases, specify an 'options' key with the options
              * to use to create the Zend\Authentication\Adapter\Http instance.
              *
-             * Starting in 1.2, you can specify a resolver implementing the Zend\Authentication\Adapter\Http\ResolverInterface
-             * that is passed into the Zend\Authentication\Adapter\Http as either basic or digest resolver.
-             * This allows you to implement your own method of authentication instead of having to rely on the two
-             * default methods (ApacheResolver for basic authentication and FileResolver for digest authentication).
+             * Starting in 1.2, you can specify a resolver implementing the
+             * Zend\Authentication\Adapter\Http\ResolverInterface that is passed
+             * into the Zend\Authentication\Adapter\Http as either basic or digest
+             * resolver. This allows you to implement your own method of authentication
+             * instead of having to rely on the two default methods (ApacheResolver
+             * for basic authentication and FileResolver for digest authentication,
+             * both based on files).
              *
-             * When you want to use this feature, use the "basic_resolver_factory" key to get your custom resolver
-             * instance from the Zend service manager. If this key is set and pointing to a valid entry in the service
-             * manager, the entry "htpasswd" is ignored (unless you use it in your custom factory to build the resolver).
+             * When you want to use this feature, use the "basic_resolver_factory"
+             * key to get your custom resolver instance from the Zend service manager.
+             * If this key is set and pointing to a valid entry in the service manager,
+             * the entry "htpasswd" is ignored (unless you use it in your custom
+             * factory to build the resolver).
              *
-             * Using the "digest_resolver_factory" ignores the "htdigest" key in the same way.
+             * Using the "digest_resolver_factory" ignores the "htdigest" key in
+             * the same way.
              *
              * For OAuth2Adapter instances, specify a 'storage' key, with options
              * to use for matching the adapter and creating an OAuth2 storage
