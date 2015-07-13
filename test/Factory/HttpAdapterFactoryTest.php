@@ -11,6 +11,9 @@ use ZF\MvcAuth\Factory\HttpAdapterFactory;
 
 class HttpAdapterFactoryTest extends TestCase
 {
+    private $htpasswd;
+    private $htdigest;
+
     public function setUp()
     {
         $this->htpasswd = __DIR__ . '/../TestAsset/htpasswd';
@@ -165,5 +168,132 @@ class HttpAdapterFactoryTest extends TestCase
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http\ApacheResolver', $adapter->getBasicResolver());
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http\FileResolver', $adapter->getDigestResolver());
+    }
+
+    public function testCanReturnBasicAdapterWithCustomResolverFromServiceManager()
+    {
+        $keyForServiceManager = 'keyForServiceManager';
+
+        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager
+            ->expects($this->once())
+            ->method('has')
+            ->with($keyForServiceManager)
+            ->will($this->returnValue(true));
+
+        $resolver = $this->getMock('\Zend\Authentication\Adapter\Http\ResolverInterface');
+        $serviceManager
+            ->expects($this->once())
+            ->method('get')
+            ->with($keyForServiceManager)
+            ->will($this->returnValue($resolver));
+
+        $adapter = HttpAdapterFactory::factory(array(
+            'accept_schemes' => array('basic', 'digest'),
+            'realm' => 'api',
+            'digest_domains' => 'https://example.com',
+            'nonce_timeout' => 3600,
+            'htpasswd' => $this->htpasswd,
+            'basic_resolver_factory' => $keyForServiceManager,
+        ), $serviceManager);
+
+        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertSame($resolver, $adapter->getBasicResolver());
+        $this->assertNull($adapter->getDigestResolver());
+    }
+
+    public function testCanReturnDigestAdapterWithCustomResolverFromServiceManager()
+    {
+        $keyForServiceManager = 'keyForServiceManager';
+
+        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager
+            ->expects($this->once())
+            ->method('has')
+            ->with($keyForServiceManager)
+            ->will($this->returnValue(true));
+
+        $resolver = $this->getMock('\Zend\Authentication\Adapter\Http\ResolverInterface');
+        $serviceManager
+            ->expects($this->once())
+            ->method('get')
+            ->with($keyForServiceManager)
+            ->will($this->returnValue($resolver));
+
+        $adapter = HttpAdapterFactory::factory(array(
+            'accept_schemes' => array('basic', 'digest'),
+            'realm' => 'api',
+            'digest_domains' => 'https://example.com',
+            'nonce_timeout' => 3600,
+            'htdigest' => $this->htdigest,
+            'digest_resolver_factory' => $keyForServiceManager,
+        ), $serviceManager);
+
+        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertNull($adapter->getBasicResolver());
+        $this->assertSame($resolver, $adapter->getDigestResolver());
+    }
+
+    public function testCanReturnAdapterWithNoResolversAndInvalidServiceManager()
+    {
+        $adapter = HttpAdapterFactory::factory(array(
+            'accept_schemes' => array('basic', 'digest'),
+            'realm' => 'api',
+            'digest_domains' => 'https://example.com',
+            'nonce_timeout' => 3600,
+            'basic_resolver_factory' => 'uselessKeyDueToMissingServiceManager',
+            'digest_resolver_factory' => 'uselessKeyDueToMissingServiceManager',
+        ));
+
+        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertNull($adapter->getBasicResolver());
+        $this->assertNull($adapter->getDigestResolver());
+    }
+
+    public function testCanReturnAdapterWithNoResolversAndInvalidResolverKeys()
+    {
+        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager->expects($this->never())->method('has');
+
+        $adapter = HttpAdapterFactory::factory(array(
+            'accept_schemes' => array('basic', 'digest'),
+            'realm' => 'api',
+            'digest_domains' => 'https://example.com',
+            'nonce_timeout' => 3600,
+            'basic_resolver_factory' => null,
+            'digest_resolver_factory' => array(),
+        ), $serviceManager);
+
+        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertNull($adapter->getBasicResolver());
+        $this->assertNull($adapter->getDigestResolver());
+    }
+
+    public function testCanReturnAdapterWithNoResolversAndMissingServiceManagerEntries()
+    {
+        $missingKeyForServiceManager = 'missingKeyForServiceManager';
+
+        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager
+            ->expects($this->any())
+            ->method('has')
+            ->with($missingKeyForServiceManager)
+            ->will($this->returnValue(false));
+        $serviceManager
+            ->expects($this->never())
+            ->method('get');
+
+        $adapter = HttpAdapterFactory::factory(array(
+            'accept_schemes' => array('basic', 'digest'),
+            'realm' => 'api',
+            'digest_domains' => 'https://example.com',
+            'nonce_timeout' => 3600,
+            'basic_resolver_factory' => $missingKeyForServiceManager,
+            'digest_resolver_factory' => $missingKeyForServiceManager,
+        ), $serviceManager);
+
+        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertNull($adapter->getBasicResolver());
+        $this->assertNull($adapter->getDigestResolver());
     }
 }
