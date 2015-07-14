@@ -31,7 +31,7 @@ class ModuleTest extends TestCase
         $application->getServiceManager()->will(function () use ($services) {
             return $services->reveal();
         });
-        
+
         return $application;
     }
 
