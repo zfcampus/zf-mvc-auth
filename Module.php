@@ -6,6 +6,7 @@
 
 namespace ZF\MvcAuth;
 
+use Zend\Http\Request as HttpRequest;
 use Zend\ModuleManager\ModuleEvent;
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -74,6 +75,10 @@ class Module
 
     public function onBootstrap(MvcEvent $mvcEvent)
     {
+        if (! $mvcEvent->getRequest() instanceof HttpRequest) {
+            return;
+        }
+
         $app      = $mvcEvent->getApplication();
         $events   = $app->getEventManager();
         $this->services = $app->getServiceManager();
