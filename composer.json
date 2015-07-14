@@ -39,11 +39,15 @@
     },
     "autoload": {
         "psr-4": {
-            "ZF\\MvcAuth\\": "src/",
-            "ZFTest\\MvcAuth\\": "test/"
+            "ZF\\MvcAuth\\": "src/"
         },
         "classmap": [
             "Module.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZFTest\\MvcAuth\\": "test/"
+        }
     }
 }
