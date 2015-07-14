@@ -36,6 +36,9 @@ return array(
             'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => 'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener',
             'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
         ),
+        'abstract_factories' => array(
+            'ZF\MvcAuth\Factory\AdapterAbstractFactory',
+        ),
     ),
     'zf-mvc-auth' => array(
         'authentication' => array(

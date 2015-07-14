@@ -9,6 +9,7 @@ namespace ZFTest\MvcAuth\Factory;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Factory\AdapterAbstractFactory;
 use ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory;
 
 class AuthenticationAdapterDelegatorFactoryTest extends TestCase
@@ -79,12 +80,17 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
                         'bat' => array(
                             // intentionally empty
                         ),
+                        'batman' => array(
+                            'adapter' => 'ZF\MvcAuth\Authentication\CompositeAdapter',
+                            'adapters' => array('foo', 'bar'),
+                        ),
                     ),
                 ),
             ),
         );
         $this->services->setService('Config', $config);
         $this->services->setService('authentication', $this->getMock('Zend\Authentication\AuthenticationService'));
+        $this->services->addAbstractFactory(new AdapterAbstractFactory());
 
         $listener = $this->factory->createDelegatorWithName(
             $this->services,
@@ -93,9 +99,9 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
             $this->callback
         );
         $this->assertSame($this->listener, $listener);
-        $this->assertEquals(array(
-            'foo-basic',
-            'bar'
-        ), $listener->getAuthenticationTypes());
+        $this->assertCount(3, $listener->getAuthenticationTypes());
+        $this->assertContains('foo-basic', $listener->getAuthenticationTypes());
+        $this->assertContains('bar', $listener->getAuthenticationTypes());
+        $this->assertContains('batman', $listener->getAuthenticationTypes());
     }
 }
