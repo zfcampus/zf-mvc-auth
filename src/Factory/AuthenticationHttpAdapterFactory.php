@@ -42,7 +42,7 @@ final class AuthenticationHttpAdapterFactory
         }
 
         return new HttpAdapter(
-            HttpAdapterFactory::factory($config['options']),
+            HttpAdapterFactory::factory($config['options'], $services),
             $services->get('authentication'),
             $type
         );
