@@ -25,12 +25,8 @@ class ModuleTest extends TestCase
         $events   = $this->setUpEvents();
 
         $application = $this->prophesize('Zend\Mvc\Application');
-        $application->getEventManager()->will(function () use ($events) {
-            return $events->reveal();
-        });
-        $application->getServiceManager()->will(function () use ($services) {
-            return $services->reveal();
-        });
+        $application->getEventManager()->will(array($events, 'reveal'));
+        $application->getServiceManager()->will(array($services, 'reveal'));
 
         return $application;
     }
@@ -56,32 +52,18 @@ class ModuleTest extends TestCase
         );
 
         $services = $this->prophesize('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->get('authentication')->will(function () use ($authentication) {
-            return $authentication->reveal();
-        });
-        $services->get('authorization')->will(function () use ($authorization) {
-            return $authorization->reveal();
-        });
+        $services->get('authentication')->will(array($authentication, 'reveal'));
+        $services->get('authorization')->will(array($authorization, 'reveal'));
         $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
-            ->will(function () use ($defaultAuthenticationListener) {
-                return $defaultAuthenticationListener->reveal();
-            });
+            ->will(array($defaultAuthenticationListener, 'reveal'));
         $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
-            ->will(function () use ($defaultAuthenticationPostListener) {
-                return $defaultAuthenticationPostListener->reveal();
-            });
+            ->will(array($defaultAuthenticationPostListener, 'reveal'));
         $services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener')
-            ->will(function () use ($defaultResourceResolverListener) {
-                return $defaultResourceResolverListener->reveal();
-            });
+            ->will(array($defaultResourceResolverListener, 'reveal'));
         $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
-            ->will(function () use ($defaultAuthorizationListener) {
-                return $defaultAuthorizationListener->reveal();
-            });
+            ->will(array($defaultAuthorizationListener, 'reveal'));
         $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
-            ->will(function () use ($defaultAuthorizationPostListener) {
-                return $defaultAuthorizationPostListener->reveal();
-            });
+            ->will(array($defaultAuthorizationPostListener, 'reveal'));
 
         return $services;
     }
@@ -125,9 +107,7 @@ class ModuleTest extends TestCase
     public function testOnBootstrapReturnsEarlyForNonHttpEvents()
     {
         $request = $this->prophesize('Zend\Stdlib\RequestInterface');
-        $this->mvcEvent->getRequest()->will(function () use ($request) {
-            return $request->reveal();
-        });
+        $this->mvcEvent->getRequest()->will(array($request, 'reveal'));
         $this->module->onBootstrap($this->mvcEvent->reveal());
     }
 
@@ -136,12 +116,8 @@ class ModuleTest extends TestCase
         $mvcEvent    = $this->mvcEvent;
         $request     = $this->prophesize('Zend\Http\Request');
         $application = $this->setUpApplication();
-        $mvcEvent->getRequest()->will(function () use ($request) {
-            return $request->reveal();
-        });
-        $mvcEvent->getApplication()->will(function () use ($application) {
-            return $application->reveal();
-        });
+        $mvcEvent->getRequest()->will(array($request, 'reveal'));
+        $mvcEvent->getApplication()->will(array($application, 'reveal'));
         $this->module->onBootstrap($mvcEvent->reveal());
     }
 }
