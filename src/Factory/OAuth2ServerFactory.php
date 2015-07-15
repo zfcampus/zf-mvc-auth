@@ -38,7 +38,7 @@ final class OAuth2ServerFactory
     public static function factory(array $config, ServiceLocatorInterface $services)
     {
         $allConfig    = $services->get('Config');
-        $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : array();
+        $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : [];
         $options      = self::marshalOptions($oauth2Config);
 
         $oauth2Server = new OAuth2Server(
@@ -101,7 +101,7 @@ final class OAuth2ServerFactory
      */
     private static function createStorageFromServices($storage, ServiceLocatorInterface $services)
     {
-        $storageServices = array();
+        $storageServices = [];
         if (is_string($storage)) {
             $storageServices[] = $storage;
         }
@@ -109,7 +109,7 @@ final class OAuth2ServerFactory
             $storageServices = $storage;
         }
 
-        $storage = array();
+        $storage = [];
         foreach ($storageServices as $key => $service) {
             $storage[$key] = $services->get($service);
         }
@@ -161,14 +161,14 @@ final class OAuth2ServerFactory
 
         $username = isset($config['username']) ? $config['username'] : null;
         $password = isset($config['password']) ? $config['password'] : null;
-        $options  = isset($config['options'])  ? $config['options'] : array();
+        $options  = isset($config['options'])  ? $config['options'] : [];
 
-        return array(
+        return [
             'dsn'      => $config['dsn'],
             'username' => $username,
             'password' => $password,
             'options'  => $options,
-        );
+        ];
     }
 
     /**
@@ -194,7 +194,7 @@ final class OAuth2ServerFactory
             );
         }
 
-        $options = isset($config['options']) ? $config['options'] : array();
+        $options = isset($config['options']) ? $config['options'] : [];
         $options['connect'] = false;
         $server  = isset($config['dsn']) ? $config['dsn'] : null;
         $mongo   = new MongoClient($server, $options);
@@ -208,7 +208,7 @@ final class OAuth2ServerFactory
      */
     private static function getOAuth2ServerConfig($config)
     {
-        $oauth2ServerConfig = array();
+        $oauth2ServerConfig = [];
         if (isset($config['storage_settings']) && is_array($config['storage_settings'])) {
             $oauth2ServerConfig = $config['storage_settings'];
         }
@@ -238,14 +238,14 @@ final class OAuth2ServerFactory
             : '';
         $options        = isset($config['options'])
             ? $config['options']
-            : array();
+            : [];
 
-        return  array_merge(array(
+        return  array_merge([
             'access_lifetime' => $accessLifetime,
             'allow_implicit'  => $allowImplicit,
             'audience'        => $audience,
             'enforce_state'   => $enforceState,
-        ), $options);
+        ], $options);
     }
 
     /**
@@ -260,7 +260,7 @@ final class OAuth2ServerFactory
     private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options)
     {
         if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
-            $clientOptions = array();
+            $clientOptions = [];
             if (isset($options['allow_credentials_in_request_body'])) {
                 $clientOptions['allow_credentials_in_request_body'] = $options['allow_credentials_in_request_body'];
             }
@@ -285,7 +285,7 @@ final class OAuth2ServerFactory
         }
 
         if (isset($availableGrantTypes['refresh_token']) && $availableGrantTypes['refresh_token'] === true) {
-            $refreshOptions = array();
+            $refreshOptions = [];
             if (isset($options['always_issue_new_refresh_token'])) {
                 $refreshOptions['always_issue_new_refresh_token'] = $options['always_issue_new_refresh_token'];
             }

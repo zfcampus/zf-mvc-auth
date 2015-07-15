@@ -15,7 +15,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @var array
      */
-    protected $authorizationTokenTypes = array();
+    protected $authorizationTokenTypes = [];
 
     /**
      * Determine if the incoming request provides either basic or digest

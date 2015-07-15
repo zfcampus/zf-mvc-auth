@@ -22,12 +22,12 @@ class NamedOAuth2ServerFactory
     {
         $config = $services->get('Config');
 
-        $oauth2Config  = isset($config['zf-oauth2']) ? $config['zf-oauth2'] : array();
+        $oauth2Config  = isset($config['zf-oauth2']) ? $config['zf-oauth2'] : [];
         $mvcAuthConfig = isset($config['zf-mvc-auth']['authentication']['adapters'])
             ? $config['zf-mvc-auth']['authentication']['adapters']
-            : array();
+            : [];
 
-        $servers = (object) array('application' => null, 'api' => array());
+        $servers = (object) ['application' => null, 'api' => []];
         return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $services, $servers) {
             // Empty type == legacy configuration.
             if (empty($type)) {

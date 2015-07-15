@@ -27,20 +27,20 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'missing AuthenticationService'
         );
-        AuthenticationHttpAdapterFactory::factory('foo', array(), $this->services);
+        AuthenticationHttpAdapterFactory::factory('foo', [], $this->services);
     }
 
     public function invalidConfiguration()
     {
-        return array(
-            'empty'  => array(array()),
-            'null'   => array(array('options' => null)),
-            'bool'   => array(array('options' => true)),
-            'int'    => array(array('options' => 1)),
-            'float'  => array(array('options' => 1.1)),
-            'string' => array(array('options' => 'options')),
-            'object' => array(array('options' => (object) array('options'))),
-        );
+        return [
+            'empty'  => [[]],
+            'null'   => [['options' => null]],
+            'bool'   => [['options' => true]],
+            'int'    => [['options' => 1]],
+            'float'  => [['options' => 1.1]],
+            'string' => [['options' => 'options']],
+            'object' => [['options' => (object) ['options']]],
+        ];
     }
 
     /**
@@ -62,28 +62,28 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
 
     public function validConfiguration()
     {
-        return array(
-            'basic' => array(array(
-                'accept_schemes' => array('basic'),
+        return [
+            'basic' => [[
+                'accept_schemes' => ['basic'],
                 'realm' => 'api',
                 'htpasswd' => __DIR__ . '/../TestAsset/htpasswd',
-            ), array('foo-basic')),
-            'digest' => array(array(
-                'accept_schemes' => array('digest'),
+            ], ['foo-basic']],
+            'digest' => [[
+                'accept_schemes' => ['digest'],
                 'realm' => 'api',
                 'digest_domains' => 'https://example.com',
                 'nonce_timeout' => 3600,
                 'htdigest' => __DIR__ . '/../TestAsset/htdigest',
-            ), array('foo-digest')),
-            'both' => array(array(
-                'accept_schemes' => array('basic', 'digest'),
+            ], ['foo-digest']],
+            'both' => [[
+                'accept_schemes' => ['basic', 'digest'],
                 'realm' => 'api',
                 'digest_domains' => 'https://example.com',
                 'nonce_timeout' => 3600,
                 'htpasswd' => __DIR__ . '/../TestAsset/htpasswd',
                 'htdigest' => __DIR__ . '/../TestAsset/htdigest',
-            ), array('foo-basic', 'foo-digest')),
-        );
+            ], ['foo-basic', 'foo-digest']],
+        ];
     }
 
     /**
@@ -101,7 +101,7 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
             ->with($this->equalTo('authentication'))
             ->will($this->returnValue($authService));
 
-        $adapter = AuthenticationHttpAdapterFactory::factory('foo', array('options' => $options), $this->services);
+        $adapter = AuthenticationHttpAdapterFactory::factory('foo', ['options' => $options], $this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\HttpAdapter', $adapter);
         $this->assertEquals($provides, $adapter->provides());
     }

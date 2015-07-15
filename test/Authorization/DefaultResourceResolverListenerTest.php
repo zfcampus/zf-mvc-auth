@@ -21,7 +21,7 @@ class DefaultResourceResolverListenerTest extends TestCase
 {
     public function setUp()
     {
-        $routeMatch = new RouteMatch(array());
+        $routeMatch = new RouteMatch([]);
         $request    = new HttpRequest();
         $response   = new HttpResponse();
         $mvcEvent   = new MvcEvent();
@@ -30,9 +30,9 @@ class DefaultResourceResolverListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
         $this->mvcAuthEvent = $this->createMvcAuthEvent($mvcEvent);
 
-        $this->restControllers = array(
+        $this->restControllers = [
             'ZendCon\V1\Rest\Session\Controller' => 'session_id',
-        );
+        ];
         $this->listener = new DefaultResourceResolverListener($this->restControllers);
     }
 

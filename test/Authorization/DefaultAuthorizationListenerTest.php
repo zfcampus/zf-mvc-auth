@@ -38,7 +38,7 @@ class DefaultAuthorizationListenerTest extends TestCase
     /**
      * @var array
      */
-    protected $restControllers = array();
+    protected $restControllers = [];
 
     /**
      * @var DefaultAuthorizationListener
@@ -61,16 +61,16 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->authorization->allow();
 
         // event for mvc and mvc-auth
-        $routeMatch = new RouteMatch(array());
+        $routeMatch = new RouteMatch([]);
         $request    = new HttpRequest();
         $response   = new HttpResponse();
-        $application = new Application(null, new ServiceManager(new Config(array('services' => array(
+        $application = new Application(null, new ServiceManager(new Config(['services' => [
             'event_manager' => new EventManager(),
             'authentication' => $this->authentication,
             'authorization' => $this->authorization,
             'request' => $request,
             'response' => $response
-        )))));
+        ]])));
 
         $mvcEvent   = new MvcEvent();
         $mvcEvent->setRequest($request)

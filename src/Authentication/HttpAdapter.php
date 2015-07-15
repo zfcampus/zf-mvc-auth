@@ -25,7 +25,7 @@ class HttpAdapter extends AbstractAdapter
      *
      * @var array
      */
-    protected $authorizationTokenTypes = array('basic', 'digest');
+    protected $authorizationTokenTypes = ['basic', 'digest'];
 
     /**
      * @var HttpAuth
@@ -70,7 +70,7 @@ class HttpAdapter extends AbstractAdapter
     public function provides()
     {
         $providesBase = $this->providesBase ? $this->providesBase . '-' : '';
-        $provides     = array();
+        $provides     = [];
 
         if ($this->httpAuth->getBasicResolver()) {
             $provides[] = $providesBase . 'basic';

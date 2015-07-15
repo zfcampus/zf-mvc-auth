@@ -26,22 +26,22 @@ class HttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'accept_schemes'
         );
-        HttpAdapterFactory::factory(array());
+        HttpAdapterFactory::factory([]);
     }
 
     public function invalidAcceptSchemes()
     {
-        return array(
-            'null' => array(null),
-            'true' => array(true),
-            'false' => array(false),
-            'zero' => array(0),
-            'int' => array(1),
-            'zerofloat' => array(0.0),
-            'float' => array(1.1),
-            'string' => array('basic'),
-            'object' => array((object) array('basic')),
-        );
+        return [
+            'null' => [null],
+            'true' => [true],
+            'false' => [false],
+            'zero' => [0],
+            'int' => [1],
+            'zerofloat' => [0.0],
+            'float' => [1.1],
+            'string' => ['basic'],
+            'object' => [(object) ['basic']],
+        ];
     }
 
     /**
@@ -53,7 +53,7 @@ class HttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'accept_schemes'
         );
-        HttpAdapterFactory::factory(array('accept_schemes' => $acceptSchemes));
+        HttpAdapterFactory::factory(['accept_schemes' => $acceptSchemes]);
     }
 
     public function testFactoryRaisesExceptionWhenRealmIsMissing()
@@ -62,9 +62,9 @@ class HttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'realm'
         );
-        HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic'),
-        ));
+        HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic'],
+        ]);
     }
 
     public function testRaisesExceptionWhenDigestConfiguredAndNoDomainsPresent()
@@ -73,11 +73,11 @@ class HttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'digest_domains'
         );
-        HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('digest'),
+        HttpAdapterFactory::factory([
+            'accept_schemes' => ['digest'],
             'realm' => 'api',
             'nonce_timeout' => 3600,
-        ));
+        ]);
     }
 
     public function testRaisesExceptionWhenDigestConfiguredAndNoNoncePresent()
@@ -86,33 +86,33 @@ class HttpAdapterFactoryTest extends TestCase
             'Zend\ServiceManager\Exception\ServiceNotCreatedException',
             'digest_domains'
         );
-        HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('digest'),
+        HttpAdapterFactory::factory([
+            'accept_schemes' => ['digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
-        ));
+        ]);
     }
 
     public function validConfigWithoutResolvers()
     {
-        return array(
-            'basic' => array(array(
-                'accept_schemes' => array('basic'),
+        return [
+            'basic' => [[
+                'accept_schemes' => ['basic'],
                 'realm' => 'api',
-            )),
-            'digest' => array(array(
-                'accept_schemes' => array('digest'),
-                'realm' => 'api',
-                'digest_domains' => 'https://example.com',
-                'nonce_timeout' => 3600,
-            )),
-            'both' => array(array(
-                'accept_schemes' => array('basic', 'digest'),
+            ]],
+            'digest' => [[
+                'accept_schemes' => ['digest'],
                 'realm' => 'api',
                 'digest_domains' => 'https://example.com',
                 'nonce_timeout' => 3600,
-            )),
-        );
+            ]],
+            'both' => [[
+                'accept_schemes' => ['basic', 'digest'],
+                'realm' => 'api',
+                'digest_domains' => 'https://example.com',
+                'nonce_timeout' => 3600,
+            ]],
+        ];
     }
 
     /**
@@ -128,11 +128,11 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testCanReturnBasicAdapterWithApacheResolver()
     {
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic'],
             'realm' => 'api',
             'htpasswd' => $this->htpasswd,
-        ));
+        ]);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http\ApacheResolver', $adapter->getBasicResolver());
@@ -141,13 +141,13 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testCanReturnDigestAdapterWithFileResolver()
     {
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'htdigest' => $this->htdigest,
-        ));
+        ]);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertNull($adapter->getBasicResolver());
@@ -156,14 +156,14 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testCanReturnCompoundAdapter()
     {
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'htpasswd' => $this->htpasswd,
             'htdigest' => $this->htdigest,
-        ));
+        ]);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http\ApacheResolver', $adapter->getBasicResolver());
@@ -188,14 +188,14 @@ class HttpAdapterFactoryTest extends TestCase
             ->with($keyForServiceManager)
             ->will($this->returnValue($resolver));
 
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'htpasswd' => $this->htpasswd,
             'basic_resolver_factory' => $keyForServiceManager,
-        ), $serviceManager);
+        ], $serviceManager);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertSame($resolver, $adapter->getBasicResolver());
@@ -220,14 +220,14 @@ class HttpAdapterFactoryTest extends TestCase
             ->with($keyForServiceManager)
             ->will($this->returnValue($resolver));
 
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'htdigest' => $this->htdigest,
             'digest_resolver_factory' => $keyForServiceManager,
-        ), $serviceManager);
+        ], $serviceManager);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertNull($adapter->getBasicResolver());
@@ -236,14 +236,14 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testCanReturnAdapterWithNoResolversAndInvalidServiceManager()
     {
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'basic_resolver_factory' => 'uselessKeyDueToMissingServiceManager',
             'digest_resolver_factory' => 'uselessKeyDueToMissingServiceManager',
-        ));
+        ]);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertNull($adapter->getBasicResolver());
@@ -255,14 +255,14 @@ class HttpAdapterFactoryTest extends TestCase
         $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
         $serviceManager->expects($this->never())->method('has');
 
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'basic_resolver_factory' => null,
-            'digest_resolver_factory' => array(),
-        ), $serviceManager);
+            'digest_resolver_factory' => [],
+        ], $serviceManager);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertNull($adapter->getBasicResolver());
@@ -283,14 +283,14 @@ class HttpAdapterFactoryTest extends TestCase
             ->expects($this->never())
             ->method('get');
 
-        $adapter = HttpAdapterFactory::factory(array(
-            'accept_schemes' => array('basic', 'digest'),
+        $adapter = HttpAdapterFactory::factory([
+            'accept_schemes' => ['basic', 'digest'],
             'realm' => 'api',
             'digest_domains' => 'https://example.com',
             'nonce_timeout' => 3600,
             'basic_resolver_factory' => $missingKeyForServiceManager,
             'digest_resolver_factory' => $missingKeyForServiceManager,
-        ), $serviceManager);
+        ], $serviceManager);
 
         $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
         $this->assertNull($adapter->getBasicResolver());

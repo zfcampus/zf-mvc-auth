@@ -9,9 +9,9 @@ class AuthenticatedIdentityTest extends TestCase
 {
     public function setUp()
     {
-        $this->authIdentity = (object) array(
+        $this->authIdentity = (object) [
             'name' => 'foo',
-        );
+        ];
         $this->identity = new AuthenticatedIdentity($this->authIdentity);
     }
 

@@ -16,13 +16,13 @@ use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;
  */
 class DefaultResourceResolverListenerFactory implements FactoryInterface
 {
-    protected $httpMethods = array(
+    protected $httpMethods = [
         Request::METHOD_DELETE => true,
         Request::METHOD_GET    => true,
         Request::METHOD_PATCH  => true,
         Request::METHOD_POST   => true,
         Request::METHOD_PUT    => true,
-    );
+    ];
 
     /**
      * Create the DefaultAuthorizationListener
@@ -32,7 +32,7 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $services)
     {
-        $config = array();
+        $config = [];
         if ($services->has('config')) {
             $config = $services->get('config');
         }
@@ -53,7 +53,7 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
      */
     protected function getRestServicesFromConfig(array $config)
     {
-        $restServices = array();
+        $restServices = [];
         if (!isset($config['zf-rest'])) {
             return $restServices;
         }

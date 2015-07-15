@@ -44,7 +44,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     /**
      * @var array
      */
-    protected $restControllers = array();
+    protected $restControllers = [];
 
     /**
      * @var DefaultAuthenticationListener
@@ -89,12 +89,12 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testInvokeForBasicAuthAddsAuthorizationHeader()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
         $this->listener->setHttpAdapter($httpAuth);
 
@@ -108,12 +108,12 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testInvokeForBasicAuthSetsIdentityWhenValid()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
         $this->listener->setHttpAdapter($httpAuth);
 
@@ -121,17 +121,17 @@ class DefaultAuthenticationListenerTest extends TestCase
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
         $this->assertEquals('user', $identity->getRoleId());
-        return array('identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent());
+        return ['identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent()];
     }
 
     public function testInvokeForBasicAuthSetsGuestIdentityWhenValid()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
         $this->listener->setHttpAdapter($httpAuth);
 
@@ -139,17 +139,17 @@ class DefaultAuthenticationListenerTest extends TestCase
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
         $this->assertEquals('guest', $identity->getRoleId());
-        return array('identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent());
+        return ['identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent()];
     }
 
     public function testInvokeForBasicAuthHasNoIdentityWhenNotValid()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
         $this->listener->setHttpAdapter($httpAuth);
 
@@ -160,12 +160,12 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testInvokeForDigestAuthAddsAuthorizationHeader()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'digest',
             'realm' => 'User Area',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setDigestResolver(new HttpAuth\FileResolver(__DIR__ . '/../TestAsset/htdigest'));
         $this->listener->setHttpAdapter($httpAuth);
 
@@ -216,10 +216,10 @@ class DefaultAuthenticationListenerTest extends TestCase
         $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
             ->disableOriginalConstructor()
             ->getMock();
-        $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, array(
+        $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, [
             'username' => 'user',
             'realm' => 'User Area',
-        ));
+        ]);
         $httpAuth->expects($this->any())
             ->method('getBasicResolver')
             ->will($this->returnValue(false));
@@ -250,9 +250,9 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testBearerTypeProxiesOAuthServer()
     {
-        $token = array(
+        $token = [
             'user_id' => 'test',
-        );
+        ];
 
         $this->setupMockOAuth2Server($token);
         $this->request->getHeaders()->addHeaderLine('Authorization', 'Bearer TOKEN');
@@ -264,9 +264,9 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testQueryAccessTokenProxiesOAuthServer()
     {
-        $token = array(
+        $token = [
             'user_id' => 'test',
-        );
+        ];
 
         $this->setupMockOAuth2Server($token);
         $this->request->getQuery()->set('access_token', 'TOKEN');
@@ -278,12 +278,12 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function requestMethodsWithRequestBodies()
     {
-        return array(
-            array('DELETE'),
-            array('PATCH'),
-            array('POST'),
-            array('PUT'),
-        );
+        return [
+            ['DELETE'],
+            ['PATCH'],
+            ['POST'],
+            ['PUT'],
+        ];
     }
 
     /**
@@ -291,9 +291,9 @@ class DefaultAuthenticationListenerTest extends TestCase
      */
     public function testBodyAccessTokenProxiesOAuthServer($method)
     {
-        $token = array(
+        $token = [
             'user_id' => 'test',
-        );
+        ];
 
         $this->setupMockOAuth2Server($token);
         $this->request->setMethod($method);
@@ -331,12 +331,12 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function setupHttpBasicAuth()
     {
-        $httpAuth = new HttpAuth(array(
+        $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
             'realm' => 'My Web Site',
             'digest_domains' => '/',
             'nonce_timeout' => 3600,
-        ));
+        ]);
         $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
         $this->listener->setHttpAdapter($httpAuth);
     }
@@ -346,10 +346,10 @@ class DefaultAuthenticationListenerTest extends TestCase
         $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
             ->disableOriginalConstructor()
             ->getMock();
-        $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, array(
+        $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, [
             'username' => 'user',
             'realm' => 'User Area',
-        ));
+        ]);
         $httpAuth->expects($this->any())
             ->method('getDigestResolver')
             ->will($this->returnValue(true));
@@ -362,8 +362,8 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function mappedAuthenticationControllers()
     {
-        return array(
-            'Foo\V2' => array(
+        return [
+            'Foo\V2' => [
                 'Foo\V2\Rest\Status\StatusController',
                 'oauth2',
                 function () {
@@ -371,8 +371,8 @@ class DefaultAuthenticationListenerTest extends TestCase
                     $request->getHeaders()->addHeaderLine('Authorization: Bearer TOKEN');
                     return $request;
                 },
-            ),
-            'Bar\V1' => array(
+            ],
+            'Bar\V1' => [
                 'Bar\V1\Rpc\Ping\PingController',
                 'basic',
                 function () {
@@ -380,8 +380,8 @@ class DefaultAuthenticationListenerTest extends TestCase
                     $request->getHeaders()->addHeaderLine('Authorization: Basic dXNlcjp1c2Vy');
                     return $request;
                 },
-            ),
-            'Baz\V3' => array(
+            ],
+            'Baz\V3' => [
                 'Baz\V3\Rest\User\UserController',
                 'digest',
                 function () {
@@ -399,8 +399,8 @@ class DefaultAuthenticationListenerTest extends TestCase
                     );
                     return $request;
                 },
-            ),
-        );
+            ],
+        ];
     }
 
     public function setupMappedAuthenticatingListener($authType, $controller, $request)
@@ -413,19 +413,19 @@ class DefaultAuthenticationListenerTest extends TestCase
                 $this->setupHttpDigestAuth();
                 break;
             case 'oauth2':
-                $this->setupMockOAuth2Server(array(
+                $this->setupMockOAuth2Server([
                     'user_id' => 'test',
-                ));
+                ]);
                 break;
         }
 
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
-        $routeMatch = new RouteMatch(array('controller' => $controller));
+        $routeMatch = new RouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
@@ -455,13 +455,13 @@ class DefaultAuthenticationListenerTest extends TestCase
         $authType,
         $requestProvider
     ) {
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
-        $routeMatch = new RouteMatch(array('controller' => $controller));
+        $routeMatch = new RouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -487,13 +487,13 @@ class DefaultAuthenticationListenerTest extends TestCase
                 $this->setupHttpDigestAuth();
                 break;
             case 'oauth2':
-                $this->setupMockOAuth2Server(array(
+                $this->setupMockOAuth2Server([
                     'user_id' => 'test',
-                ));
+                ]);
                 break;
         }
 
-        $routeMatch = new RouteMatch(array('controller' => $controller));
+        $routeMatch = new RouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -518,7 +518,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->getMock();
         $this->listener->setOauth2Server($server);
 
-        $routeMatch = new RouteMatch(array('controller' => $controller));
+        $routeMatch = new RouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -545,17 +545,17 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->getMock();
         $this->listener->setOauth2Server($server);
 
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
 
         $request = new HttpRequest();
         $request->getHeaders()->addHeaderLine('Authorization: Bearer TOKEN');
 
-        $routeMatch = new RouteMatch(array('controller' => 'FooBarBaz\V4\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'FooBarBaz\V4\Rest\Test\TestController']);
 
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
@@ -579,17 +579,17 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         // No OAuth2 server, intentionally
 
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
 
         $request = new HttpRequest();
         $request->getHeaders()->addHeaderLine('Authorization: Bearer TOKEN');
 
-        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
 
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
@@ -602,7 +602,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testAllowsAttachingAdapters()
     {
-        $types = array('foo');
+        $types = ['foo'];
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -614,7 +614,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testCanRetrieveSupportedAuthenticationTypes()
     {
-        $types = array('foo');
+        $types = ['foo'];
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -627,20 +627,20 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testAdapterPreAuthIsTriggeredWhenNoTypeMatchedInRequest()
     {
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(array('controller' => 'Foo\V1\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'Foo\V1\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
             ->setRouteMatch($routeMatch);
 
-        $types = array('foo');
+        $types = ['foo'];
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -664,20 +664,20 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testMatchedAdapterIsAuthenticatedAgainst()
     {
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
             ->setRouteMatch($routeMatch);
 
-        $types = array('oauth2');
+        $types = ['oauth2'];
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -707,20 +707,20 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testFirstAdapterProvidingTypeIsAuthenticatedAgainst()
     {
-        $map = array(
+        $map = [
             'Foo\V2' => 'oauth2',
             'Bar\V1' => 'basic',
             'Baz\V3' => 'digest',
-        );
+        ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
             ->setRouteMatch($routeMatch);
 
-        $types = array('oauth2');
+        $types = ['oauth2'];
         $adapter1 = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();
@@ -763,15 +763,15 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function testListsProvidedNonAdapterAuthenticationTypes()
     {
-        $types = array('foo');
+        $types = ['foo'];
         $this->listener->addAuthenticationTypes($types);
         $this->assertEquals($types, $this->listener->getAuthenticationTypes());
     }
 
     public function testListsCombinedAuthenticationTypes()
     {
-        $types = array('foo');
-        $customTypes = array('bar');
+        $types = ['foo'];
+        $customTypes = ['bar'];
         $this->listener->addAuthenticationTypes($customTypes);
 
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
@@ -804,7 +804,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $server->expects($this->atLeastOnce())
             ->method('getAccessTokenData')
             ->with($this->anything())
-            ->willReturn(array('user_id' => 'TOKEN'));
+            ->willReturn(['user_id' => 'TOKEN']);
 
         $this->listener->attach(new OAuth2Adapter($server));
         $this->listener->__invoke($this->mvcAuthEvent);
@@ -815,18 +815,18 @@ class DefaultAuthenticationListenerTest extends TestCase
      */
     public function testAllowsAdaptersToReturnResponsesAndReturnsThemDirectly()
     {
-        $map = array(
+        $map = [
             'Foo\V2' => 'custom',
-        );
+        ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(array('controller' => 'Foo\V2\Rest\Test\TestController'));
+        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
             ->setRouteMatch($routeMatch);
 
-        $types = array('custom');
+        $types = ['custom'];
         $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
             ->disableOriginalConstructor()
             ->getMock();

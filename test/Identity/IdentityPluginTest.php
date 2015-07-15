@@ -34,7 +34,7 @@ class IdentityPluginTest extends TestCase
 
     public function testInvalidTypeInEventIdentityParamCausesPluginToYieldGuestIdentity()
     {
-        $this->event->setParam('ZF\MvcAuth\Identity', (object) array('foo' => 'bar'));
+        $this->event->setParam('ZF\MvcAuth\Identity', (object) ['foo' => 'bar']);
         $this->assertInstanceOf(
             'ZF\MvcAuth\Identity\GuestIdentity',
             $this->plugin->__invoke()

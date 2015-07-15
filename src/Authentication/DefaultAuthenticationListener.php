@@ -22,21 +22,21 @@ class DefaultAuthenticationListener
      *
      * @var AdapterInterface[]
      */
-    private $adapters = array();
+    private $adapters = [];
 
     /**
      * Supported authentication types
      *
      * @var array
      */
-    private $authenticationTypes = array();
+    private $authenticationTypes = [];
 
     /**
      * Map of API/version to authentication type pairs
      *
      * @var array
      */
-    private $authMap = array();
+    private $authMap = [];
 
     /**
      * Legacy reasons only: HttpAuth instance
@@ -97,7 +97,7 @@ class DefaultAuthenticationListener
             // available.
             return array_unique(array_merge(
                 $this->authenticationTypes,
-                array('basic', 'digest')
+                ['basic', 'digest']
             ));
         }
         return $this->authenticationTypes;

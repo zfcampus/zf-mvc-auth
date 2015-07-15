@@ -19,13 +19,13 @@ class AclAuthorizationFactory implements FactoryInterface
     /**
      * @var array
      */
-    protected $httpMethods = array(
+    protected $httpMethods = [
         Request::METHOD_DELETE => true,
         Request::METHOD_GET    => true,
         Request::METHOD_PATCH  => true,
         Request::METHOD_POST   => true,
         Request::METHOD_PUT    => true,
-    );
+    ];
 
     /**
      * Create the DefaultAuthorizationListener
@@ -35,7 +35,7 @@ class AclAuthorizationFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $services)
     {
-        $config = array();
+        $config = [];
         if ($services->has('config')) {
             $config = $services->get('config');
         }
@@ -53,7 +53,7 @@ class AclAuthorizationFactory implements FactoryInterface
      */
     protected function createAclFromConfig(array $config)
     {
-        $aclConfig     = array();
+        $aclConfig     = [];
         $denyByDefault = false;
 
         if (isset($config['zf-mvc-auth'])
@@ -90,25 +90,25 @@ class AclAuthorizationFactory implements FactoryInterface
         if (isset($privileges['actions'])) {
             foreach ($privileges['actions'] as $action => $methods) {
                 $action = lcfirst($action);
-                $aclConfig[] = array(
+                $aclConfig[] = [
                     'resource'   => sprintf('%s::%s', $controllerService, $action),
                     'privileges' => $this->createPrivilegesFromMethods($methods, $denyByDefault),
-                );
+                ];
             }
         }
 
         if (isset($privileges['collection'])) {
-            $aclConfig[] = array(
+            $aclConfig[] = [
                 'resource'   => sprintf('%s::collection', $controllerService),
                 'privileges' => $this->createPrivilegesFromMethods($privileges['collection'], $denyByDefault),
-            );
+            ];
         }
 
         if (isset($privileges['entity'])) {
-            $aclConfig[] = array(
+            $aclConfig[] = [
                 'resource'   => sprintf('%s::entity', $controllerService),
                 'privileges' => $this->createPrivilegesFromMethods($privileges['entity'], $denyByDefault),
-            );
+            ];
         }
     }
 
@@ -121,7 +121,7 @@ class AclAuthorizationFactory implements FactoryInterface
      */
     protected function createPrivilegesFromMethods(array $methods, $denyByDefault)
     {
-        $privileges = array();
+        $privileges = [];
 
         if (isset($methods['default']) && $methods['default']) {
             $privileges = $this->httpMethods;
