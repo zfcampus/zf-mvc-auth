@@ -20,35 +20,35 @@ class AclAuthorizationFactoryTest extends TestCase
 
     public function testCanCreateWhitelistAcl()
     {
-        $config = array('zf-mvc-auth' => array('authorization' => array(
-            'Foo\Bar\RestController' => array(
-                'entity' => array(
+        $config = ['zf-mvc-auth' => ['authorization' => [
+            'Foo\Bar\RestController' => [
+                'entity' => [
                     'GET'    => false,
                     'POST'   => false,
                     'PUT'    => true,
                     'PATCH'  => true,
                     'DELETE' => true,
-                ),
-                'collection' => array(
+                ],
+                'collection' => [
                     'GET'    => false,
                     'POST'   => true,
                     'PUT'    => false,
                     'PATCH'  => false,
                     'DELETE' => false,
-                ),
-            ),
-            'Foo\Bar\RpcController' => array(
-                'actions' => array(
-                    'do' => array(
+                ],
+            ],
+            'Foo\Bar\RpcController' => [
+                'actions' => [
+                    'do' => [
                         'GET'    => false,
                         'POST'   => true,
                         'PUT'    => false,
                         'PATCH'  => false,
                         'DELETE' => false,
-                    ),
-                ),
-            ),
-        )));
+                    ],
+                ],
+            ],
+        ]]];
         $this->services->setService('config', $config);
 
         $acl = $this->factory->createService($this->services);
@@ -85,36 +85,36 @@ class AclAuthorizationFactoryTest extends TestCase
 
     public function testBlacklistAclSpecificationHonorsBooleansSetForMethods()
     {
-        $config = array('zf-mvc-auth' => array('authorization' => array(
+        $config = ['zf-mvc-auth' => ['authorization' => [
             'deny_by_default' => true,
-            'Foo\Bar\RestController' => array(
-                'entity' => array(
+            'Foo\Bar\RestController' => [
+                'entity' => [
                     'GET'    => false,
                     'POST'   => false,
                     'PUT'    => true,
                     'PATCH'  => true,
                     'DELETE' => true,
-                ),
-                'collection' => array(
+                ],
+                'collection' => [
                     'GET'    => false,
                     'POST'   => true,
                     'PUT'    => false,
                     'PATCH'  => false,
                     'DELETE' => false,
-                ),
-            ),
-            'Foo\Bar\RpcController' => array(
-                'actions' => array(
-                    'do' => array(
+                ],
+            ],
+            'Foo\Bar\RpcController' => [
+                'actions' => [
+                    'do' => [
                         'GET'    => false,
                         'POST'   => true,
                         'PUT'    => false,
                         'PATCH'  => false,
                         'DELETE' => false,
-                    ),
-                ),
-            ),
-        )));
+                    ],
+                ],
+            ],
+        ]]];
         $this->services->setService('config', $config);
 
         $acl = $this->factory->createService($this->services);
@@ -152,31 +152,31 @@ class AclAuthorizationFactoryTest extends TestCase
 
     public function testBlacklistAclsDenyByDefaultForUnspecifiedHttpMethods()
     {
-        $config = array('zf-mvc-auth' => array('authorization' => array(
+        $config = ['zf-mvc-auth' => ['authorization' => [
             'deny_by_default' => true,
-            'Foo\Bar\RestController' => array(
-                'entity' => array(
+            'Foo\Bar\RestController' => [
+                'entity' => [
                     'GET'    => false,
                     'POST'   => false,
-                ),
-                'collection' => array(
+                ],
+                'collection' => [
                     'GET'    => false,
                     'PUT'    => false,
                     'PATCH'  => false,
                     'DELETE' => false,
-                ),
-            ),
-            'Foo\Bar\RpcController' => array(
-                'actions' => array(
-                    'do' => array(
+                ],
+            ],
+            'Foo\Bar\RpcController' => [
+                'actions' => [
+                    'do' => [
                         'GET'    => false,
                         'PUT'    => false,
                         'PATCH'  => false,
                         'DELETE' => false,
-                    ),
-                ),
-            ),
-        )));
+                    ],
+                ],
+            ],
+        ]]];
         $this->services->setService('config', $config);
 
         $acl = $this->factory->createService($this->services);
@@ -207,19 +207,19 @@ class AclAuthorizationFactoryTest extends TestCase
 
     public function testRpcActionsAreNormalizedWhenCreatingAcl()
     {
-        $config = array('zf-mvc-auth' => array('authorization' => array(
-            'Foo\Bar\RpcController' => array(
-                'actions' => array(
-                    'Do' => array(
+        $config = ['zf-mvc-auth' => ['authorization' => [
+            'Foo\Bar\RpcController' => [
+                'actions' => [
+                    'Do' => [
                         'GET'    => false,
                         'POST'   => true,
                         'PUT'    => false,
                         'PATCH'  => false,
                         'DELETE' => false,
-                    ),
-                ),
-            ),
-        )));
+                    ],
+                ],
+            ],
+        ]]];
         $this->services->setService('config', $config);
 
         $acl = $this->factory->createService($this->services);

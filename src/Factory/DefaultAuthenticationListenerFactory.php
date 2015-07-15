@@ -153,14 +153,14 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
     protected function getAuthenticationMap(ServiceLocatorInterface $services)
     {
         if (! $services->has('config')) {
-            return array();
+            return [];
         }
 
         $config = $services->get('config');
         if (! isset($config['zf-mvc-auth']['authentication']['map'])
             || ! is_array($config['zf-mvc-auth']['authentication']['map'])
         ) {
-            return array();
+            return [];
         }
 
         return $config['zf-mvc-auth']['authentication']['map'];

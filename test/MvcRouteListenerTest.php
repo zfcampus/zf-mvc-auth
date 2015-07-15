@@ -50,7 +50,7 @@ class MvcRouteListenerTest extends TestCase
         $this->events->attach($this->listener);
         $this->assertListenerAtPriority(
             -50,
-            array($this->listener, 'authentication'),
+            [$this->listener, 'authentication'],
             $this->events->getListeners('route')
         );
     }
@@ -60,7 +60,7 @@ class MvcRouteListenerTest extends TestCase
         $this->events->attach($this->listener);
         $this->assertListenerAtPriority(
             -51,
-            array($this->listener, 'authenticationPost'),
+            [$this->listener, 'authenticationPost'],
             $this->events->getListeners('route')
         );
     }
@@ -70,7 +70,7 @@ class MvcRouteListenerTest extends TestCase
         $this->events->attach($this->listener);
         $this->assertListenerAtPriority(
             -600,
-            array($this->listener, 'authorization'),
+            [$this->listener, 'authorization'],
             $this->events->getListeners('route')
         );
     }
@@ -80,7 +80,7 @@ class MvcRouteListenerTest extends TestCase
         $this->events->attach($this->listener);
         $this->assertListenerAtPriority(
             -601,
-            array($this->listener, 'authorizationPost'),
+            [$this->listener, 'authorizationPost'],
             $this->events->getListeners('route')
         );
     }

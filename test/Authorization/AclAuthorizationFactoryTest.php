@@ -9,20 +9,20 @@ class AclAuthorizationFactoryTest extends TestCase
 {
     public function testFactoryGeneratesAclFromConfiguration()
     {
-        $config = array(
-            array(
+        $config = [
+            [
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'privileges' => array('POST'),
-            ),
-            array(
+                'privileges' => ['POST'],
+            ],
+            [
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::entity',
-                'privileges' => array('PATCH', 'DELETE'),
-            ),
-            array(
+                'privileges' => ['PATCH', 'DELETE'],
+            ],
+            [
                 'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'privileges' => array('POST'),
-            ),
-        );
+                'privileges' => ['POST'],
+            ],
+        ];
 
         $acl = AclAuthorizationFactory::factory($config);
 
@@ -55,21 +55,21 @@ class AclAuthorizationFactoryTest extends TestCase
 
     public function testFactoryGeneratesBlacklistAclFromConfiguration()
     {
-        $config = array(
+        $config = [
             'deny_by_default' => true,
-            array(
+            [
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::collection',
-                'privileges' => array('GET'),
-            ),
-            array(
+                'privileges' => ['GET'],
+            ],
+            [
                 'resource' => 'ZendCon\V1\Rest\Session\Controller::entity',
-                'privileges' => array('GET'),
-            ),
-            array(
+                'privileges' => ['GET'],
+            ],
+            [
                 'resource' => 'ZendCon\V1\Rpc\Message\Controller::message',
-                'privileges' => array('GET'),
-            ),
-        );
+                'privileges' => ['GET'],
+            ],
+        ];
 
         $acl = AclAuthorizationFactory::factory($config);
 

@@ -21,7 +21,7 @@ class OAuth2Adapter extends AbstractAdapter
      *
      * @var array
      */
-    protected $authorizationTokenTypes = array('bearer');
+    protected $authorizationTokenTypes = ['bearer'];
 
     /**
      * @var OAuth2Server
@@ -33,18 +33,18 @@ class OAuth2Adapter extends AbstractAdapter
      *
      * @var array
      */
-    private $providesTypes = array('oauth2');
+    private $providesTypes = ['oauth2'];
 
     /**
      * Request methods that will not have request bodies
      *
      * @var array
      */
-    private $requestsWithoutBodies = array(
+    private $requestsWithoutBodies = [
         'GET',
         'HEAD',
         'OPTIONS',
-    );
+    ];
 
     /**
      * @param OAuth2Server $oauth2Server
@@ -54,7 +54,7 @@ class OAuth2Adapter extends AbstractAdapter
         $this->oauth2Server = $oauth2Server;
 
         if (is_string($types) && ! empty($types)) {
-            $types = array($types);
+            $types = [$types];
         }
 
         if (is_array($types)) {
@@ -137,9 +137,9 @@ class OAuth2Adapter extends AbstractAdapter
         $oauth2request = new OAuth2Request(
             $request->getQuery()->toArray(),
             $request->getPost()->toArray(),
-            array(),
-            ($request->getCookie() ? $request->getCookie()->getArrayCopy() : array()),
-            ($request->getFiles() ? $request->getFiles()->toArray() : array()),
+            [],
+            ($request->getCookie() ? $request->getCookie()->getArrayCopy() : []),
+            ($request->getFiles() ? $request->getFiles()->toArray() : []),
             (method_exists($request, 'getServer') ? $request->getServer()->toArray() : $_SERVER),
             $request->getContent(),
             $request->getHeaders()->toArray()
@@ -151,7 +151,7 @@ class OAuth2Adapter extends AbstractAdapter
             $status = $oauth2Response->getStatusCode();
 
             // 401 or 403 mean invalid credentials or unauthorized scopes; report those.
-            if (in_array($status, array(401, 403), true) && null !== $oauth2Response->getParameter('error')) {
+            if (in_array($status, [401, 403], true) && null !== $oauth2Response->getParameter('error')) {
                 return $this->mergeOAuth2Response($status, $response, $oauth2Response);
             }
 

@@ -27,7 +27,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
 
     public function testReturnsListenerWithNoAdaptersWhenNoAdaptersAreInConfiguration()
     {
-        $config = array();
+        $config = [];
         $this->services->setService('Config', $config);
 
         $listener = $this->factory->createDelegatorWithName(
@@ -37,52 +37,52 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
             $this->callback
         );
         $this->assertSame($this->listener, $listener);
-        $this->assertEquals(array(), $listener->getAuthenticationTypes());
+        $this->assertEquals([], $listener->getAuthenticationTypes());
     }
 
 
     public function testReturnsListenerWithConfiguredAdapters()
     {
-        $config = array(
+        $config = [
             // ensure top-level zf-oauth2 are available
-            'zf-oauth2' => array(
-                'grant_types' => array(
+            'zf-oauth2' => [
+                'grant_types' => [
                     'client_credentials' => true,
                     'authorization_code' => true,
                     'password'           => true,
                     'refresh_token'      => true,
                     'jwt'                => true,
-                ),
+                ],
                 'api_problem_error_response' => true,
-            ),
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'adapters' => array(
-                        'foo' => array(
+            ],
+            'zf-mvc-auth' => [
+                'authentication' => [
+                    'adapters' => [
+                        'foo' => [
                             'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
-                            'options' => array(
-                                'accept_schemes' => array('basic'),
+                            'options' => [
+                                'accept_schemes' => ['basic'],
                                 'realm' => 'api',
                                 'htpasswd' => __DIR__ . '/../TestAsset/htpasswd',
-                            ),
-                        ),
-                        'bar' => array(
+                            ],
+                        ],
+                        'bar' => [
                             'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                            'storage' => array(
+                            'storage' => [
                                 'adapter' => 'pdo',
                                 'dsn' => 'sqlite::memory:',
-                            ),
-                        ),
-                        'baz' => array(
+                            ],
+                        ],
+                        'baz' => [
                             'adapter' => 'UNKNOWN',
-                        ),
-                        'bat' => array(
+                        ],
+                        'bat' => [
                             // intentionally empty
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $this->services->setService('Config', $config);
         $this->services->setService('authentication', $this->getMock('Zend\Authentication\AuthenticationService'));
 
@@ -93,9 +93,9 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
             $this->callback
         );
         $this->assertSame($this->listener, $listener);
-        $this->assertEquals(array(
+        $this->assertEquals([
             'foo-basic',
             'bar'
-        ), $listener->getAuthenticationTypes());
+        ], $listener->getAuthenticationTypes());
     }
 }

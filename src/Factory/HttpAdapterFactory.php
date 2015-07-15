@@ -59,9 +59,9 @@ final class HttpAdapterFactory
 
         $httpAdapter = new HttpAuth(array_merge(
             $config,
-            array(
+            [
                 'accept_schemes' => implode(' ', $config['accept_schemes'])
-            )
+            ]
         ));
 
         if (in_array('basic', $config['accept_schemes'])) {
