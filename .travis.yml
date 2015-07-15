@@ -10,15 +10,31 @@ matrix:
   fast_finish: true
   include:
     - php: 5.3
+      env:
+        - deps=high
     - php: 5.4
+      env:
+        - deps=high
     - php: 5.5
       env:
         - EXECUTE_CS_CHECK=true
+        - deps=high
     - php: 5.6
       env:
         - EXECUTE_COVERAGE=true
+        - deps=high
+    - php: 5.6
+      env:
+        - deps=low
     - php: 7
-    - php: hhvm 
+      env:
+        - deps=high
+    - php: 7
+      env:
+        - deps=low
+    - php: hhvm
+      env:
+        - deps=high
   allow_failures:
     - php: 7
     - php: hhvm
@@ -32,6 +48,8 @@ before_install:
   - composer self-update
 
 install:
+  - if [[ "$deps" = "high" ]]; then travis_retry composer --no-interaction --prefer-source update;  fi;
+  - if [[ "$deps" = "low" ]]; then travis_retry composer --no-interaction --prefer-source --prefer-lowest update;  fi;
   - travis_retry composer install --no-interaction --ignore-platform-reqs --prefer-source
 
 script:
