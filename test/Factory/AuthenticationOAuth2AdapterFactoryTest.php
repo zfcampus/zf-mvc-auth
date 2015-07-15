@@ -19,15 +19,15 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
 
     public function invalidConfiguration()
     {
-        return array(
-            'empty'  => array(array()),
-            'null'   => array(array('storage' => null)),
-            'bool'   => array(array('storage' => true)),
-            'int'    => array(array('storage' => 1)),
-            'float'  => array(array('storage' => 1.1)),
-            'string' => array(array('storage' => 'options')),
-            'object' => array(array('storage' => (object) array('storage'))),
-        );
+        return [
+            'empty'  => [[]],
+            'null'   => [['storage' => null]],
+            'bool'   => [['storage' => true]],
+            'int'    => [['storage' => 1]],
+            'float'  => [['storage' => 1.1]],
+            'string' => [['storage' => 'options']],
+            'object' => [['storage' => (object) ['storage']]],
+        ];
     }
 
     /**
@@ -41,32 +41,32 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
 
     public function testCreatesInstanceFromValidConfiguration()
     {
-        $config = array(
+        $config = [
             'adapter' => 'pdo',
-            'storage' => array(
+            'storage' => [
                 'adapter' => 'pdo',
                 'dsn' => 'sqlite::memory:',
-            ),
-        );
+            ],
+        ];
 
         $this->services->expects($this->any())
             ->method('get')
             ->with($this->stringContains('Config'))
-            ->will($this->returnValue(array(
-                'zf-oauth2' => array(
-                    'grant_types' => array(
+            ->will($this->returnValue([
+                'zf-oauth2' => [
+                    'grant_types' => [
                         'client_credentials' => true,
                         'authorization_code' => true,
                         'password'           => true,
                         'refresh_token'      => true,
                         'jwt'                => true,
-                    ),
+                    ],
                     'api_problem_error_response' => true,
-                ),
-            )));
+                ],
+            ]));
 
         $adapter = AuthenticationOAuth2AdapterFactory::factory('foo', $config, $this->services);
         $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
-        $this->assertEquals(array('foo'), $adapter->provides());
+        $this->assertEquals(['foo'], $adapter->provides());
     }
 }

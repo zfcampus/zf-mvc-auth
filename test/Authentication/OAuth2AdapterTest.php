@@ -41,7 +41,7 @@ class OAuth2AdapterTest extends TestCase
         $oauth2Response
             ->expects($this->once())
             ->method('getHttpHeaders')
-            ->willReturn(array());
+            ->willReturn([]);
 
         $this->oauthServer
             ->expects($this->once())
@@ -85,7 +85,7 @@ class OAuth2AdapterTest extends TestCase
         $oauth2Response
             ->expects($this->once())
             ->method('getHttpHeaders')
-            ->willReturn(array());
+            ->willReturn([]);
 
         $this->oauthServer
             ->expects($this->once())
@@ -124,7 +124,7 @@ class OAuth2AdapterTest extends TestCase
         $oauth2Response
             ->expects($this->once())
             ->method('getHttpHeaders')
-            ->willReturn(array());
+            ->willReturn([]);
 
         $this->oauthServer
             ->expects($this->once())
@@ -152,12 +152,12 @@ class OAuth2AdapterTest extends TestCase
      */
     public function testErrorResponseIncludesOAuth2ResponseHeaders()
     {
-        $expectedHeaders = array(
+        $expectedHeaders = [
             'WWW-Authenticate' => 'Bearer realm="example.com", '
             . 'scope="user", '
             . 'error="unauthorized", '
             . 'error_description="User has insufficient privileges"',
-        );
+        ];
         $oauth2Response = $this->getMockBuilder('OAuth2\Response')
             ->disableOriginalConstructor()
             ->getMock();

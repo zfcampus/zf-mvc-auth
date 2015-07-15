@@ -21,39 +21,39 @@ class NamedOAuth2ServerFactoryTest extends TestCase
 
     public function setUpConfig($services)
     {
-        $services->setService('Config', array(
-            'zf-oauth2' => array(
+        $services->setService('Config', [
+            'zf-oauth2' => [
                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
-                'grant_types' => array(
+                'grant_types' => [
                     'client_credentials' => true,
                     'authorization_code' => true,
                     'password'           => true,
                     'refresh_token'      => true,
                     'jwt'                => true,
-                ),
+                ],
                 'api_problem_error_response' => true,
-            ),
-            'zf-mvc-auth' => array(
-                'authentication' => array(
-                    'adapters' => array(
-                        'test' => array(
+            ],
+            'zf-mvc-auth' => [
+                'authentication' => [
+                    'adapters' => [
+                        'test' => [
                             'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                            'storage' => array(
+                            'storage' => [
                                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                                 'route'   => 'test',
-                            ),
-                        ),
-                        'test2' => array(
+                            ],
+                        ],
+                        'test2' => [
                             'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                            'storage' => array(
+                            'storage' => [
                                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                                 'route'   => 'test2',
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        ));
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
         $oauth2StorageAdapter = $this->getMockBuilder('OAuth2\Storage\Memory')
             ->disableOriginalConstructor(true)

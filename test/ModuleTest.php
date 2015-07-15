@@ -25,8 +25,8 @@ class ModuleTest extends TestCase
         $events   = $this->setUpEvents();
 
         $application = $this->prophesize('Zend\Mvc\Application');
-        $application->getEventManager()->will(array($events, 'reveal'));
-        $application->getServiceManager()->will(array($services, 'reveal'));
+        $application->getEventManager()->will([$events, 'reveal']);
+        $application->getServiceManager()->will([$services, 'reveal']);
 
         return $application;
     }
@@ -52,18 +52,18 @@ class ModuleTest extends TestCase
         );
 
         $services = $this->prophesize('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->get('authentication')->will(array($authentication, 'reveal'));
-        $services->get('authorization')->will(array($authorization, 'reveal'));
+        $services->get('authentication')->will([$authentication, 'reveal']);
+        $services->get('authorization')->will([$authorization, 'reveal']);
         $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
-            ->will(array($defaultAuthenticationListener, 'reveal'));
+            ->will([$defaultAuthenticationListener, 'reveal']);
         $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
-            ->will(array($defaultAuthenticationPostListener, 'reveal'));
+            ->will([$defaultAuthenticationPostListener, 'reveal']);
         $services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener')
-            ->will(array($defaultResourceResolverListener, 'reveal'));
+            ->will([$defaultResourceResolverListener, 'reveal']);
         $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
-            ->will(array($defaultAuthorizationListener, 'reveal'));
+            ->will([$defaultAuthorizationListener, 'reveal']);
         $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
-            ->will(array($defaultAuthorizationPostListener, 'reveal'));
+            ->will([$defaultAuthorizationPostListener, 'reveal']);
 
         return $services;
     }
@@ -97,7 +97,7 @@ class ModuleTest extends TestCase
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            Argument::is(array($this->module, 'onAuthenticationPost')),
+            Argument::is([$this->module, 'onAuthenticationPost']),
             -1
         );
 
@@ -107,7 +107,7 @@ class ModuleTest extends TestCase
     public function testOnBootstrapReturnsEarlyForNonHttpEvents()
     {
         $request = $this->prophesize('Zend\Stdlib\RequestInterface');
-        $this->mvcEvent->getRequest()->will(array($request, 'reveal'));
+        $this->mvcEvent->getRequest()->will([$request, 'reveal']);
         $this->module->onBootstrap($this->mvcEvent->reveal());
     }
 
@@ -116,8 +116,8 @@ class ModuleTest extends TestCase
         $mvcEvent    = $this->mvcEvent;
         $request     = $this->prophesize('Zend\Http\Request');
         $application = $this->setUpApplication();
-        $mvcEvent->getRequest()->will(array($request, 'reveal'));
-        $mvcEvent->getApplication()->will(array($application, 'reveal'));
+        $mvcEvent->getRequest()->will([$request, 'reveal']);
+        $mvcEvent->getApplication()->will([$application, 'reveal']);
         $this->module->onBootstrap($mvcEvent->reveal());
     }
 }
