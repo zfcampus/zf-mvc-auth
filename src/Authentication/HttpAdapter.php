@@ -120,7 +120,7 @@ class HttpAdapter extends AbstractAdapter
      */
     public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent)
     {
-        if($request->getHeader('Authorization') !== false) {
+        if ($request->getHeader('Authorization') !== false) {
             $this->httpAuth->setRequest($request);
             $this->httpAuth->setResponse($response);
 
