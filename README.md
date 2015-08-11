@@ -635,6 +635,51 @@ If you use `zf-apigility-admin`'s Admin API and/or the Apigility UI to
 configure authentication adapters, the above configuration will be created for
 you.
 
+#### Attach a custom storage adapter
+
+A storage adapter can be set using a service register in the service manager.
+
+```php
+return array(
+    /* ... */
+    'zf-mvc-auth' => array(
+        'authentication' => array(
+            'adapters' => array(
+                'client' => array(
+                    // This defines an OAuth2 adapter backed by a custom adapter.
+                    'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                    'storage' => array(
+                        'adapter' => 'My\\Custom\\Adapter\\DbAdapter',
+                        /* ... */
+                    ),
+                ),
+            ),
+            /* ... */
+        ),
+        /* ... */
+    ),
+    /* ... */
+);
+```
+
+A custom adapter must return a `callable`. The adapter's configuration will be passed as a parameter.
+For example, we can have this factory adapter:
+
+```php
+class MyCustomDbAdapterFactory
+{
+    function __invoke($services)
+    {
+        return function ($config = []) use ($services) {
+            return new DynamoDbAdapter($client, $config);
+        };
+    }
+}
+```
+
+If you use the Apigility UI, your adapter will not be able to be chosen as an authentication provider, neither 
+configured. You will only see the adapter's label. That is completely normal.
+
 #### Attaching an adapter during an event listener
 
 The best event to attach to in this circumstances is the "authentication" event.
