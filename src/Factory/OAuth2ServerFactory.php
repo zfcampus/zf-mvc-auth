@@ -46,7 +46,7 @@ final class OAuth2ServerFactory
             $options
         );
 
-        return self::injectGrantTypes($oauth2Server, $oauth2Config['grant_types'], $options);
+        return self::injectGrantTypes($oauth2Server, $oauth2Config['grant_types'], $options, $services);
     }
 
     /**
@@ -88,6 +88,12 @@ final class OAuth2ServerFactory
             case 'mongo':
                 return self::createMongoAdapter($config, $services);
             default:
+                if ($services->has($adapter)) {
+                    /** @var \Closure $callback */
+                    $callback = $services->get($adapter);
+                    return $callback($config, $services);
+                }
+
                 throw new ServiceNotCreatedException('Invalid storage adapter type for OAuth2');
         }
     }
@@ -257,8 +263,9 @@ final class OAuth2ServerFactory
      * @param array $options
      * @return OAuth2Server
      */
-    private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options)
+    private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options, $services = null)
     {
+
         if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
             $clientOptions = [];
             if (isset($options['allow_credentials_in_request_body'])) {
@@ -295,6 +302,15 @@ final class OAuth2ServerFactory
 
             // Add the "Refresh Token" grant type
             $server->addGrantType(new RefreshToken($server->getStorage('refresh_token'), $refreshOptions));
+        }
+
+        // Add custom grant type from the service locator
+        if (isset($availableGrantTypes['custom_grant_types']) && is_array($availableGrantTypes['custom_grant_types'])) {
+            foreach ($availableGrantTypes['custom_grant_types'] as $grantKey => $grantType) {
+                if ($services->has($grantType)) {
+                    $server->addGrantType($services->get($grantType, $grantKey));
+                }
+            }
         }
 
         return $server;
