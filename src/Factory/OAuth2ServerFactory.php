@@ -84,7 +84,7 @@ final class OAuth2ServerFactory
     {
         switch (strtolower($adapter)) {
             case 'pdo':
-                return self::createPdoAdapter($config);
+                return self::createPdoAdapter($config, $services);
             case 'mongo':
                 return self::createMongoAdapter($config, $services);
             default:
@@ -122,8 +122,12 @@ final class OAuth2ServerFactory
      * @param array $config
      * @return PdoAdapter
      */
-    private static function createPdoAdapter(array $config)
+    private static function createPdoAdapter(array $config, ServiceLocatorInterface $services)
     {
+        if (isset($config['storage']) && !empty($config['storage'])) {
+            return $services->get($config['storage']);
+        }
+
         return new PdoAdapter(
             self::createPdoConfig($config),
             self::getOAuth2ServerConfig($config)
@@ -139,6 +143,10 @@ final class OAuth2ServerFactory
      */
     private static function createMongoAdapter(array $config, ServiceLocatorInterface $services)
     {
+        if (isset($config['storage']) && !empty($config['storage'])) {
+            return $services->get($config['storage']);
+        }
+
         return new MongoAdapter(
             self::createMongoDatabase($config, $services),
             self::getOAuth2ServerConfig($config)
