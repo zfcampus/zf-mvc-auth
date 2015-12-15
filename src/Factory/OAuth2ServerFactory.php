@@ -263,9 +263,12 @@ final class OAuth2ServerFactory
      * @param array $options
      * @return OAuth2Server
      */
-    private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options, $services = null)
-    {
-
+    private static function injectGrantTypes(
+        OAuth2Server $server, 
+        array $availableGrantTypes,
+        array $options,
+        ServiceLocatorInterface $services
+    ) {
         if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
             $clientOptions = [];
             if (isset($options['allow_credentials_in_request_body'])) {
@@ -312,7 +315,6 @@ final class OAuth2ServerFactory
                 }
             }
         }
-
         return $server;
     }
 }
