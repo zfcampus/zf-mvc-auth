@@ -6,6 +6,7 @@
 
 namespace ZF\MvcAuth\Authorization;
 
+use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Router\RouteMatch;
@@ -63,6 +64,23 @@ class DefaultAuthorizationListener
 
         $resource = $mvcAuthEvent->getResource();
         $identity = $mvcAuthEvent->getIdentity();
-        return $this->authorization->isAuthorized($identity, $resource, $request->getMethod());
+        $isAuthorized = $this->authorization->isAuthorized($identity, $resource, $request->getMethod());
+
+        // We need reset MVC response which can have been modified
+        // by authentication layer. This avoid challenging client in case a
+        // guest identity is allowed to access the resource after all.
+        if ($isAuthorized) {
+            // Resetting response set on mvc event is not sufficient
+            // This denote another problem which
+            $app = $mvcEvent->getApplication();
+            $response = $app->getResponse();
+
+            $response->setStatusCode(200);
+            $response->setHeaders(new Headers());
+
+            $mvcEvent->setResponse($response);
+        }
+
+        return $isAuthorized;
     }
 }

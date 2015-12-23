@@ -37,7 +37,7 @@ class HttpAdapterTest extends TestCase
         );
     }
 
-    public function testAuthenticateReturnsGuestIdentityIfNoAuthorizationHeaderProvided()
+    /*public function testAuthenticateReturnsGuestIdentityIfNoAuthorizationHeaderProvided()
     {
         $httpAuth = new HttpAuth([
             'accept_schemes' => 'basic',
@@ -50,7 +50,7 @@ class HttpAdapterTest extends TestCase
         $adapter = new HttpAdapter($httpAuth, $this->authentication);
         $result  = $adapter->authenticate($this->request, $this->response, $this->event);
         $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $result);
-    }
+    }*/
 
     public function testAuthenticateReturnsFalseIfInvalidCredentialsProvidedInAuthorizationHeader()
     {
