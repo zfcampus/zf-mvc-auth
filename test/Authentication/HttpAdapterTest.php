@@ -37,21 +37,6 @@ class HttpAdapterTest extends TestCase
         );
     }
 
-    public function testAuthenticateReturnsGuestIdentityIfNoAuthorizationHeaderProvided()
-    {
-        $httpAuth = new HttpAuth([
-            'accept_schemes' => 'basic',
-            'realm' => 'My Web Site',
-            'digest_domains' => '/',
-            'nonce_timeout' => 3600,
-        ]);
-        $httpAuth->setBasicResolver(new HttpAuth\ApacheResolver(__DIR__ . '/../TestAsset/htpasswd'));
-
-        $adapter = new HttpAdapter($httpAuth, $this->authentication);
-        $result  = $adapter->authenticate($this->request, $this->response, $this->event);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $result);
-    }
-
     public function testAuthenticateReturnsFalseIfInvalidCredentialsProvidedInAuthorizationHeader()
     {
         $httpAuth = new HttpAuth([

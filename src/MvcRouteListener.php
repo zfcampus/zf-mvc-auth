@@ -13,6 +13,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Http\Request as HttpRequest;
 use Zend\Stdlib\ResponseInterface as Response;
+use Zend\Http\Response as HttpResponse;
 
 class MvcRouteListener extends AbstractListenerAggregate
 {
@@ -156,7 +157,22 @@ class MvcRouteListener extends AbstractListenerAggregate
                 return ($r instanceof Response);
             }
         );
-        return $responses->last();
+
+        $response = $responses->last();
+
+        // In case of a response denoting authentication failure, we cannot
+        // just return it because doing this would short-circuit route event,
+        // meaning that authorization rules would not have any chance to be
+        // evaluated for a guest identity. We ensure that response is set on
+        // MvcEvent instead.
+        if ($response instanceof HttpResponse
+            && $response->getStatusCode() == 401
+        ) {
+            $mvcEvent->setResponse($response);
+            return;
+        }
+
+        return $response;
     }
 
     /**

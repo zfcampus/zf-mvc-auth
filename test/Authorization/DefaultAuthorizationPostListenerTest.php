@@ -58,6 +58,17 @@ class DefaultAuthorizationPostListenerTest extends TestCase
         $this->assertSame($response, $listener($this->mvcAuthEvent));
     }
 
+    public function testReturns401ResponseWhenNotAuthenticatedAndNotAuthorized()
+    {
+        $listener = $this->listener;
+        $response = $this->mvcAuthEvent->getMvcEvent()->getResponse();
+        $response->setStatusCode('401');
+        $this->mvcAuthEvent->setIsAuthorized(false);
+        $this->assertSame($response, $listener($this->mvcAuthEvent));
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals('Unauthorized', $response->getReasonPhrase());
+    }
+
     public function testReturns403ResponseWhenNotAuthorizedAndHttpResponseComposed()
     {
         $listener = $this->listener;

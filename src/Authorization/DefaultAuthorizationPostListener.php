@@ -23,15 +23,19 @@ class DefaultAuthorizationPostListener
         $response = $mvcEvent->getResponse();
 
         if ($mvcAuthEvent->isAuthorized()) {
-            if ($response instanceof HttpResponse) {
-                if ($response->getStatusCode() != 200) {
-                    $response->setStatusCode(200);
-                }
+            if ($response instanceof HttpResponse
+                && $response->getStatusCode() != 200
+            ) {
+                $response->setStatusCode(200);
             }
             return;
         }
 
-        if (!$response instanceof HttpResponse) {
+        // If no HTTP response, or an HTTP response already denoting a problem,
+        // return it immediately
+        if (!$response instanceof HttpResponse
+            || $response->getStatusCode() == 401
+        ) {
             return $response;
         }
 
