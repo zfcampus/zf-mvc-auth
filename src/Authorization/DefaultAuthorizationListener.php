@@ -70,8 +70,6 @@ class DefaultAuthorizationListener
         // by authentication layer. This avoid challenging client in case a
         // guest identity is allowed to access the resource after all.
         if ($isAuthorized) {
-            // Resetting response set on mvc event is not sufficient
-            // This denote another problem which
             $app = $mvcEvent->getApplication();
             $response = $app->getResponse();
 
