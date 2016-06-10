@@ -12,7 +12,7 @@ use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Request;
@@ -64,13 +64,13 @@ class DefaultAuthorizationListenerTest extends TestCase
         $routeMatch = new RouteMatch([]);
         $request    = new HttpRequest();
         $response   = new HttpResponse();
-        $application = new Application(null, new ServiceManager(new Config(['services' => [
-            'event_manager' => new EventManager(),
-            'authentication' => $this->authentication,
-            'authorization' => $this->authorization,
-            'request' => $request,
-            'response' => $response
-        ]])));
+        $application = new Application(new ServiceManager(['services' => [
+            'EventManager' => new EventManager(),
+            'Authentication' => $this->authentication,
+            'Authorization' => $this->authorization,
+            'Request' => $request,
+            'Response' => $response
+        ]]));
 
         $mvcEvent   = new MvcEvent();
         $mvcEvent->setRequest($request)

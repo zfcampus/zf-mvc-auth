@@ -4,41 +4,44 @@
  * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-return array(
-    'controller_plugins' => array(
-        'invokables' => array(
+use Zend\Authentication\Storage\NonPersistent;
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+return [
+    'controller_plugins' => [
+        'invokables' => [
             'getidentity' => 'ZF\MvcAuth\Identity\IdentityPlugin',
-        ),
-    ),
-    'service_manager' => array(
-        'aliases' => array(
-            'authentication' => 'ZF\MvcAuth\Authentication',
-            'authorization' => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
+        ],
+    ],
+    'service_manager'    => [
+        'aliases'    => [
+            'authentication'                                  => 'ZF\MvcAuth\Authentication',
+            'authorization'                                   => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
             'ZF\MvcAuth\Authorization\AuthorizationInterface' => 'ZF\MvcAuth\Authorization\AclAuthorization',
-        ),
-        'delegators' => array(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => array(
+        ],
+        'delegators' => [
+            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => [
                 'ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory',
-            ),
-        ),
-        'factories' => array(
-            'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
-            'ZF\MvcAuth\ApacheResolver' => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
-            'ZF\MvcAuth\FileResolver' => 'ZF\MvcAuth\Factory\FileResolverFactory',
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
-            'ZF\MvcAuth\Authentication\AuthHttpAdapter' => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
-            'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
-            'ZF\MvcAuth\Authorization\DefaultResourceResolverListener' => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
-            'ZF\OAuth2\Service\OAuth2Server' => 'ZF\MvcAuth\Factory\NamedOAuth2ServerFactory',
-        ),
-        'invokables' => array(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => 'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener',
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
-        ),
-    ),
-    'zf-mvc-auth' => array(
-        'authentication' => array(
+            ],
+        ],
+        'factories'  => [
+            'ZF\MvcAuth\Authentication'                                   => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
+            'ZF\MvcAuth\ApacheResolver'                                   => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
+            'ZF\MvcAuth\FileResolver'                                     => 'ZF\MvcAuth\Factory\FileResolverFactory',
+            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener'     => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
+            'ZF\MvcAuth\Authentication\AuthHttpAdapter'                   => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
+            'ZF\MvcAuth\Authorization\AclAuthorization'                   => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
+            'ZF\MvcAuth\Authorization\DefaultAuthorizationListener'       => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
+            'ZF\MvcAuth\Authorization\DefaultResourceResolverListener'    => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
+            'ZF\OAuth2\Service\OAuth2Server'                              => 'ZF\MvcAuth\Factory\NamedOAuth2ServerFactory',
+            NonPersistent::class                                          => InvokableFactory::class,
+            'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => InvokableFactory::class,
+            'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener'   => InvokableFactory::class,
+
+        ],
+    ],
+    'zf-mvc-auth'        => [
+        'authentication' => [
             /* First, we define authentication configuration types. These have
              * the keys:
              * - http
@@ -171,12 +174,12 @@ return array(
                 'etc',
             )
              */
-        ),
-        'authorization' => array(
+        ],
+        'authorization'  => [
             // Toggle the following to true to change the ACL creation to
             // require an authenticated user by default, and thus selectively
             // allow unauthenticated users based on the rules.
-            'deny_by_default' => false,
+            'deny_by_default' => FALSE,
 
             /*
              * Rules indicating what controllers are behind authentication.
@@ -218,6 +221,6 @@ return array(
                 ),
             ),
              */
-        ),
-    ),
-);
+        ],
+    ],
+];
