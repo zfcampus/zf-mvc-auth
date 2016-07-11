@@ -76,7 +76,7 @@ class DefaultAuthenticationListenerFactory implements FactoryInterface
         // or no HTTP adapter configuration provided to zf-mvc-auth, we can stop early.
 
         $httpAdapter = $container->get('ZF\MvcAuth\Authentication\AuthHttpAdapter');
-        
+
         if ($httpAdapter === false) {
             return false;
         }

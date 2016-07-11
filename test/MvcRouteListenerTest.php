@@ -46,7 +46,4 @@ class MvcRouteListenerTest extends TestCase
 
         $this->assertTrue($found, $message);
     }
-
-
-
 }

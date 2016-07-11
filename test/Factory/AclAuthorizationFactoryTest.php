@@ -125,7 +125,7 @@ class AclAuthorizationFactoryTest extends TestCase
         $factory = $this->factory;
 
         $acl = $factory($this->services, 'AclAuthorization');
-        
+
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
 
         $authorizations = $config['zf-mvc-auth']['authorization'];

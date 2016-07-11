@@ -33,7 +33,7 @@ class Module
     public function init(ModuleManager $moduleManager)
     {
         $events = $moduleManager->getEventManager();
-        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, array($this, 'onMergeConfig'));
+        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, [$this, 'onMergeConfig']);
     }
 
     /**
@@ -95,7 +95,7 @@ class Module
 
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            array($this, 'onAuthenticationPost'),
+            [$this, 'onAuthenticationPost'],
             -1
         );
     }
