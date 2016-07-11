@@ -15,15 +15,17 @@ use Zend\Authentication\Storage\NonPersistent;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
 use Zend\Stdlib\Request;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use ZF\MvcAuth\MvcAuthEvent;
+use ZFTest\MvcAuth\RouteMatchFactoryTrait;
 
 class DefaultAuthenticationListenerTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     /**
      * @var HttpRequest
      */
@@ -425,7 +427,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             'Baz\V3' => 'digest',
         ];
         $this->listener->setAuthMap($map);
-        $routeMatch = new RouteMatch(['controller' => $controller]);
+        $routeMatch = $this->createRouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
@@ -461,7 +463,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             'Baz\V3' => 'digest',
         ];
         $this->listener->setAuthMap($map);
-        $routeMatch = new RouteMatch(['controller' => $controller]);
+        $routeMatch = $this->createRouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -493,7 +495,7 @@ class DefaultAuthenticationListenerTest extends TestCase
                 break;
         }
 
-        $routeMatch = new RouteMatch(['controller' => $controller]);
+        $routeMatch = $this->createRouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -518,7 +520,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->getMock();
         $this->listener->setOauth2Server($server);
 
-        $routeMatch = new RouteMatch(['controller' => $controller]);
+        $routeMatch = $this->createRouteMatch(['controller' => $controller]);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($requestProvider())
@@ -555,7 +557,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $request = new HttpRequest();
         $request->getHeaders()->addHeaderLine('Authorization: Bearer TOKEN');
 
-        $routeMatch = new RouteMatch(['controller' => 'FooBarBaz\V4\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'FooBarBaz\V4\Rest\Test\TestController']);
 
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
@@ -589,7 +591,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $request = new HttpRequest();
         $request->getHeaders()->addHeaderLine('Authorization: Bearer TOKEN');
 
-        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
 
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
@@ -634,7 +636,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(['controller' => 'Foo\V1\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'Foo\V1\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
@@ -671,7 +673,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
@@ -714,7 +716,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)
@@ -820,7 +822,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         ];
         $this->listener->setAuthMap($map);
         $request    = new HttpRequest();
-        $routeMatch = new RouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
+        $routeMatch = $this->createRouteMatch(['controller' => 'Foo\V2\Rest\Test\TestController']);
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
         $mvcEvent
             ->setRequest($request)

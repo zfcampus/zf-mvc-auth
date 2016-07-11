@@ -8,6 +8,7 @@ namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Request;
 use Zend\Http\Response;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
 use Zend\Router\RouteMatch;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZF\MvcAuth\Identity\IdentityInterface;
@@ -52,7 +53,7 @@ class DefaultAuthorizationListener
         }
 
         $routeMatch = $mvcEvent->getRouteMatch();
-        if (!$routeMatch instanceof RouteMatch) {
+        if (! ($routeMatch instanceof RouteMatch || $routeMatch instanceof V2RouteMatch)) {
             return;
         }
 

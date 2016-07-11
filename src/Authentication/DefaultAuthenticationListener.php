@@ -1,17 +1,19 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Authentication;
 
+use InvalidArgumentException;
 use OAuth2\Server as OAuth2Server;
 use RuntimeException;
 use Zend\Authentication\Adapter\Http as HttpAuth;
-use Zend\Router\RouteMatch;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use ZF\MvcAuth\Identity;
 use ZF\MvcAuth\MvcAuthEvent;
 
@@ -203,13 +205,23 @@ class DefaultAuthenticationListener
      * Match the controller to an authentication type, based on the API to
      * which the controller belongs.
      *
-     * @param null|RouteMatch $routeMatch
+     * @param null|V2RouteMatch|RouteMatch $routeMatch
      * @return string|false
      */
-    private function getTypeFromMap(RouteMatch $routeMatch = null)
+    private function getTypeFromMap($routeMatch = null)
     {
-        if (! $routeMatch) {
+        if (null === $routeMatch) {
             return false;
+        }
+
+        if (! ($routeMatch instanceof RouteMatch || $routeMatch instanceof V2RouteMatch)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s expected either a %s or %s; received %s',
+                __METHOD__,
+                RouteMatch::class,
+                V2RouteMatch::class,
+                (is_object($routeMatch) ? get_class($routeMatch) : gettype($routeMatch))
+            ));
         }
 
         $controller = $routeMatch->getParam('controller', false);

@@ -7,12 +7,12 @@
 namespace ZFTest\MvcAuth\Authorization;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionMethod;
 use Zend\EventManager\EventManager;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
-use Zend\Router\RouteMatch;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Request;
@@ -21,10 +21,13 @@ use ZF\MvcAuth\Authorization\AclAuthorization;
 use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
+use ZFTest\MvcAuth\RouteMatchFactoryTrait;
 use ZFTest\MvcAuth\TestAsset\AuthenticationService;
 
 class DefaultAuthorizationListenerTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     /**
      * @var AuthenticationService
      */
@@ -61,16 +64,20 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->authorization->allow();
 
         // event for mvc and mvc-auth
-        $routeMatch = new RouteMatch([]);
+        $routeMatch = $this->createRouteMatch([]);
         $request    = new HttpRequest();
         $response   = new HttpResponse();
-        $application = new Application(new ServiceManager(['services' => [
+        $container  = new ServiceManager();
+
+        (new Config(['services' => [
             'EventManager' => new EventManager(),
             'Authentication' => $this->authentication,
             'Authorization' => $this->authorization,
             'Request' => $request,
             'Response' => $response
-        ]]));
+        ]]))->configureServiceManager($container);
+
+        $application = $this->applicationFactory($container);
 
         $mvcEvent   = new MvcEvent();
         $mvcEvent->setRequest($request)
@@ -81,6 +88,20 @@ class DefaultAuthorizationListenerTest extends TestCase
         $this->mvcAuthEvent = new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
 
         $this->listener = new DefaultAuthorizationListener($this->authorization);
+    }
+
+    public function applicationFactory(ServiceManager $container)
+    {
+        $r = new ReflectionMethod(Application::class, '__construct');
+        $arguments = $r->getParameters();
+        $first = array_shift($arguments);
+
+        if ($first->getName() !== 'serviceManager') {
+            // V2 construction
+            return new Application([], $container);
+        }
+
+        return new Application($container);
     }
 
     public function testBailsEarlyOnInvalidRequest()
