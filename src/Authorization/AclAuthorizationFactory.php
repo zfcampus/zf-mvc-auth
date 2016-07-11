@@ -81,7 +81,7 @@ abstract class AclAuthorizationFactory
 
         // null privileges means no permissions were setup; nothing to do
         if (null === $privileges) {
-            continue;
+            return;
         }
 
         $acl->$grantType('guest', $resource, $privileges);
