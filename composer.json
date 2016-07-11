@@ -18,6 +18,7 @@
         }
     },
     "require": {
+        "php": "^5.6 || ^7.0",
         "zendframework/zend-authentication": "^2.5.3",
         "zendframework/zend-eventmanager": "^2.6.3 || ^3.0.1",
         "zendframework/zend-http": "^2.5.4",
