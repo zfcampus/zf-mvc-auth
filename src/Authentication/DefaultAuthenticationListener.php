@@ -92,7 +92,7 @@ class DefaultAuthenticationListener
     public function getAuthenticationTypes()
     {
         if ($this->httpAdapter instanceof HttpAuth) {
-            // Legacy purposes only. We cannot munge the actual HttpAdapter instance
+            // Legacy purposes only. We cannot merge the actual HttpAdapter instance
             // until we have the MvcAuthEvent (and thus the AuthenticationService),
             // so if an HttpAuth instance was directly attached, and this method is
             // queried before invocation, we report both basic and digest as being
