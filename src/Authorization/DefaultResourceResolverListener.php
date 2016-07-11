@@ -7,7 +7,7 @@
 namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Request;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\RouteMatch;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultResourceResolverListener

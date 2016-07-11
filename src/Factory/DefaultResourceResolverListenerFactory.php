@@ -6,9 +6,12 @@
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
 use Zend\Http\Request;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;
 
 /**
@@ -25,22 +28,30 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
     ];
 
     /**
-     * Create the DefaultAuthorizationListener
+     * Create an object
      *
-     * @param ServiceLocatorInterface $services
-     * @return DefaultResourceResolverListener
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     *
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
      */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
     {
         $config = [];
-        if ($services->has('config')) {
-            $config = $services->get('config');
+        if ($container->has('config')) {
+            $config = $container->get('config');
         }
 
         return new DefaultResourceResolverListener(
             $this->getRestServicesFromConfig($config)
         );
     }
+
 
     /**
      * Generate the list of REST services for the listener

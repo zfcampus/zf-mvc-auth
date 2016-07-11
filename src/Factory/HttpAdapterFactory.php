@@ -5,6 +5,7 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\Adapter\Http\ApacheResolver;
 use Zend\Authentication\Adapter\Http\FileResolver;
@@ -27,12 +28,12 @@ final class HttpAdapterFactory
     /**
      * Create an HttpAuth instance based on the configuration passed.
      *
-     * @param array $config
-     * @param ServiceLocatorInterface $serviceLocator
-     * @return HttpAuth
-     * @throws ServiceNotCreatedException if any required elements are missing
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $serviceLocator
+     *
+     * @return \Zend\Authentication\Adapter\Http
      */
-    public static function factory(array $config, ServiceLocatorInterface $serviceLocator = null)
+    public static function factory(array $config, ContainerInterface $serviceLocator = null)
     {
         if (! isset($config['accept_schemes']) || ! is_array($config['accept_schemes'])) {
             throw new ServiceNotCreatedException(
@@ -88,13 +89,14 @@ final class HttpAdapterFactory
     }
 
     /**
-     * @param ServiceLocatorInterface|null $serviceLocator
-     * @param null $key
+     * @param \Interop\Container\ContainerInterface $serviceLocator
+     * @param null                                  $key
+     *
      * @return bool
      */
-    private static function serviceLocatorHasKey(ServiceLocatorInterface $serviceLocator = null, $key = null)
+    private static function serviceLocatorHasKey(ContainerInterface $serviceLocator = null, $key = null)
     {
-        if (!$serviceLocator instanceof ServiceLocatorInterface) {
+        if (!$serviceLocator instanceof ContainerInterface) {
             return false;
         }
         if (!is_string($key)) {

@@ -5,6 +5,7 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use MongoClient;
 use OAuth2\GrantType\AuthorizationCode;
 use OAuth2\GrantType\ClientCredentials;
@@ -13,7 +14,6 @@ use OAuth2\GrantType\UserCredentials;
 use OAuth2\GrantType\JwtBearer;
 use OAuth2\Server as OAuth2Server;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\OAuth2\Adapter\MongoAdapter;
 use ZF\OAuth2\Adapter\PdoAdapter;
 
@@ -29,13 +29,12 @@ final class OAuth2ServerFactory
     /**
      * Create and return a fully configured OAuth2 server instance.
      *
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return OAuth2Server
-     * @throws ServiceNotCreatedException when missing details necessary to
-     *     create instance and/or dependencies.
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return \OAuth2\Server
      */
-    public static function factory(array $config, ServiceLocatorInterface $services)
+    public static function factory(array $config, ContainerInterface $services)
     {
         $allConfig    = $services->get('Config');
         $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : [];
@@ -52,11 +51,12 @@ final class OAuth2ServerFactory
     /**
      * Create and return an OAuth2 storage adapter instance.
      *
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return PdoAdapter|MongoAdapter|array A PdoAdapter, MongoAdapter, or array of storage instances.
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return array|\ZF\OAuth2\Adapter\MongoAdapter|\ZF\OAuth2\Adapter\PdoAdapter A PdoAdapter, MongoAdapter, or array of storage instances.
      */
-    private static function createStorage(array $config, ServiceLocatorInterface $services)
+    private static function createStorage(array $config, ContainerInterface $services)
     {
         if (isset($config['adapter']) && is_string($config['adapter'])) {
             return self::createStorageFromAdapter($config['adapter'], $config, $services);
@@ -74,13 +74,13 @@ final class OAuth2ServerFactory
     /**
      * Create an OAuth2 storage instance based on the adapter specified.
      *
-     * @param string $adapter One of "pdo" or "mongo".
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return PdoAdapter|MongoAdapter
-     * @throws ServiceNotCreatedException
+     * @param string                                $adapter One of "pdo" or "mongo".
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return \ZF\OAuth2\Adapter\MongoAdapter|\ZF\OAuth2\Adapter\PdoAdapter
      */
-    private static function createStorageFromAdapter($adapter, array $config, ServiceLocatorInterface $services)
+    private static function createStorageFromAdapter($adapter, array $config, ContainerInterface $services)
     {
         switch (strtolower($adapter)) {
             case 'pdo':
@@ -95,11 +95,12 @@ final class OAuth2ServerFactory
     /**
      * Creates the OAuth2 storage from services.
      *
-     * @param string|string[] $storage A string or an array of strings; each MUST be a valid service.
-     * @param ServiceLocatorInterface $services
+     * @param string|string[]                       $storage A string or an array of strings; each MUST be a valid service.
+     * @param \Interop\Container\ContainerInterface $services
+     *
      * @return array
      */
-    private static function createStorageFromServices($storage, ServiceLocatorInterface $services)
+    private static function createStorageFromServices($storage, ContainerInterface $services)
     {
         $storageServices = [];
         if (is_string($storage)) {
@@ -133,11 +134,12 @@ final class OAuth2ServerFactory
     /**
      * Create and return an OAuth2 Mongo adapter.
      *
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return MongoAdapter
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return \ZF\OAuth2\Adapter\MongoAdapter
      */
-    private static function createMongoAdapter(array $config, ServiceLocatorInterface $services)
+    private static function createMongoAdapter(array $config, ContainerInterface $services)
     {
         return new MongoAdapter(
             self::createMongoDatabase($config, $services),
@@ -174,11 +176,12 @@ final class OAuth2ServerFactory
     /**
      * Create and return a Mongo database instance.
      *
-     * @param array $config
-     * @param ServiceLocatorInterface $services
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
      * @return \MongoDB
      */
-    private static function createMongoDatabase(array $config, ServiceLocatorInterface $services)
+    private static function createMongoDatabase(array $config, ContainerInterface $services)
     {
         $dbLocatorName = isset($config['locator_name'])
             ? $config['locator_name']
@@ -203,6 +206,8 @@ final class OAuth2ServerFactory
 
     /**
      * Retrieve oauth2-server-php storage settings configuration.
+     *
+     * @param $config
      *
      * @return array
      */

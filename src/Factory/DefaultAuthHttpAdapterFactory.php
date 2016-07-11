@@ -6,10 +6,12 @@
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Factory for creating the DefaultAuthHttpAdapterFactory from configuration
@@ -17,24 +19,33 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 class DefaultAuthHttpAdapterFactory implements FactoryInterface
 {
     /**
-     * @param ServiceLocatorInterface $services
-     * @throws ServiceNotCreatedException
-     * @return false|HttpAuth
+     * Create an object
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     *
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
      */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
     {
         // If no configuration present, nothing to create
-        if (!$services->has('config')) {
+        if (!$container->has('config')) {
             return false;
         }
 
-        $config = $services->get('config');
+        $config = $container->get('config');
 
         // If no HTTP adapter configuration present, nothing to create
         if (!isset($config['zf-mvc-auth']['authentication']['http'])) {
             return false;
         }
 
-        return HttpAdapterFactory::factory($config['zf-mvc-auth']['authentication']['http'], $services);
+        return HttpAdapterFactory::factory($config['zf-mvc-auth']['authentication']['http'], $container);
     }
+
 }

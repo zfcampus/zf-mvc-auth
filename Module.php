@@ -83,18 +83,6 @@ class Module
         $events   = $app->getEventManager();
         $this->services = $app->getServiceManager();
 
-        $authentication = $this->services->get('authentication');
-        $mvcAuthEvent   = new MvcAuthEvent(
-            $mvcEvent,
-            $authentication,
-            $this->services->get('authorization')
-        );
-        $routeListener  = new MvcRouteListener(
-            $mvcAuthEvent,
-            $events,
-            $authentication
-        );
-
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION,
             $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')

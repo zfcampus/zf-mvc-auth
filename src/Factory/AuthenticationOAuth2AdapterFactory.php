@@ -5,9 +5,8 @@
  */
 namespace ZF\MvcAuth\Factory;
 
-use MongoClient;
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\OAuth2Adapter;
 
 final class AuthenticationOAuth2AdapterFactory
@@ -22,14 +21,13 @@ final class AuthenticationOAuth2AdapterFactory
     /**
      * Create and return an OAuth2Adapter instance.
      *
-     * @param string|array $type
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return OAuth2Adapter
-     * @throws ServiceNotCreatedException when missing details necessary to
-     *     create instance and/or dependencies.
+     * @param string|array                          $type
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return \ZF\MvcAuth\Authentication\OAuth2Adapter
      */
-    public static function factory($type, array $config, ServiceLocatorInterface $services)
+    public static function factory($type, array $config, ContainerInterface $services)
     {
         if (! isset($config['storage']) || ! is_array($config['storage'])) {
             throw new ServiceNotCreatedException('Missing storage details for OAuth2 server');

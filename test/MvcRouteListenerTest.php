@@ -8,6 +8,8 @@ use ZF\MvcAuth\MvcRouteListener;
 
 class MvcRouteListenerTest extends TestCase
 {
+    private $listener;
+
     public function setUp()
     {
         $this->events = new EventManager;
@@ -45,43 +47,6 @@ class MvcRouteListenerTest extends TestCase
         $this->assertTrue($found, $message);
     }
 
-    public function testRegistersAuthenticationListenerOnExpectedPriority()
-    {
-        $this->events->attach($this->listener);
-        $this->assertListenerAtPriority(
-            -50,
-            [$this->listener, 'authentication'],
-            $this->events->getListeners('route')
-        );
-    }
 
-    public function testRegistersPostAuthenticationListenerOnExpectedPriority()
-    {
-        $this->events->attach($this->listener);
-        $this->assertListenerAtPriority(
-            -51,
-            [$this->listener, 'authenticationPost'],
-            $this->events->getListeners('route')
-        );
-    }
 
-    public function testRegistersAuthorizationListenerOnExpectedPriority()
-    {
-        $this->events->attach($this->listener);
-        $this->assertListenerAtPriority(
-            -600,
-            [$this->listener, 'authorization'],
-            $this->events->getListeners('route')
-        );
-    }
-
-    public function testRegistersPostAuthorizationListenerOnExpectedPriority()
-    {
-        $this->events->attach($this->listener);
-        $this->assertListenerAtPriority(
-            -601,
-            [$this->listener, 'authorizationPost'],
-            $this->events->getListeners('route')
-        );
-    }
 }

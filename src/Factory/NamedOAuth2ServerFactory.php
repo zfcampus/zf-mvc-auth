@@ -5,7 +5,12 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
 use RuntimeException;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
 
 /**
@@ -16,11 +21,24 @@ use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
  * ZF\OAuth2\Factory\OAuth2ServerInstanceFactory after first marshaling the
  * correct configuration from zf-mvc-auth.authentication.adapters.
  */
-class NamedOAuth2ServerFactory
+class NamedOAuth2ServerFactory implements FactoryInterface
 {
-    public function __invoke($services)
+    /**
+     * Create an object
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     *
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
     {
-        $config = $services->get('Config');
+        $config = $container->get('Config');
 
         $oauth2Config  = isset($config['zf-oauth2']) ? $config['zf-oauth2'] : [];
         $mvcAuthConfig = isset($config['zf-mvc-auth']['authentication']['adapters'])
@@ -28,13 +46,13 @@ class NamedOAuth2ServerFactory
             : [];
 
         $servers = (object) ['application' => null, 'api' => []];
-        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $services, $servers) {
+        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $container, $servers) {
             // Empty type == legacy configuration.
             if (empty($type)) {
                 if ($servers->application) {
                     return $servers->application;
                 }
-                $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
+                $factory = new OAuth2ServerInstanceFactory($oauth2Config, $container);
                 return $servers->application = $factory();
             }
 
@@ -55,7 +73,7 @@ class NamedOAuth2ServerFactory
                 // Found!
                 return $servers->api[$type] = OAuth2ServerFactory::factory(
                     $adapterConfig['storage'],
-                    $services
+                    $container
                 );
             }
 
@@ -65,8 +83,10 @@ class NamedOAuth2ServerFactory
             if ($servers->application) {
                 return $servers->application;
             }
-            $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
+            $factory = new OAuth2ServerInstanceFactory($oauth2Config, $container);
             return $servers->application = $factory();
         };
     }
+
+
 }
