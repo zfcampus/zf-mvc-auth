@@ -13,7 +13,7 @@ use Zend\Mvc\MvcEvent;
 
 class Module
 {
-    protected $services;
+    protected $container;
 
     /**
      * Retrieve module configuration
@@ -22,7 +22,7 @@ class Module
      */
     public function getConfig()
     {
-        return include __DIR__ . '/config/module.config.php';
+        return include __DIR__ . '/../config/module.config.php';
     }
 
     /**
@@ -69,28 +69,28 @@ class Module
 
         $app      = $mvcEvent->getApplication();
         $events   = $app->getEventManager();
-        $this->services = $app->getServiceManager();
+        $this->container = $app->getServiceManager();
 
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION,
-            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
+            $this->container->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
+            $this->container->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
             1000
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION_POST,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
         );
 
         $events->attach(
@@ -102,10 +102,10 @@ class Module
 
     public function onAuthenticationPost(MvcAuthEvent $e)
     {
-        if ($this->services->has('api-identity')) {
+        if ($this->container->has('api-identity')) {
             return;
         }
 
-        $this->services->setService('api-identity', $e->getIdentity());
+        $this->container->setService('api-identity', $e->getIdentity());
     }
 }
