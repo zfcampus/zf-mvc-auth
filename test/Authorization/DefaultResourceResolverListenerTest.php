@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\MvcAuth\Authorization;
@@ -10,18 +10,20 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\Request;
 use Zend\Stdlib\Response;
 use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;
 use ZF\MvcAuth\MvcAuthEvent;
+use ZFTest\MvcAuth\RouteMatchFactoryTrait;
 use ZFTest\MvcAuth\TestAsset;
 
 class DefaultResourceResolverListenerTest extends TestCase
 {
+    use RouteMatchFactoryTrait;
+
     public function setUp()
     {
-        $routeMatch = new RouteMatch([]);
+        $routeMatch = $this->createRouteMatch([]);
         $request    = new HttpRequest();
         $response   = new HttpResponse();
         $mvcEvent   = new MvcEvent();
@@ -39,7 +41,7 @@ class DefaultResourceResolverListenerTest extends TestCase
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
     {
         $this->authentication = new TestAsset\AuthenticationService();
-        $this->authorization  = $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface');
+        $this->authorization  = $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock();
         return new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
     }
 

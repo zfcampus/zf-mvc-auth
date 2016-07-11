@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth;
@@ -13,19 +13,7 @@ use Zend\Mvc\MvcEvent;
 
 class Module
 {
-    protected $services;
-
-    /**
-     * Retrieve autoloader configuration
-     *
-     * @return array
-     */
-    public function getAutoloaderConfig()
-    {
-        return array('Zend\Loader\StandardAutoloader' => array('namespaces' => array(
-            __NAMESPACE__ => __DIR__ . '/src/',
-        )));
-    }
+    protected $container;
 
     /**
      * Retrieve module configuration
@@ -34,7 +22,7 @@ class Module
      */
     public function getConfig()
     {
-        return include __DIR__ . '/config/module.config.php';
+        return include __DIR__ . '/../config/module.config.php';
     }
 
     /**
@@ -45,7 +33,7 @@ class Module
     public function init(ModuleManager $moduleManager)
     {
         $events = $moduleManager->getEventManager();
-        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, array($this, 'onMergeConfig'));
+        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, [$this, 'onMergeConfig']);
     }
 
     /**
@@ -81,55 +69,43 @@ class Module
 
         $app      = $mvcEvent->getApplication();
         $events   = $app->getEventManager();
-        $this->services = $app->getServiceManager();
-
-        $authentication = $this->services->get('authentication');
-        $mvcAuthEvent   = new MvcAuthEvent(
-            $mvcEvent,
-            $authentication,
-            $this->services->get('authorization')
-        );
-        $routeListener  = new MvcRouteListener(
-            $mvcAuthEvent,
-            $events,
-            $authentication
-        );
+        $this->container = $app->getServiceManager();
 
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION,
-            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
+            $this->container->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            $this->services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
+            $this->container->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
             1000
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
         );
         $events->attach(
             MvcAuthEvent::EVENT_AUTHORIZATION_POST,
-            $this->services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
+            $this->container->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
         );
 
         $events->attach(
             MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            array($this, 'onAuthenticationPost'),
+            [$this, 'onAuthenticationPost'],
             -1
         );
     }
 
     public function onAuthenticationPost(MvcAuthEvent $e)
     {
-        if ($this->services->has('api-identity')) {
+        if ($this->container->has('api-identity')) {
             return;
         }
 
-        $this->services->setService('api-identity', $e->getIdentity());
+        $this->container->setService('api-identity', $e->getIdentity());
     }
 }

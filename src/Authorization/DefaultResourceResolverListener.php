@@ -6,8 +6,10 @@
 
 namespace ZF\MvcAuth\Authorization;
 
+use InvalidArgumentException;
 use Zend\Http\Request;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Mvc\Router\RouteMatch as V2RouteMatch;
+use Zend\Router\RouteMatch;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class DefaultResourceResolverListener
@@ -69,12 +71,22 @@ class DefaultResourceResolverListener
      *
      * If it cannot resolve a controller service name, boolean false is returned.
      *
-     * @param RouteMatch $routeMatch
+     * @param RouteMatch|V2RouteMatch $routeMatch
      * @param \Zend\Stdlib\RequestInterface $request
      * @return false|string
      */
-    public function buildResourceString(RouteMatch $routeMatch, $request)
+    public function buildResourceString($routeMatch, $request)
     {
+        if (! ($routeMatch instanceof RouteMatch || $routeMatch instanceof V2RouteMatch)) {
+            throw new InvalidArgumentException(sprintf(
+                '%s expected either a %s or %s; received %s',
+                __METHOD__,
+                RouteMatch::class,
+                V2RouteMatch::class,
+                (is_object($routeMatch) ? get_class($routeMatch) : gettype($routeMatch))
+            ));
+        }
+
         // Considerations:
         // - We want the controller service name
         $controller = $routeMatch->getParam('controller', false);
@@ -107,11 +119,11 @@ class DefaultResourceResolverListener
      * as a query string parameter.
      *
      * @param string $identifierName
-     * @param RouteMatch $routeMatch
+     * @param RouteMatch|V2RouteMatch $routeMatch Validated by calling method.
      * @param \Zend\Stdlib\RequestInterface $request
      * @return false|mixed
      */
-    protected function getIdentifier($identifierName, RouteMatch $routeMatch, $request)
+    protected function getIdentifier($identifierName, $routeMatch, $request)
     {
         $id = $routeMatch->getParam($identifierName, false);
         if ($id) {

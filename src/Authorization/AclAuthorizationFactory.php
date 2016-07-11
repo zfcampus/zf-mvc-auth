@@ -1,13 +1,19 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Authorization;
 
 abstract class AclAuthorizationFactory
 {
+    /**
+     * Create and return an AclAuthorization instance populated with provided privileges.
+     *
+     * @param array $config
+     * @return AclAuthoriazation
+     */
     public static function factory(array $config)
     {
         // Determine whether we are whitelisting or blacklisting
@@ -28,26 +34,56 @@ abstract class AclAuthorizationFactory
             $grant = 'allow';
         }
 
-        foreach ($config as $set) {
+        if (! empty($config)) {
+            return self::injectGrants($acl, $grant, $config);
+        }
+
+        return $acl;
+    }
+
+    /**
+     * Inject the ACL with the grants specified in the collection of rules.
+     *
+     * @param AclAuthorization $acl
+     * @param string $grantType Either "allow" or "deny".
+     * @param array $rules
+     * @return AclAuthorization
+     */
+    private static function injectGrants(AclAuthorization $acl, $grantType, array $rules)
+    {
+        foreach ($rules as $set) {
             if (! is_array($set) || ! isset($set['resource'])) {
                 continue;
             }
 
-            // Add new resource to ACL
-            $resource = $set['resource'];
-            $acl->addResource($set['resource']);
-
-            // Deny guest specified privileges to resource
-            $privileges = isset($set['privileges']) ? $set['privileges'] : null;
-
-            // "null" privileges means no permissions were setup; nothing to do
-            if (null === $privileges) {
-                continue;
-            }
-
-            $acl->$grant('guest', $resource, $privileges);
+            self::injectGrant($acl, $grantType, $set);
         }
 
         return $acl;
+    }
+
+    /**
+     * Inject the ACL with the grant specified by a single rule set.
+     *
+     * @param AclAuthorization $acl
+     * @param string $grantType
+     * @param array $ruleSet
+     * @return void
+     */
+    private static function injectGrant(AclAuthorization $acl, $grantType, array $ruleSet)
+    {
+        // Add new resource to ACL
+        $resource = $ruleSet['resource'];
+        $acl->addResource($ruleSet['resource']);
+
+        // Deny guest specified privileges to resource
+        $privileges = isset($ruleSet['privileges']) ? $ruleSet['privileges'] : null;
+
+        // null privileges means no permissions were setup; nothing to do
+        if (null === $privileges) {
+            return;
+        }
+
+        $acl->$grantType('guest', $resource, $privileges);
     }
 }

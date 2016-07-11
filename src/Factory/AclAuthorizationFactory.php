@@ -1,14 +1,16 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\Http\Request;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use ZF\MvcAuth\Authorization\AclAuthorization;
 use ZF\MvcAuth\Authorization\AclAuthorizationFactory as AclFactory;
 
 /**
@@ -28,19 +30,30 @@ class AclAuthorizationFactory implements FactoryInterface
     ];
 
     /**
-     * Create the DefaultAuthorizationListener
+     * Create and return an AclAuthorization instance.
      *
-     * @param ServiceLocatorInterface $services
-     * @return \ZF\MvcAuth\Authorization\AuthorizationInterface
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param null|array $options
+     * @return AclAuthorization
      */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = [];
-        if ($services->has('config')) {
-            $config = $services->get('config');
-        }
-
+        $config = $this->getConfigFromContainer($container);
         return $this->createAclFromConfig($config);
+    }
+
+    /**
+     * Create the AclAuthorization (v2).
+     *
+     * Provided for backwards compatibility; proxies to __invoke().
+     *
+     * @param ContainerInterface|ServiceLocatorInterface $container
+     * @return AclAuthorization
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, AclAuthorization::class);
     }
 
     /**
@@ -49,26 +62,20 @@ class AclAuthorizationFactory implements FactoryInterface
      * Consumes the AclFactory in order to create the AclAuthorization instance.
      *
      * @param array $config
-     * @return \ZF\MvcAuth\Authorization\AclAuthorization
+     * @return AclAuthorization
      */
     protected function createAclFromConfig(array $config)
     {
         $aclConfig     = [];
         $denyByDefault = false;
 
-        if (isset($config['zf-mvc-auth'])
-            && isset($config['zf-mvc-auth']['authorization'])
-        ) {
-            $config = $config['zf-mvc-auth']['authorization'];
+        if (array_key_exists('deny_by_default', $config)) {
+            $denyByDefault = $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
+            unset($config['deny_by_default']);
+        }
 
-            if (array_key_exists('deny_by_default', $config)) {
-                $denyByDefault = $aclConfig['deny_by_default'] = (bool) $config['deny_by_default'];
-                unset($config['deny_by_default']);
-            }
-
-            foreach ($config as $controllerService => $privileges) {
-                $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig, $denyByDefault);
-            }
+        foreach ($config as $controllerService => $privileges) {
+            $this->createAclConfigFromPrivileges($controllerService, $privileges, $aclConfig, $denyByDefault);
         }
 
         return AclFactory::factory($aclConfig);
@@ -150,5 +157,29 @@ class AclAuthorizationFactory implements FactoryInterface
         }
 
         return array_keys($privileges);
+    }
+
+    /**
+     * Retrieve configuration from the container.
+     *
+     * Attempts to pull the 'config' service, and, further, the
+     * zf-mvc-auth.authorization segment.
+     *
+     * @param ContainerInterface $container
+     * @return array
+     */
+    private function getConfigFromContainer(ContainerInterface $container)
+    {
+        if (! $container->has('config')) {
+            return [];
+        }
+
+        $config = $container->get('config');
+
+        if (! isset($config['zf-mvc-auth']['authorization'])) {
+            return [];
+        }
+
+        return $config['zf-mvc-auth']['authorization'];
     }
 }

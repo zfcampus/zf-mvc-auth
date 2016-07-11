@@ -13,7 +13,7 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
 {
     public function setUp()
     {
-        $this->services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $this->services = $this->getMockBuilder('Zend\ServiceManager\ServiceLocatorInterface')->getMock();
     }
 
 

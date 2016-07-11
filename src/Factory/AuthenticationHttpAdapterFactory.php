@@ -1,12 +1,12 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 
 final class AuthenticationHttpAdapterFactory
@@ -19,17 +19,17 @@ final class AuthenticationHttpAdapterFactory
     }
 
     /**
-     * Create an instance of ZF\MvcAuth\Authentication\HttpAdapter based on
-     * the configuration provided and the registered AuthenticationService.
+     * Create an instance of HttpAdapter based on the configuration provided
+     * and the registered AuthenticationService.
      *
      * @param string $type The base "type" the adapter will provide
      * @param array $config
-     * @param ServiceLocatorInterface $services
+     * @param ContainerInterface $container
      * @return HttpAdapter
      */
-    public static function factory($type, array $config, ServiceLocatorInterface $services)
+    public static function factory($type, array $config, ContainerInterface $container)
     {
-        if (! $services->has('authentication')) {
+        if (! $container->has('authentication')) {
             throw new ServiceNotCreatedException(
                 'Cannot create HTTP authentication adapter; missing AuthenticationService'
             );
@@ -42,8 +42,8 @@ final class AuthenticationHttpAdapterFactory
         }
 
         return new HttpAdapter(
-            HttpAdapterFactory::factory($config['options'], $services),
-            $services->get('authentication'),
+            HttpAdapterFactory::factory($config['options'], $container),
+            $container->get('authentication'),
             $type
         );
     }

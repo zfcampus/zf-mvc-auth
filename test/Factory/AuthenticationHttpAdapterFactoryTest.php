@@ -13,7 +13,7 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
 {
     public function setUp()
     {
-        $this->services = $this->getMock('Zend\ServiceManager\ServiceLocatorInterface');
+        $this->services = $this->getMockBuilder('Zend\ServiceManager\ServiceLocatorInterface')->getMock();
     }
 
     public function testRaisesExceptionIfNoAuthenticationServicePresent()
@@ -91,7 +91,7 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
      */
     public function testCreatesHttpAdapterWhenConfigurationIsValid(array $options, array $provides)
     {
-        $authService = $this->getMock('Zend\Authentication\AuthenticationService');
+        $authService = $this->getMockBuilder('Zend\Authentication\AuthenticationService')->getMock();
         $this->services->expects($this->atLeastOnce())
             ->method('has')
             ->with($this->equalTo('authentication'))

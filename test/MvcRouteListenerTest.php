@@ -4,10 +4,16 @@ namespace ZFTest\MvcAuth;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\EventManager\EventManager;
+use Zend\EventManager\Test\EventListenerIntrospectionTrait;
+use Zend\Mvc\MvcEvent;
 use ZF\MvcAuth\MvcRouteListener;
 
 class MvcRouteListenerTest extends TestCase
 {
+    use EventListenerIntrospectionTrait;
+
+    private $listener;
+
     public function setUp()
     {
         $this->events = new EventManager;
@@ -27,61 +33,47 @@ class MvcRouteListenerTest extends TestCase
         );
     }
 
-    public function assertListenerAtPriority($priority, $expectedCallback, $listeners, $message = '')
-    {
-        $found = false;
-        foreach ($listeners as $listener) {
-            $this->assertInstanceOf('Zend\Stdlib\CallbackHandler', $listener);
-            if ($listener->getMetadatum('priority') !== $priority) {
-                continue;
-            }
-
-            if ($listener->getCallback() === $expectedCallback) {
-                $found = true;
-                break;
-            }
-        }
-
-        $this->assertTrue($found, $message);
-    }
-
     public function testRegistersAuthenticationListenerOnExpectedPriority()
     {
-        $this->events->attach($this->listener);
+        $this->listener->attach($this->events);
         $this->assertListenerAtPriority(
-            -50,
             [$this->listener, 'authentication'],
-            $this->events->getListeners('route')
+            -50,
+            MvcEvent::EVENT_ROUTE,
+            $this->events
         );
     }
 
     public function testRegistersPostAuthenticationListenerOnExpectedPriority()
     {
-        $this->events->attach($this->listener);
+        $this->listener->attach($this->events);
         $this->assertListenerAtPriority(
-            -51,
             [$this->listener, 'authenticationPost'],
-            $this->events->getListeners('route')
+            -51,
+            MvcEvent::EVENT_ROUTE,
+            $this->events
         );
     }
 
     public function testRegistersAuthorizationListenerOnExpectedPriority()
     {
-        $this->events->attach($this->listener);
+        $this->listener->attach($this->events);
         $this->assertListenerAtPriority(
-            -600,
             [$this->listener, 'authorization'],
-            $this->events->getListeners('route')
+            -600,
+            MvcEvent::EVENT_ROUTE,
+            $this->events
         );
     }
 
     public function testRegistersPostAuthorizationListenerOnExpectedPriority()
     {
-        $this->events->attach($this->listener);
+        $this->listener->attach($this->events);
         $this->assertListenerAtPriority(
-            -601,
             [$this->listener, 'authorizationPost'],
-            $this->events->getListeners('route')
+            -601,
+            MvcEvent::EVENT_ROUTE,
+            $this->events
         );
     }
 }

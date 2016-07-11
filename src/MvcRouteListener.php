@@ -41,9 +41,8 @@ class MvcRouteListener extends AbstractListenerAggregate
         EventManagerInterface $events,
         AuthenticationService $authentication
     ) {
+        $this->attach($events);
         $mvcAuthEvent->setTarget($this);
-        $events->attach($this);
-
         $this->mvcAuthEvent   = $mvcAuthEvent;
         $this->events         = $events;
         $this->authentication = $authentication;
@@ -54,7 +53,7 @@ class MvcRouteListener extends AbstractListenerAggregate
      *
      * @param EventManagerInterface $events
      */
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, [$this, 'authentication'], -50);
         $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, [$this, 'authenticationPost'], -51);

@@ -1,44 +1,55 @@
-<?php // @codingStandardsIgnoreFile
+<?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
-return array(
-    'controller_plugins' => array(
-        'invokables' => array(
-            'getidentity' => 'ZF\MvcAuth\Identity\IdentityPlugin',
-        ),
-    ),
-    'service_manager' => array(
-        'aliases' => array(
-            'authentication' => 'ZF\MvcAuth\Authentication',
-            'authorization' => 'ZF\MvcAuth\Authorization\AuthorizationInterface',
-            'ZF\MvcAuth\Authorization\AuthorizationInterface' => 'ZF\MvcAuth\Authorization\AclAuthorization',
-        ),
-        'delegators' => array(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => array(
-                'ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory',
-            ),
-        ),
-        'factories' => array(
-            'ZF\MvcAuth\Authentication' => 'ZF\MvcAuth\Factory\AuthenticationServiceFactory',
-            'ZF\MvcAuth\ApacheResolver' => 'ZF\MvcAuth\Factory\ApacheResolverFactory',
-            'ZF\MvcAuth\FileResolver' => 'ZF\MvcAuth\Factory\FileResolverFactory',
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener' => 'ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory',
-            'ZF\MvcAuth\Authentication\AuthHttpAdapter' => 'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory',
-            'ZF\MvcAuth\Authorization\AclAuthorization' => 'ZF\MvcAuth\Factory\AclAuthorizationFactory',
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationListener' => 'ZF\MvcAuth\Factory\DefaultAuthorizationListenerFactory',
-            'ZF\MvcAuth\Authorization\DefaultResourceResolverListener' => 'ZF\MvcAuth\Factory\DefaultResourceResolverListenerFactory',
-            'ZF\OAuth2\Service\OAuth2Server' => 'ZF\MvcAuth\Factory\NamedOAuth2ServerFactory',
-        ),
-        'invokables' => array(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener' => 'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener',
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener' => 'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener',
-        ),
-    ),
-    'zf-mvc-auth' => array(
-        'authentication' => array(
+namespace ZF\MvcAuth;
+
+use Zend\Authentication\Storage\NonPersistent;
+use Zend\ServiceManager\Factory\InvokableFactory;
+
+return [
+    'controller_plugins' => [
+        'aliases' => [
+            'getidentity' => Identity\IdentityPlugin::class,
+            'getIdentity' => Identity\IdentityPlugin::class,
+        ],
+        'factories' => [
+            Identity\IdentityPlugin::class => InvokableFactory::class,
+        ],
+    ],
+    'service_manager'    => [
+        'aliases'    => [
+            'authentication'                            => 'ZF\MvcAuth\Authentication',
+            'authorization'                             => Authorization\AuthorizationInterface::class,
+            Authorization\AuthorizationInterface::class => Authorization\AclAuthorization::class,
+        ],
+        'delegators' => [
+            Authentication\DefaultAuthenticationListener::class => [
+                Factory\AuthenticationAdapterDelegatorFactory::class,
+            ],
+        ],
+        // @codingStandardsIgnoreStart
+        'factories'  => [
+            'ZF\MvcAuth\Authentication'                             => Factory\AuthenticationServiceFactory::class,
+            'ZF\MvcAuth\ApacheResolver'                             => Factory\ApacheResolverFactory::class,
+            'ZF\MvcAuth\FileResolver'                               => Factory\FileResolverFactory::class,
+            Authentication\DefaultAuthenticationListener::class     => Factory\DefaultAuthenticationListenerFactory::class,
+            Authentication\AuthHttpAdapter::class                   => Factory\DefaultAuthHttpAdapterFactory::class,
+            Authorization\AclAuthorization::class                   => Factory\AclAuthorizationFactory::class,
+            Authorization\DefaultAuthorizationListener::class       => Factory\DefaultAuthorizationListenerFactory::class,
+            Authorization\DefaultResourceResolverListener::class    => Factory\DefaultResourceResolverListenerFactory::class,
+            'ZF\OAuth2\Service\OAuth2Server'                        => Factory\NamedOAuth2ServerFactory::class,
+            NonPersistent::class                                    => InvokableFactory::class,
+            Authentication\DefaultAuthenticationPostListener::class => InvokableFactory::class,
+            Authorization\DefaultAuthorizationPostListener::class   => InvokableFactory::class,
+
+        ],
+        // @codingStandardsIgnoreEnd
+    ],
+    'zf-mvc-auth'        => [
+        'authentication' => [
             /* First, we define authentication configuration types. These have
              * the keys:
              * - http
@@ -46,16 +57,20 @@ return array(
              *
              * Note: as of 1.1, these are deprecated.
              *
-            'http' => array(
-                'accept_schemes' => array('basic', 'digest'),
+            'http' => [
+                'accept_schemes' => ['basic', 'digest'],
                 'realm' => 'My Web Site',
                 'digest_domains' => '/',
                 'nonce_timeout' => 3600,
-                'htpasswd' => APPLICATION_PATH . '/data/htpasswd' // htpasswd tool generated
-                'htdigest' => APPLICATION_PATH . '/data/htdigest' // @see http://www.askapache.com/online-tools/htpasswd-generator/
-                'basic_resolver_factory' => 'ServiceManagerKeyToAsk', // if this is set, the htpasswd key is ignored - see below
-                'digest_resolver_factory' => 'ServiceManagerKeyToAsk', // if this is set, the htdigest key is ignored - see below
-            ),
+                // htpasswd tool generated:
+                'htpasswd' => APPLICATION_PATH . '/data/htpasswd',
+                // @see http://www.askapache.com/online-tools/htpasswd-generator/
+                'htdigest' => APPLICATION_PATH . '/data/htdigest',
+                // If this is set, the htpasswd key is ignored - see below
+                'basic_resolver_factory' => 'ServiceManagerKeyToAsk',
+                // If this is set, the htdigest key is ignored - see below:
+                'digest_resolver_factory' => 'ServiceManagerKeyToAsk',
+            ],
              *
              * Starting in 1.1, we have an "adapters" key, which is a key/value
              * pair of adapter name -> adapter configuration information. Each
@@ -97,82 +112,84 @@ return array(
              *
              * This looks like the following for the HTTP basic/digest and OAuth2
              * adapters:
-            'adapters' => array
+            'adapters' => [
                 // HTTP adapter
-                'api' => array(
+                'api' => [
                     'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
-                    'options' => array(
-                        'accept_schemes' => array('basic', 'digest'),
+                    'options' => [
+                        'accept_schemes' => ['basic', 'digest'],
                         'realm' => 'api',
                         'digest_domains' => 'https://example.com',
                         'nonce_timeout' => 3600,
                         'htpasswd' => 'data/htpasswd',
                         'htdigest' => 'data/htdigest',
-                        'basic_resolver_factory' => 'ServiceManagerKeyToAsk', // if this is set, the htpasswd key is ignored
-                        'digest_resolver_factory' => 'ServiceManagerKeyToAsk', // if this is set, the htdigest key is ignored
-                    ),
-                ),
+                        // If this is set, the htpasswd key is ignored:
+                        'basic_resolver_factory' => 'ServiceManagerKeyToAsk',
+                        // If this is set, the htdigest key is ignored:
+                        'digest_resolver_factory' => 'ServiceManagerKeyToAsk',
+                    ],
+                ],
                 // OAuth2 adapter, using an "adapter" type of "pdo"
-                'user' => array(
+                'user' => [
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                    'storage' => array(
+                    'storage' => [
                         'adapter' => 'pdo',
                         'route' => '/user',
                         'dsn' => 'mysql:host=localhost;dbname=oauth2',
                         'username' => 'username',
                         'password' => 'password',
-                        'options' => aray(
+                        'options' => [
                             1002 => 'SET NAMES utf8', // PDO::MYSQL_ATTR_INIT_COMMAND
-                        ),
-                    ),
-                ),
+                        ],
+                    ],
+                ],
                 // OAuth2 adapter, using an "adapter" type of "mongo"
-                'client' => array(
+                'client' => [
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                    'storage' => array(
+                    'storage' => [
                         'adapter' => 'mongo',
                         'route' => '/client',
                         'locator_name' => 'SomeServiceName', // If provided, pulls the given service
                         'dsn' => 'mongodb://localhost',
                         'database' => 'oauth2',
-                        'options' => array(
+                        'options' => [
                             'username' => 'username',
                             'password' => 'password',
                             'connectTimeoutMS' => 500,
-                        ),
-                    ),
-                ),
+                        ],
+                    ],
+                ],
                 // OAuth2 adapter, using a named "storage" service
-                'named-storage' => array(
+                'named-storage' => [
                     'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
-                    'storage' => array(
+                    'storage' => [
                         'storage' => 'Name\Of\An\OAuth2\Storage\Service',
                         'route' => '/named-storage',
-                    ),
-                ),
-            ),
+                    ],
+                ],
+            ],
              *
              * Next, we also have a "map", which maps an API module (with
              * optional version) to a given authentication type (one of basic,
              * digest, or oauth2):
-            'map' => array(
+            'map' => [
                 'ApiModuleName' => 'oauth2',
                 'OtherApi\V2' => 'basic',
                 'AnotherApi\V1' => 'digest',
-            ),
+            ],
              *
              * We also allow you to specify custom authentication types that you
              * support via listeners; by adding them to the configuration, you
              * ensure that they will be available for mapping modules to
              * authentication types in the Admin.
-            'types' => array(
+            'types' => [
                 'token',
                 'key',
                 'etc',
-            )
+            ]
              */
-        ),
-        'authorization' => array(
+        ],
+        'authorization'  => [
             // Toggle the following to true to change the ACL creation to
             // require an authenticated user by default, and thus selectively
             // allow unauthenticated users based on the rules.
@@ -195,29 +212,29 @@ return array(
              * special key "default" can be used to set the default flag for
              * all HTTP methods.
              *
-            'Controller\Service\Name' => array(
-                'actions' => array(
-                    'action' => array(
+            'Controller\Service\Name' => [
+                'actions' => [
+                    'action' => [
                         'default' => boolean,
                         'GET' => boolean,
                         'POST' => boolean,
                         // etc.
-                    ),
-                ),
-                'collection' => array(
+                    ],
+                ],
+                'collection' => [
                     'default' => boolean,
                     'GET' => boolean,
                     'POST' => boolean,
                     // etc.
-                ),
-                'entity' => array(
+                ],
+                'entity' => [
                     'default' => boolean,
                     'GET' => boolean,
                     'POST' => boolean,
                     // etc.
-                ),
-            ),
+                ],
+            ],
              */
-        ),
-    ),
-);
+        ],
+    ],
+];

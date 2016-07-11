@@ -1,37 +1,54 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
 
-use Zend\Authentication\Adapter\Http\ApacheResolver;
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 class ApacheResolverFactory implements FactoryInterface
 {
     /**
-     * Create service
+     * Create and return an ApacheResolver instance.
      *
-     * @param  ServiceLocatorInterface $serviceLocator
-     * @return ApacheResolver|false
+     * If appropriate configuration is not found, returns boolean false.
+     *
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param null|array $options
+     * @return false|ApacheResolver
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        if (!$serviceLocator->has('config')) {
+        if (false === $container->has('config')) {
             return false;
         }
 
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
 
-        if (!isset($config['zf-mvc-auth']['authentication']['http']['htpasswd'])) {
+        if (! isset($config['zf-mvc-auth']['authentication']['http']['htpasswd'])) {
             return false;
         }
 
         $htpasswd = $config['zf-mvc-auth']['authentication']['http']['htpasswd'];
 
         return new ApacheResolver($htpasswd);
+    }
+
+    /**
+     * Create and return an ApacheResolve instance (v2).
+     *
+     * Exists for backwards compatibility only; proxies to __invoke().
+     *
+     * @param  ServiceLocatorInterface $container
+     * @return false|ApacheResolver
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, ApacheResolver::class);
     }
 }

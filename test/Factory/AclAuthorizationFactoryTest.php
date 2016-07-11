@@ -12,6 +12,9 @@ use ZF\MvcAuth\Factory\AclAuthorizationFactory;
 
 class AclAuthorizationFactoryTest extends TestCase
 {
+    private $factory;
+    private $services;
+
     public function setUp()
     {
         $this->services = new ServiceManager();
@@ -51,7 +54,9 @@ class AclAuthorizationFactoryTest extends TestCase
         ]]];
         $this->services->setService('config', $config);
 
-        $acl = $this->factory->createService($this->services);
+        $factory = $this->factory;
+
+        $acl = $factory($this->services, 'AclAuthorization');
 
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
 
@@ -117,7 +122,9 @@ class AclAuthorizationFactoryTest extends TestCase
         ]]];
         $this->services->setService('config', $config);
 
-        $acl = $this->factory->createService($this->services);
+        $factory = $this->factory;
+
+        $acl = $factory($this->services, 'AclAuthorization');
 
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
 
@@ -179,7 +186,9 @@ class AclAuthorizationFactoryTest extends TestCase
         ]]];
         $this->services->setService('config', $config);
 
-        $acl = $this->factory->createService($this->services);
+        $factory = $this->factory;
+
+        $acl = $factory($this->services, 'AclAuthorization');
 
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
 
@@ -222,7 +231,9 @@ class AclAuthorizationFactoryTest extends TestCase
         ]]];
         $this->services->setService('config', $config);
 
-        $acl = $this->factory->createService($this->services);
+        $factory = $this->factory;
+
+        $acl = $factory($this->services, 'AclAuthorization');
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
         $this->assertFalse($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'POST'));
     }
