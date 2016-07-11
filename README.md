@@ -126,7 +126,7 @@ return array(
 );
 ```
 
-In the absence of a `map` subkey, if andy authentication adapter configuration
+In the absence of a `map` subkey, if any authentication adapter configuration
 is defined, that configuration will be used for any API.
 
 **Note for users migrating from 1.0**: In the 1.0 series, authentication was
