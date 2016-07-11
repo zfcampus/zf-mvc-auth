@@ -1,48 +1,55 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\FactoryInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use ZF\MvcAuth\Authorization\AuthorizationInterface;
 use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
 
 /**
- * Factory for creating the DefaultAuthorizationListener from configuration
+ * Factory for creating the DefaultAuthorizationListener from configuration.
  */
 class DefaultAuthorizationListenerFactory implements FactoryInterface
 {
     /**
-     * Create an object
+     * Create and return the default authorization listener.
      *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
-     *
-     * @return object
-     * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when
-     *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @param ContainerInterface $container
+     * @param string             $requestedName
+     * @param null|array         $options
+     * @return DefaultAuthorizationListenerFactory
+     * @throws ServiceNotCreatedException if the AuthorizationInterface service is missing.
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        if (!$container->has('ZF\MvcAuth\Authorization\AuthorizationInterface')) {
-            throw new ServiceNotCreatedException(
-                'Cannot create DefaultAuthorizationListener service; '
-                . 'no ZF\MvcAuth\Authorization\AuthorizationInterface service available!'
-            );
+        if (! $container->has(AuthorizationInterface::class)) {
+            throw new ServiceNotCreatedException(sprintf(
+                'Cannot create %s service; no %s service available!',
+                DefaultAuthorizationListener::class,
+                AuthorizationInterface::class
+            ));
         }
 
-        return new DefaultAuthorizationListener(
-            $container->get('ZF\MvcAuth\Authorization\AuthorizationInterface')
-        );
+        return new DefaultAuthorizationListener($container->get(AuthorizationInterface::class));
     }
 
+    /**
+     * Create and return the default authorization listener (v2).
+     *
+     * Provided for backwards compatibility; proxies to __invoke().
+     *
+     * @param ServiceLocatorInterface $container
+     * @return DefaultAuthorizationListenerFactory
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, DefaultAuthorizationListener::class);
+    }
 }

@@ -1,42 +1,36 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Zend\Authentication\Adapter\Http\ApacheResolver;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\FactoryInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 class ApacheResolverFactory implements FactoryInterface
 {
     /**
-     * Create an object
+     * Create and return an ApacheResolver instance.
      *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
+     * If appropriate configuration is not found, returns boolean false.
      *
-     * @return object
-     * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when
-     *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param null|array $options
+     * @return false|ApacheResolver
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        if (FALSE === $container->has('config')) {
+        if (false === $container->has('config')) {
             return false;
         }
 
         $config = $container->get('config');
 
-        if (!isset($config['zf-mvc-auth']['authentication']['http']['htpasswd'])) {
+        if (! isset($config['zf-mvc-auth']['authentication']['http']['htpasswd'])) {
             return false;
         }
 
@@ -45,5 +39,16 @@ class ApacheResolverFactory implements FactoryInterface
         return new ApacheResolver($htpasswd);
     }
 
- 
+    /**
+     * Create and return an ApacheResolve instance (v2).
+     *
+     * Exists for backwards compatibility only; proxies to __invoke().
+     *
+     * @param  ServiceLocatorInterface $container
+     * @return false|ApacheResolver
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, ApacheResolver::class);
+    }
 }

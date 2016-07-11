@@ -1,16 +1,12 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 namespace ZF\MvcAuth\Factory;
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use RuntimeException;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
 use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
 
 /**
@@ -21,24 +17,15 @@ use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
  * ZF\OAuth2\Factory\OAuth2ServerInstanceFactory after first marshaling the
  * correct configuration from zf-mvc-auth.authentication.adapters.
  */
-class NamedOAuth2ServerFactory implements FactoryInterface
+class NamedOAuth2ServerFactory
 {
     /**
-     * Create an object
-     *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
-     *
-     * @return object
-     * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when
-     *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @param ContainerInterface $container
+     * @return callable
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
+    public function __invoke(ContainerInterface $container)
     {
-        $config = $container->get('Config');
+        $config = $container->get('config');
 
         $oauth2Config  = isset($config['zf-oauth2']) ? $config['zf-oauth2'] : [];
         $mvcAuthConfig = isset($config['zf-mvc-auth']['authentication']['adapters'])
@@ -87,6 +74,4 @@ class NamedOAuth2ServerFactory implements FactoryInterface
             return $servers->application = $factory();
         };
     }
-
-
 }
