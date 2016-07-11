@@ -6,9 +6,9 @@
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\Http\Request;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use ZF\MvcAuth\Authorization\AclAuthorizationFactory as AclFactory;
 
 /**
@@ -27,21 +27,16 @@ class AclAuthorizationFactory implements FactoryInterface
         Request::METHOD_PUT    => true,
     ];
 
-    /**
-     * Create the DefaultAuthorizationListener
-     *
-     * @param ServiceLocatorInterface $services
-     * @return \ZF\MvcAuth\Authorization\AuthorizationInterface
-     */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
     {
         $config = [];
-        if ($services->has('config')) {
-            $config = $services->get('config');
+        if ($container->has('config')) {
+            $config = $container->get('config');
         }
 
         return $this->createAclFromConfig($config);
     }
+
 
     /**
      * Generate the ACL instance based on the zf-mvc-auth "authorization" configuration

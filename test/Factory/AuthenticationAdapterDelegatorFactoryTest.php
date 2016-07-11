@@ -13,6 +13,15 @@ use ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory;
 
 class AuthenticationAdapterDelegatorFactoryTest extends TestCase
 {
+    /**
+     * @var AuthenticationAdapterDelegatorFactory
+     */
+    private $factory;
+    /**
+     * @var ServiceManager
+     */
+    private $services;
+
     public function setUp()
     {
         // Actual service manager instance, as multiple services may be
@@ -30,9 +39,10 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
         $config = [];
         $this->services->setService('Config', $config);
 
-        $listener = $this->factory->createDelegatorWithName(
+        $factory = $this->factory;
+
+        $listener = $factory(
             $this->services,
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
             'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
             $this->callback
         );
@@ -86,9 +96,10 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
         $this->services->setService('Config', $config);
         $this->services->setService('authentication', $this->getMock('Zend\Authentication\AuthenticationService'));
 
-        $listener = $this->factory->createDelegatorWithName(
+        $factory = $this->factory;
+
+        $listener = $factory(
             $this->services,
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
             'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
             $this->callback
         );

@@ -9,7 +9,7 @@ namespace ZF\MvcAuth\Authentication;
 use OAuth2\Server as OAuth2Server;
 use RuntimeException;
 use Zend\Authentication\Adapter\Http as HttpAuth;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use ZF\MvcAuth\Identity;

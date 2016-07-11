@@ -8,7 +8,7 @@ namespace ZF\MvcAuth\Authorization;
 
 use Zend\Http\Request;
 use Zend\Http\Response;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\RouteMatch;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZF\MvcAuth\Identity\IdentityInterface;
 

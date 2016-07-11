@@ -6,25 +6,35 @@
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
 use Zend\Authentication\Adapter\Http\FileResolver;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class FileResolverFactory implements FactoryInterface
 {
     /**
-     * Create service
+     * Create an object
      *
-     * @param  ServiceLocatorInterface $serviceLocator
-     * @return FileResolver|false
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     *
+     * @return object
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     *     creating a service.
+     * @throws ContainerException if any other error occurs
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = NULL)
     {
-        if (!$serviceLocator->has('config')) {
+        if (!$container->has('config')) {
             return false;
         }
 
-        $config = $serviceLocator->get('config');
+        $config = $container->get('config');
 
         if (!isset($config['zf-mvc-auth']['authentication']['http']['htdigest'])) {
             return false;
@@ -34,4 +44,5 @@ class FileResolverFactory implements FactoryInterface
 
         return new FileResolver($htdigest);
     }
+
 }

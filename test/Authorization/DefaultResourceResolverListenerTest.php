@@ -10,7 +10,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\RouteMatch;
+use Zend\Router\RouteMatch;
 use Zend\Stdlib\Request;
 use Zend\Stdlib\Response;
 use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;

@@ -5,8 +5,8 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 
 final class AuthenticationHttpAdapterFactory
@@ -22,12 +22,13 @@ final class AuthenticationHttpAdapterFactory
      * Create an instance of ZF\MvcAuth\Authentication\HttpAdapter based on
      * the configuration provided and the registered AuthenticationService.
      *
-     * @param string $type The base "type" the adapter will provide
-     * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return HttpAdapter
+     * @param string                                $type The base "type" the adapter will provide
+     * @param array                                 $config
+     * @param \Interop\Container\ContainerInterface $services
+     *
+     * @return \ZF\MvcAuth\Authentication\HttpAdapter
      */
-    public static function factory($type, array $config, ServiceLocatorInterface $services)
+    public static function factory($type, array $config, ContainerInterface $services)
     {
         if (! $services->has('authentication')) {
             throw new ServiceNotCreatedException(
