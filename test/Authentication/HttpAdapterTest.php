@@ -33,7 +33,7 @@ class HttpAdapterTest extends TestCase
         $this->event = new MvcAuthEvent(
             $mvcEvent,
             $this->authentication,
-            $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface')
+            $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock()
         );
     }
 

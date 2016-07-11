@@ -1,18 +1,19 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use Zend\Http\Request;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;
 
 /**
- * Factory for creating the DefaultResourceResolverListener from configuration
+ * Factory for creating the DefaultResourceResolverListener from configuration.
  */
 class DefaultResourceResolverListenerFactory implements FactoryInterface
 {
@@ -25,21 +26,33 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
     ];
 
     /**
-     * Create the DefaultAuthorizationListener
+     * Create and return a DefaultResourceResolverListener instance.
      *
-     * @param ServiceLocatorInterface $services
+     * @param ContainerInterface $container
+     * @param string             $requestedName
+     * @param null|array         $options
      * @return DefaultResourceResolverListener
      */
-    public function createService(ServiceLocatorInterface $services)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = [];
-        if ($services->has('config')) {
-            $config = $services->get('config');
-        }
+        $config = $container->has('config') ?  $container->get('config') : [];
 
         return new DefaultResourceResolverListener(
             $this->getRestServicesFromConfig($config)
         );
+    }
+
+    /**
+     * Create and return a DefaultResourceResolverListener instance (v2).
+     *
+     * Provided for backwards compatibility; proxies to __invoke().
+     *
+     * @param ServiceLocatorInterface $container
+     * @return DefaultResourceResolverListener
+     */
+    public function createService(ServiceLocatorInterface $container)
+    {
+        return $this($container, DefaultResourceResolverListener::class);
     }
 
     /**
@@ -54,12 +67,12 @@ class DefaultResourceResolverListenerFactory implements FactoryInterface
     protected function getRestServicesFromConfig(array $config)
     {
         $restServices = [];
-        if (!isset($config['zf-rest'])) {
+        if (! isset($config['zf-rest'])) {
             return $restServices;
         }
 
         foreach ($config['zf-rest'] as $controllerService => $restConfig) {
-            if (!isset($restConfig['route_identifier_name'])) {
+            if (! isset($restConfig['route_identifier_name'])) {
                 continue;
             }
             $restServices[$controllerService] = $restConfig['route_identifier_name'];

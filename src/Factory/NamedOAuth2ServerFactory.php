@@ -1,10 +1,11 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use RuntimeException;
 use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
 
@@ -18,9 +19,13 @@ use ZF\OAuth2\Factory\OAuth2ServerInstanceFactory;
  */
 class NamedOAuth2ServerFactory
 {
-    public function __invoke($services)
+    /**
+     * @param ContainerInterface $container
+     * @return callable
+     */
+    public function __invoke(ContainerInterface $container)
     {
-        $config = $services->get('Config');
+        $config = $container->get('config');
 
         $oauth2Config  = isset($config['zf-oauth2']) ? $config['zf-oauth2'] : [];
         $mvcAuthConfig = isset($config['zf-mvc-auth']['authentication']['adapters'])
@@ -28,13 +33,13 @@ class NamedOAuth2ServerFactory
             : [];
 
         $servers = (object) ['application' => null, 'api' => []];
-        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $services, $servers) {
+        return function ($type = null) use ($oauth2Config, $mvcAuthConfig, $container, $servers) {
             // Empty type == legacy configuration.
             if (empty($type)) {
                 if ($servers->application) {
                     return $servers->application;
                 }
-                $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
+                $factory = new OAuth2ServerInstanceFactory($oauth2Config, $container);
                 return $servers->application = $factory();
             }
 
@@ -55,7 +60,7 @@ class NamedOAuth2ServerFactory
                 // Found!
                 return $servers->api[$type] = OAuth2ServerFactory::factory(
                     $adapterConfig['storage'],
-                    $services
+                    $container
                 );
             }
 
@@ -65,7 +70,7 @@ class NamedOAuth2ServerFactory
             if ($servers->application) {
                 return $servers->application;
             }
-            $factory = new OAuth2ServerInstanceFactory($oauth2Config, $services);
+            $factory = new OAuth2ServerInstanceFactory($oauth2Config, $container);
             return $servers->application = $factory();
         };
     }

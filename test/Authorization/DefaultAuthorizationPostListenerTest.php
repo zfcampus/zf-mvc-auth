@@ -29,7 +29,7 @@ class DefaultAuthorizationPostListenerTest extends TestCase
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
     {
         $this->authentication = new TestAsset\AuthenticationService();
-        $this->authorization  = $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface');
+        $this->authorization  = $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock();
         return new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
     }
 

@@ -5,6 +5,7 @@
  */
 namespace ZF\MvcAuth\Factory;
 
+use Interop\Container\ContainerInterface;
 use MongoClient;
 use OAuth2\GrantType\AuthorizationCode;
 use OAuth2\GrantType\ClientCredentials;
@@ -13,7 +14,6 @@ use OAuth2\GrantType\UserCredentials;
 use OAuth2\GrantType\JwtBearer;
 use OAuth2\Server as OAuth2Server;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\OAuth2\Adapter\MongoAdapter;
 use ZF\OAuth2\Adapter\PdoAdapter;
 
@@ -30,19 +30,17 @@ final class OAuth2ServerFactory
      * Create and return a fully configured OAuth2 server instance.
      *
      * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return OAuth2Server
-     * @throws ServiceNotCreatedException when missing details necessary to
-     *     create instance and/or dependencies.
+     * @param ContainerInterface $container
+     * @return \OAuth2\Server
      */
-    public static function factory(array $config, ServiceLocatorInterface $services)
+    public static function factory(array $config, ContainerInterface $container)
     {
-        $allConfig    = $services->get('Config');
+        $allConfig    = $container->get('config');
         $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : [];
         $options      = self::marshalOptions($oauth2Config);
 
         $oauth2Server = new OAuth2Server(
-            self::createStorage(array_merge($oauth2Config, $config), $services),
+            self::createStorage(array_merge($oauth2Config, $config), $container),
             $options
         );
 
@@ -53,19 +51,19 @@ final class OAuth2ServerFactory
      * Create and return an OAuth2 storage adapter instance.
      *
      * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return PdoAdapter|MongoAdapter|array A PdoAdapter, MongoAdapter, or array of storage instances.
+     * @param ContainerInterface $container
+     * @return array|MongoAdapter|PdoAdapter A PdoAdapter, MongoAdapter, or array of storage instances.
      */
-    private static function createStorage(array $config, ServiceLocatorInterface $services)
+    private static function createStorage(array $config, ContainerInterface $container)
     {
         if (isset($config['adapter']) && is_string($config['adapter'])) {
-            return self::createStorageFromAdapter($config['adapter'], $config, $services);
+            return self::createStorageFromAdapter($config['adapter'], $config, $container);
         }
 
         if (isset($config['storage'])
             && (is_string($config['storage']) || is_array($config['storage']))
         ) {
-            return self::createStorageFromServices($config['storage'], $services);
+            return self::createStorageFromServices($config['storage'], $container);
         }
 
         throw new ServiceNotCreatedException('Missing or invalid storage adapter information for OAuth2');
@@ -76,17 +74,16 @@ final class OAuth2ServerFactory
      *
      * @param string $adapter One of "pdo" or "mongo".
      * @param array $config
-     * @param ServiceLocatorInterface $services
-     * @return PdoAdapter|MongoAdapter
-     * @throws ServiceNotCreatedException
+     * @param ContainerInterface $container
+     * @return MongoAdapter|PdoAdapter
      */
-    private static function createStorageFromAdapter($adapter, array $config, ServiceLocatorInterface $services)
+    private static function createStorageFromAdapter($adapter, array $config, ContainerInterface $container)
     {
         switch (strtolower($adapter)) {
             case 'pdo':
                 return self::createPdoAdapter($config);
             case 'mongo':
-                return self::createMongoAdapter($config, $services);
+                return self::createMongoAdapter($config, $container);
             default:
                 throw new ServiceNotCreatedException('Invalid storage adapter type for OAuth2');
         }
@@ -96,22 +93,24 @@ final class OAuth2ServerFactory
      * Creates the OAuth2 storage from services.
      *
      * @param string|string[] $storage A string or an array of strings; each MUST be a valid service.
-     * @param ServiceLocatorInterface $services
+     * @param ContainerInterface $container
      * @return array
      */
-    private static function createStorageFromServices($storage, ServiceLocatorInterface $services)
+    private static function createStorageFromServices($storage, ContainerInterface $container)
     {
         $storageServices = [];
+
         if (is_string($storage)) {
             $storageServices[] = $storage;
         }
+
         if (is_array($storage)) {
             $storageServices = $storage;
         }
 
         $storage = [];
         foreach ($storageServices as $key => $service) {
-            $storage[$key] = $services->get($service);
+            $storage[$key] = $container->get($service);
         }
         return $storage;
     }
@@ -134,13 +133,13 @@ final class OAuth2ServerFactory
      * Create and return an OAuth2 Mongo adapter.
      *
      * @param array $config
-     * @param ServiceLocatorInterface $services
+     * @param ContainerInterface $container
      * @return MongoAdapter
      */
-    private static function createMongoAdapter(array $config, ServiceLocatorInterface $services)
+    private static function createMongoAdapter(array $config, ContainerInterface $container)
     {
         return new MongoAdapter(
-            self::createMongoDatabase($config, $services),
+            self::createMongoDatabase($config, $container),
             self::getOAuth2ServerConfig($config)
         );
     }
@@ -175,17 +174,17 @@ final class OAuth2ServerFactory
      * Create and return a Mongo database instance.
      *
      * @param array $config
-     * @param ServiceLocatorInterface $services
+     * @param ContainerInterface $container
      * @return \MongoDB
      */
-    private static function createMongoDatabase(array $config, ServiceLocatorInterface $services)
+    private static function createMongoDatabase(array $config, ContainerInterface $container)
     {
         $dbLocatorName = isset($config['locator_name'])
             ? $config['locator_name']
             : 'MongoDB';
 
-        if ($services->has($dbLocatorName)) {
-            return $services->get($dbLocatorName);
+        if ($container->has($dbLocatorName)) {
+            return $container->get($dbLocatorName);
         }
 
         if (! isset($config['database'])) {
@@ -203,6 +202,8 @@ final class OAuth2ServerFactory
 
     /**
      * Retrieve oauth2-server-php storage settings configuration.
+     *
+     * @param $config
      *
      * @return array
      */
@@ -236,7 +237,7 @@ final class OAuth2ServerFactory
         $audience = isset($config['audience'])
             ? $config['audience']
             : '';
-        $options        = isset($config['options'])
+        $options = isset($config['options'])
             ? $config['options']
             : [];
 

@@ -21,7 +21,7 @@ class NamedOAuth2ServerFactoryTest extends TestCase
 
     public function setUpConfig($services)
     {
-        $services->setService('Config', [
+        $services->setService('config', [
             'zf-oauth2' => [
                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                 'grant_types' => [
@@ -68,21 +68,21 @@ class NamedOAuth2ServerFactoryTest extends TestCase
 
     public function testCallingReturnedFactoryMultipleTimesWithNoArgumentReturnsSameServerInstance()
     {
-        $factory = $this->factory->__invoke($this->services);
+        $factory = $this->factory->__invoke($this->services, 'NamedOAuth2Server');
         $server  = $factory();
         $this->assertSame($server, $factory());
     }
 
     public function testCallingReturnedFactoryMultipleTimesWithSameArgumentReturnsSameServerInstance()
     {
-        $factory = $this->factory->__invoke($this->services);
+        $factory = $this->factory->__invoke($this->services, 'NamedOAuth2Server');
         $server  = $factory('test');
         $this->assertSame($server, $factory('test'));
     }
 
     public function testCallingReturnedFactoryMultipleTimesWithDifferentArgumentsReturnsDifferentInstances()
     {
-        $factory = $this->factory->__invoke($this->services);
+        $factory = $this->factory->__invoke($this->services, 'NamedOAuth2Server');
         $server  = $factory('test');
         $this->assertNotSame($server, $factory());
         $this->assertNotSame($server, $factory('test2'));
@@ -90,7 +90,7 @@ class NamedOAuth2ServerFactoryTest extends TestCase
 
     public function testCallingReturnedFactoryWithUnrecognizedArgumentReturnsApplicationWideInstance()
     {
-        $factory = $this->factory->__invoke($this->services);
+        $factory = $this->factory->__invoke($this->services, 'NamedOAuth2Server');
         $server  = $factory();
         $this->assertSame($server, $factory('unknown'));
     }
