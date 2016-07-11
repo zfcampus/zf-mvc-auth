@@ -8,6 +8,7 @@ namespace ZFTest\MvcAuth\Factory;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use ReflectionProperty;
+use Zend\Authentication\AuthenticationServiceInterface;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory;
@@ -161,7 +162,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithBasicSchemeAndHtpasswdValueReturnsListenerWithHttpAdapter()
     {
-        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $authenticationService = $this->getMockBuilder(AuthenticationServiceInterface::class)->getMock();
         $this->services->setService('authentication', $authenticationService);
         $this->services->setService('config', [
             'zf-mvc-auth' => [
@@ -185,7 +186,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithDigestSchemeAndHtdigestValueReturnsListenerWithHttpAdapter()
     {
-        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $authenticationService = $this->getMockBuilder(AuthenticationServiceInterface::class)->getMock();
         $this->services->setService('authentication', $authenticationService);
         $this->services->setService('config', [
             'zf-mvc-auth' => [
@@ -209,7 +210,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithCustomAuthenticationTypesReturnsListenerComposingThem()
     {
-        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $authenticationService = $this->getMockBuilder(AuthenticationServiceInterface::class)->getMock();
         $this->services->setService('authentication', $authenticationService);
         $this->services->setService('config', [
             'zf-mvc-auth' => [
@@ -268,7 +269,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
     public function testCallingFactoryWithAuthenticationMapReturnsListenerComposingMap()
     {
-        $authenticationService = $this->getMock('Zend\Authentication\AuthenticationServiceInterface');
+        $authenticationService = $this->getMockBuilder(AuthenticationServiceInterface::class)->getMock();
         $this->services->setService('authentication', $authenticationService);
         $this->services->setService('config', [
             'zf-mvc-auth' => [

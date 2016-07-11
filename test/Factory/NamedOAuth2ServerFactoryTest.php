@@ -21,7 +21,7 @@ class NamedOAuth2ServerFactoryTest extends TestCase
 
     public function setUpConfig($services)
     {
-        $services->setService('Config', [
+        $services->setService('config', [
             'zf-oauth2' => [
                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                 'grant_types' => [

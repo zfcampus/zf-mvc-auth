@@ -37,7 +37,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
     public function testReturnsListenerWithNoAdaptersWhenNoAdaptersAreInConfiguration()
     {
         $config = [];
-        $this->services->setService('Config', $config);
+        $this->services->setService('config', $config);
 
         $factory = $this->factory;
 
@@ -93,8 +93,11 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
                 ],
             ],
         ];
-        $this->services->setService('Config', $config);
-        $this->services->setService('authentication', $this->getMock('Zend\Authentication\AuthenticationService'));
+        $this->services->setService('config', $config);
+        $this->services->setService(
+            'authentication',
+            $this->getMockBuilder('Zend\Authentication\AuthenticationService')->getMock()
+        );
 
         $factory = $this->factory;
 

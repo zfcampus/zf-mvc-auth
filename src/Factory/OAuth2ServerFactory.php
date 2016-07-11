@@ -35,7 +35,7 @@ final class OAuth2ServerFactory
      */
     public static function factory(array $config, ContainerInterface $container)
     {
-        $allConfig    = $container->get('Config');
+        $allConfig    = $container->get('config');
         $oauth2Config = isset($allConfig['zf-oauth2']) ? $allConfig['zf-oauth2'] : [];
         $options      = self::marshalOptions($oauth2Config);
 

@@ -17,7 +17,7 @@ class OAuth2AdapterTest extends TestCase
 {
     public function setUp()
     {
-        $this->oauthServer = $this->getMock('OAuth2\Server');
+        $this->oauthServer = $this->getMockBuilder('OAuth2\Server')->getMock();
         $this->adapter = new OAuth2Adapter($this->oauthServer);
     }
 

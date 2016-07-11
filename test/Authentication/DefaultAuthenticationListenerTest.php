@@ -69,7 +69,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->authentication = new AuthenticationService(new NonPersistent());
 
         // authorization service
-        $this->authorization = $this->getMock('ZF\MvcAuth\Authorization\AuthorizationInterface');
+        $this->authorization = $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock();
 
         // event for mvc and mvc-auth
         $this->request    = new HttpRequest();

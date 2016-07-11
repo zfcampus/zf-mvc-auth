@@ -31,7 +31,7 @@ class OAuth2ServerFactoryTest extends TestCase
 
     protected function mockConfig($services)
     {
-        $services->setService('Config', $this->getOAuth2Options());
+        $services->setService('config', $this->getOAuth2Options());
         return $services;
     }
 
@@ -143,7 +143,7 @@ class OAuth2ServerFactoryTest extends TestCase
         ];
 
         $services = new ServiceManager();
-        $services->setService('Config', $options);
+        $services->setService('config', $options);
 
         $config = [
             'adapter' => 'pdo',

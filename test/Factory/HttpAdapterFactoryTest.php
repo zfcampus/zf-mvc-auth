@@ -174,14 +174,14 @@ class HttpAdapterFactoryTest extends TestCase
     {
         $keyForServiceManager = 'keyForServiceManager';
 
-        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('has')
             ->with($keyForServiceManager)
             ->will($this->returnValue(true));
 
-        $resolver = $this->getMock('\Zend\Authentication\Adapter\Http\ResolverInterface');
+        $resolver = $this->getMockBuilder('\Zend\Authentication\Adapter\Http\ResolverInterface')->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('get')
@@ -206,14 +206,14 @@ class HttpAdapterFactoryTest extends TestCase
     {
         $keyForServiceManager = 'keyForServiceManager';
 
-        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('has')
             ->with($keyForServiceManager)
             ->will($this->returnValue(true));
 
-        $resolver = $this->getMock('\Zend\Authentication\Adapter\Http\ResolverInterface');
+        $resolver = $this->getMockBuilder('\Zend\Authentication\Adapter\Http\ResolverInterface')->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('get')
@@ -252,7 +252,7 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testCanReturnAdapterWithNoResolversAndInvalidResolverKeys()
     {
-        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
         $serviceManager->expects($this->never())->method('has');
 
         $adapter = HttpAdapterFactory::factory([
@@ -273,7 +273,7 @@ class HttpAdapterFactoryTest extends TestCase
     {
         $missingKeyForServiceManager = 'missingKeyForServiceManager';
 
-        $serviceManager = $this->getMock('\Zend\ServiceManager\ServiceLocatorInterface');
+        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
         $serviceManager
             ->expects($this->any())
             ->method('has')
