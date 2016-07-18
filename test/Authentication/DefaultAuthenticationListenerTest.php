@@ -328,7 +328,6 @@ class DefaultAuthenticationListenerTest extends TestCase
         self::assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity, $message);
         self::assertEquals($token['user_id'], $identity->getRoleId());
         self::assertEquals($token, $identity->getAuthenticationIdentity());
-
     }
 
     public function setupHttpBasicAuth()

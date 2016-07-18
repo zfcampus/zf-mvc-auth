@@ -50,7 +50,7 @@ class DefaultResourceResolverListener
         $routeMatch = $mvcEvent->getRouteMatch();
 
         $resource = $this->buildResourceString($routeMatch, $request);
-        if (!$resource) {
+        if (! $resource) {
             return;
         }
 
@@ -90,13 +90,13 @@ class DefaultResourceResolverListener
         // Considerations:
         // - We want the controller service name
         $controller = $routeMatch->getParam('controller', false);
-        if (!$controller) {
+        if (! $controller) {
             return false;
         }
 
         // - Is this an RPC or a REST call?
         //   - Basically, if it's not in the zf-rest configuration, we assume RPC
-        if (!array_key_exists($controller, $this->restControllers)) {
+        if (! array_key_exists($controller, $this->restControllers)) {
             $action = $routeMatch->getParam('action', 'index');
             return sprintf('%s::%s', $controller, $action);
         }
@@ -130,7 +130,7 @@ class DefaultResourceResolverListener
             return $id;
         }
 
-        if (!$request instanceof Request) {
+        if (! $request instanceof Request) {
             return false;
         }
 
