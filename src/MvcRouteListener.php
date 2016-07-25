@@ -69,7 +69,7 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authentication(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest
+        if (! $mvcEvent->getRequest() instanceof HttpRequest
             || $mvcEvent->getRequest()->isOptions()
         ) {
             return;
@@ -106,7 +106,7 @@ class MvcRouteListener extends AbstractListenerAggregate
         }
 
         $identity = $this->authentication->getIdentity();
-        if ($identity === null && !$mvcAuthEvent->hasAuthenticationResult()) {
+        if ($identity === null && ! $mvcAuthEvent->hasAuthenticationResult()) {
             // if there is no Authentication identity or result, safe to assume we have a guest
             $mvcAuthEvent->setIdentity(new Identity\GuestIdentity());
             return;
@@ -142,7 +142,7 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authenticationPost(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest
+        if (! $mvcEvent->getRequest() instanceof HttpRequest
             || $mvcEvent->getRequest()->isOptions()
         ) {
             return;
@@ -166,7 +166,7 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authorization(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest
+        if (! $mvcEvent->getRequest() instanceof HttpRequest
             || $mvcEvent->getRequest()->isOptions()
         ) {
             return;
@@ -196,7 +196,7 @@ class MvcRouteListener extends AbstractListenerAggregate
      */
     public function authorizationPost(MvcEvent $mvcEvent)
     {
-        if (!$mvcEvent->getRequest() instanceof HttpRequest
+        if (! $mvcEvent->getRequest() instanceof HttpRequest
             || $mvcEvent->getRequest()->isOptions()
         ) {
             return;

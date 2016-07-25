@@ -160,7 +160,7 @@ final class OAuth2ServerFactory
 
         $username = isset($config['username']) ? $config['username'] : null;
         $password = isset($config['password']) ? $config['password'] : null;
-        $options  = isset($config['options'])  ? $config['options'] : [];
+        $options  = isset($config['options']) ? $config['options'] : [];
 
         return [
             'dsn'      => $config['dsn'],

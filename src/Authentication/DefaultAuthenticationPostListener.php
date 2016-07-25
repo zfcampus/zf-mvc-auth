@@ -19,7 +19,7 @@ class DefaultAuthenticationPostListener
      */
     public function __invoke(MvcAuthEvent $mvcAuthEvent)
     {
-        if (!$mvcAuthEvent->hasAuthenticationResult()) {
+        if (! $mvcAuthEvent->hasAuthenticationResult()) {
             return;
         }
 
@@ -30,7 +30,7 @@ class DefaultAuthenticationPostListener
 
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
         $response = $mvcEvent->getResponse();
-        if (!$response instanceof HttpResponse) {
+        if (! $response instanceof HttpResponse) {
             return $response;
         }
 

@@ -15,6 +15,8 @@ class Module
 {
     protected $container;
 
+    protected $mvcRouteListener;
+
     /**
      * Retrieve module configuration
      *
@@ -115,5 +117,15 @@ class Module
         }
 
         $this->container->setService('api-identity', $e->getIdentity());
+    }
+
+    /**
+     * Retrieve the configured MvcRouteListener.
+     *
+     * @return null|MvcRouteListener
+     */
+    public function getMvcRouteListener()
+    {
+        return $this->mvcRouteListener;
     }
 }
