@@ -31,7 +31,7 @@ class DefaultAuthorizationPostListener
             return;
         }
 
-        if (!$response instanceof HttpResponse) {
+        if (! $response instanceof HttpResponse) {
             return $response;
         }
 

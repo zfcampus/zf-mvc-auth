@@ -43,12 +43,12 @@ class DefaultAuthorizationListener
         $mvcEvent = $mvcAuthEvent->getMvcEvent();
 
         $request  = $mvcEvent->getRequest();
-        if (!$request instanceof Request) {
+        if (! $request instanceof Request) {
             return;
         }
 
         $response  = $mvcEvent->getResponse();
-        if (!$response instanceof Response) {
+        if (! $response instanceof Response) {
             return;
         }
 
@@ -58,7 +58,7 @@ class DefaultAuthorizationListener
         }
 
         $identity = $mvcAuthEvent->getIdentity();
-        if (!$identity instanceof IdentityInterface) {
+        if (! $identity instanceof IdentityInterface) {
             return;
         }
 
