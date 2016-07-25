@@ -7,6 +7,7 @@
 namespace ZFTest\MvcAuth;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionMethod;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\Test\EventListenerIntrospectionTrait;
@@ -29,33 +30,52 @@ class ModuleTest extends TestCase
 {
     use EventListenerIntrospectionTrait;
 
+    protected function createApplication(ServiceManager $services, EventManagerInterface $events)
+    {
+        $r = new ReflectionMethod(Application::class, '__construct');
+        if ($r->getNumberOfRequiredParameters() === 2) {
+            // zend-mvc v2
+            return new Application([], $services, $events);
+        }
+
+        // zend-mvc v3
+        return new Application($services, $events);
+    }
+
+    protected function createServiceManager(array $config)
+    {
+        if (method_exists(ServiceManager::class, 'configure')) { // v3
+            // zend-servicemanager v3
+            return new ServiceManager($config['service_manager']);
+        }
+
+        // zend-servicemanager v2
+        $servicesConfig = new ServiceManagerConfig($config['service_manager']);
+        $services = new ServiceManager($servicesConfig);
+    }
+
     public function testOnBootstrapReturnsEarlyForNonHttpEvents()
     {
         $mvcEvent = $this->prophesize(MvcEvent::class);
         $module = new Module();
 
-        $request = $this->prophesize(RequestInterface::class);
-        $mvcEvent->getRequest()->will([$request, 'reveal']);
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+        $mvcEvent->getRequest()->willReturn($request);
         $module->onBootstrap($mvcEvent->reveal());
 
-        $this->assertNull($module->getMvcRouteListener());
+        $this->assertAttributeEmpty('container', $module);
     }
 
-    public function testOnBootstrapAttachesListeners()
+    public function expectedListeners()
     {
         $module = new Module();
         $config = $module->getConfig();
-        $request = $this->prophesize(Request::class);
-        $response = $this->prophesize(Response::class);
+        $request = $this->prophesize(Request::class)->reveal();
+        $response = $this->prophesize(Response::class)->reveal();
 
-        if (method_exists(ServiceManager::class, 'configure')) { // v3
-            $services = new ServiceManager($config['service_manager']);
-        } else { // v2
-            $servicesConfig = new ServiceManagerConfig($config['service_manager']);
-            $services = new ServiceManager($servicesConfig);
-        }
-        $services->setService('Request', $request->reveal());
-        $services->setService('Response', $response->reveal());
+        $services = $this->createServiceManager($config);
+        $services->setService('Request', $request);
+        $services->setService('Response', $response);
         $services->setService('config', $config);
 
         $events = new EventManager();
@@ -64,42 +84,37 @@ class ModuleTest extends TestCase
 
         $mvcEvent = new MvcEvent(MvcEvent::EVENT_BOOTSTRAP);
         $mvcEvent->setApplication($application);
-        $mvcEvent->setRequest($services->get('Request'));
-        $mvcEvent->setResponse($services->get('Response'));
+        $mvcEvent->setRequest($request);
+        $mvcEvent->setResponse($response);
 
         $module->onBootstrap($mvcEvent);
 
-        $listeners = [
-            [[$module->getMvcRouteListener(), 'authentication'], -50, MvcEvent::EVENT_ROUTE],
-            [[$module->getMvcRouteListener(), 'authenticationPost'], -51, MvcEvent::EVENT_ROUTE],
-            [[$module->getMvcRouteListener(), 'authorization'], -600, MvcEvent::EVENT_ROUTE],
-            [[$module->getMvcRouteListener(), 'authorizationPost'], -601, MvcEvent::EVENT_ROUTE],
-            [$services->get(DefaultAuthenticationListener::class), 1, MvcAuthEvent::EVENT_AUTHENTICATION],
-            [$services->get(DefaultAuthenticationPostListener::class), 1, MvcAuthEvent::EVENT_AUTHENTICATION_POST],
-            [$services->get(DefaultResourceResolverListener::class), 1000, MvcAuthEvent::EVENT_AUTHORIZATION],
-            [$services->get(DefaultAuthorizationListener::class), 1, MvcAuthEvent::EVENT_AUTHORIZATION],
-            [$services->get(DefaultAuthorizationPostListener::class), 1, MvcAuthEvent::EVENT_AUTHORIZATION_POST],
-            [[$module, 'onAuthenticationPost'], -1, MvcAuthEvent::EVENT_AUTHENTICATION_POST],
+        // @codingStandardsIgnoreStart
+        return [
+            'mvc-route-authentication'         => [[$module->getMvcRouteListener(), 'authentication'],        -50, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authentication-post'    => [[$module->getMvcRouteListener(), 'authenticationPost'],    -51, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authorization'          => [[$module->getMvcRouteListener(), 'authorization'],        -600, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authorization-post'     => [[$module->getMvcRouteListener(), 'authorizationPost'],    -601, MvcEvent::EVENT_ROUTE,                   $events],
+            'authentication'                   => [$services->get(DefaultAuthenticationListener::class),        1, MvcAuthEvent::EVENT_AUTHENTICATION,      $events],
+            'authentication-post'              => [$services->get(DefaultAuthenticationPostListener::class),    1, MvcAuthEvent::EVENT_AUTHENTICATION_POST, $events],
+            'resource-resoolver-authorization' => [$services->get(DefaultResourceResolverListener::class),   1000, MvcAuthEvent::EVENT_AUTHORIZATION,       $events],
+            'authorization'                    => [$services->get(DefaultAuthorizationListener::class),         1, MvcAuthEvent::EVENT_AUTHORIZATION,       $events],
+            'authorization-post'               => [$services->get(DefaultAuthorizationPostListener::class),     1, MvcAuthEvent::EVENT_AUTHORIZATION_POST,  $events],
+            'module-authentication-post'       => [[$module, 'onAuthenticationPost'],                          -1, MvcAuthEvent::EVENT_AUTHENTICATION_POST, $events],
         ];
-
-        foreach ($listeners as $listener) {
-            $this->assertListenerAtPriority(
-                $listener[0],
-                $listener[1],
-                $listener[2],
-                $events
-            );
-        }
+        // @codingStandardsIgnoreEnd
     }
 
-    protected function createApplication(ServiceManager $services, EventManagerInterface $events)
+    /**
+     * @dataProvider expectedListeners
+     */
+    public function testOnBootstrapAttachesListeners(callable $listener, $priority, $event, EventManager $events)
     {
-        $r = new \ReflectionMethod(Application::class, '__construct');
-        if ($r->getNumberOfRequiredParameters() === 2) {
-            // v2
-            return new Application([], $services, $events);
-        }
-
-        return new Application($services, $events);
+        $this->assertListenerAtPriority(
+            $listener,
+            $priority,
+            $event,
+            $events
+        );
     }
 }
