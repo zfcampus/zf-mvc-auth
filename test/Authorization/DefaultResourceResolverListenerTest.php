@@ -53,6 +53,20 @@ class DefaultResourceResolverListenerTest extends TestCase
         $this->assertFalse($this->listener->buildResourceString($routeMatch, $request));
     }
 
+    public function testBuildResourceStringReturnsEntityWhenIdentifierIsZero()
+    {
+        $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();
+        $routeMatch = $mvcEvent->getRouteMatch();
+        $routeMatch->setParam('controller', 'ZendCon\V1\Rest\Session\Controller');
+        $routeMatch->setParam('action', 'foo');
+        $routeMatch->setParam('session_id', '0');
+        $request    = $mvcEvent->getRequest();
+        $this->assertEquals(
+            'ZendCon\V1\Rest\Session\Controller::entity',
+            $this->listener->buildResourceString($routeMatch, $request)
+        );
+    }
+
     public function testBuildResourceStringReturnsControllerActionFormattedStringForNonRestController()
     {
         $mvcEvent   = $this->mvcAuthEvent->getMvcEvent();

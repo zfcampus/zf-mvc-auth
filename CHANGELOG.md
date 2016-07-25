@@ -39,6 +39,11 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#120](https://github.com/zfcampus/zf-mvc-auth/pull/120) fixes the
   `Module::onBootstrap()` method to re-introduce attachment of the
   `MvcRouteListener`.
+- [#119](https://github.com/zfcampus/zf-mvc-auth/pull/119) fixes a comparisoin
+  in `DefaultResourceResolverListener::getIdentifier()` whereby an identifier of
+  `0` was incorrectly resulting in matching to a collection request. As
+  collections and entities often have different permissions, this could lead to
+  potential false-positiive authorization checks.
 
 ## 1.4.0 - 2016-07-11
 
