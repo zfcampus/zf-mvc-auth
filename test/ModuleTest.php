@@ -1,123 +1,120 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\MvcAuth;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use Prophecy\Argument;
+use ReflectionMethod;
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\Test\EventListenerIntrospectionTrait;
+use Zend\Http\Request;
+use Zend\Http\Response;
+use Zend\Mvc\Application;
+use Zend\Mvc\MvcEvent;
+use Zend\Mvc\Service\ServiceManagerConfig;
+use Zend\ServiceManager\ServiceManager;
+use Zend\Stdlib\RequestInterface;
+use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener;
+use ZF\MvcAuth\Authorization\DefaultAuthorizationListener;
+use ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener;
+use ZF\MvcAuth\Authorization\DefaultResourceResolverListener;
 use ZF\MvcAuth\Module;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class ModuleTest extends TestCase
 {
-    public function setUp()
+    use EventListenerIntrospectionTrait;
+
+    protected function createApplication(ServiceManager $services, EventManagerInterface $events)
     {
-        $this->mvcEvent = $mvcEvent = $this->prophesize('Zend\Mvc\MvcEvent');
-        $this->module = new Module();
+        $r = new ReflectionMethod(Application::class, '__construct');
+        if ($r->getNumberOfRequiredParameters() === 2) {
+            // zend-mvc v2
+            return new Application([], $services, $events);
+        }
+
+        // zend-mvc v3
+        return new Application($services, $events);
     }
 
-    public function setUpApplication()
+    protected function createServiceManager(array $config)
     {
-        $services = $this->setUpServices();
-        $events   = $this->setUpEvents();
+        if (method_exists(ServiceManager::class, 'configure')) { // v3
+            // zend-servicemanager v3
+            return new ServiceManager($config['service_manager']);
+        }
 
-        $application = $this->prophesize('Zend\Mvc\Application');
-        $application->getEventManager()->will([$events, 'reveal']);
-        $application->getServiceManager()->will([$services, 'reveal']);
-
-        return $application;
-    }
-
-    public function setUpServices()
-    {
-        $authentication = $this->prophesize('Zend\Authentication\AuthenticationService');
-        $authorization  = $this->prophesize('ZF\MvcAuth\Authorization\AuthorizationInterface');
-        $defaultAuthenticationListener = $this->prophesize(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener'
-        );
-        $defaultAuthenticationPostListener = $this->prophesize(
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener'
-        );
-        $defaultResourceResolverListener = $this->prophesize(
-            'ZF\MvcAuth\Authorization\DefaultResourceResolverListener'
-        );
-        $defaultAuthorizationListener = $this->prophesize(
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationListener'
-        );
-        $defaultAuthorizationPostListener = $this->prophesize(
-            'ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener'
-        );
-
-        $services = $this->prophesize('Zend\ServiceManager\ServiceLocatorInterface');
-        $services->get('authentication')->will([$authentication, 'reveal']);
-        $services->get('authorization')->will([$authorization, 'reveal']);
-        $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
-            ->will([$defaultAuthenticationListener, 'reveal']);
-        $services->get('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
-            ->will([$defaultAuthenticationPostListener, 'reveal']);
-        $services->get('ZF\MvcAuth\Authorization\DefaultResourceResolverListener')
-            ->will([$defaultResourceResolverListener, 'reveal']);
-        $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
-            ->will([$defaultAuthorizationListener, 'reveal']);
-        $services->get('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
-            ->will([$defaultAuthorizationPostListener, 'reveal']);
-
-        return $services;
-    }
-
-    public function setUpEvents()
-    {
-        $events = $this->prophesize('Zend\EventManager\EventManagerInterface');
-
-        $events->attach(Argument::type('ZF\MvcAuth\MvcRouteListener'));
-
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHENTICATION,
-            Argument::type('ZF\MvcAuth\Authentication\DefaultAuthenticationListener')
-        );
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            Argument::type('ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener')
-        );
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHORIZATION,
-            Argument::type('ZF\MvcAuth\Authorization\DefaultResourceResolverListener'),
-            1000
-        );
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHORIZATION,
-            Argument::type('ZF\MvcAuth\Authorization\DefaultAuthorizationListener')
-        );
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHORIZATION_POST,
-            Argument::type('ZF\MvcAuth\Authorization\DefaultAuthorizationPostListener')
-        );
-        $events->attach(
-            MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            Argument::is([$this->module, 'onAuthenticationPost']),
-            -1
-        );
-
-        return $events;
+        // zend-servicemanager v2
+        $servicesConfig = new ServiceManagerConfig($config['service_manager']);
+        $services = new ServiceManager($servicesConfig);
     }
 
     public function testOnBootstrapReturnsEarlyForNonHttpEvents()
     {
-        $request = $this->prophesize('Zend\Stdlib\RequestInterface');
-        $this->mvcEvent->getRequest()->will([$request, 'reveal']);
-        $this->module->onBootstrap($this->mvcEvent->reveal());
+        $mvcEvent = $this->prophesize(MvcEvent::class);
+        $module = new Module();
+
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+        $mvcEvent->getRequest()->willReturn($request);
+        $module->onBootstrap($mvcEvent->reveal());
+
+        $this->assertAttributeEmpty('container', $module);
     }
 
-    public function testOnBootstrapAttachesListeners()
+    public function expectedListeners()
     {
-        $mvcEvent    = $this->mvcEvent;
-        $request     = $this->prophesize('Zend\Http\Request');
-        $application = $this->setUpApplication();
-        $mvcEvent->getRequest()->will([$request, 'reveal']);
-        $mvcEvent->getApplication()->will([$application, 'reveal']);
-        $this->module->onBootstrap($mvcEvent->reveal());
+        $module = new Module();
+        $config = $module->getConfig();
+        $request = $this->prophesize(Request::class)->reveal();
+        $response = $this->prophesize(Response::class)->reveal();
+
+        $services = $this->createServiceManager($config);
+        $services->setService('Request', $request);
+        $services->setService('Response', $response);
+        $services->setService('config', $config);
+
+        $events = new EventManager();
+
+        $application = $this->createApplication($services, $events);
+
+        $mvcEvent = new MvcEvent(MvcEvent::EVENT_BOOTSTRAP);
+        $mvcEvent->setApplication($application);
+        $mvcEvent->setRequest($request);
+        $mvcEvent->setResponse($response);
+
+        $module->onBootstrap($mvcEvent);
+
+        // @codingStandardsIgnoreStart
+        return [
+            'mvc-route-authentication'         => [[$module->getMvcRouteListener(), 'authentication'],        -50, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authentication-post'    => [[$module->getMvcRouteListener(), 'authenticationPost'],    -51, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authorization'          => [[$module->getMvcRouteListener(), 'authorization'],        -600, MvcEvent::EVENT_ROUTE,                   $events],
+            'mvc-route-authorization-post'     => [[$module->getMvcRouteListener(), 'authorizationPost'],    -601, MvcEvent::EVENT_ROUTE,                   $events],
+            'authentication'                   => [$services->get(DefaultAuthenticationListener::class),        1, MvcAuthEvent::EVENT_AUTHENTICATION,      $events],
+            'authentication-post'              => [$services->get(DefaultAuthenticationPostListener::class),    1, MvcAuthEvent::EVENT_AUTHENTICATION_POST, $events],
+            'resource-resoolver-authorization' => [$services->get(DefaultResourceResolverListener::class),   1000, MvcAuthEvent::EVENT_AUTHORIZATION,       $events],
+            'authorization'                    => [$services->get(DefaultAuthorizationListener::class),         1, MvcAuthEvent::EVENT_AUTHORIZATION,       $events],
+            'authorization-post'               => [$services->get(DefaultAuthorizationPostListener::class),     1, MvcAuthEvent::EVENT_AUTHORIZATION_POST,  $events],
+            'module-authentication-post'       => [[$module, 'onAuthenticationPost'],                          -1, MvcAuthEvent::EVENT_AUTHENTICATION_POST, $events],
+        ];
+        // @codingStandardsIgnoreEnd
+    }
+
+    /**
+     * @dataProvider expectedListeners
+     */
+    public function testOnBootstrapAttachesListeners(callable $listener, $priority, $event, EventManager $events)
+    {
+        $this->assertListenerAtPriority(
+            $listener,
+            $priority,
+            $event,
+            $events
+        );
     }
 }

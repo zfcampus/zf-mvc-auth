@@ -36,7 +36,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#120](https://github.com/zfcampus/zf-mvc-auth/pull/120) fixes the
+  `Module::onBootstrap()` method to re-introduce attachment of the
+  `MvcRouteListener`.
 
 ## 1.4.0 - 2016-07-11
 
