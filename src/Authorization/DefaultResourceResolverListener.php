@@ -106,7 +106,7 @@ class DefaultResourceResolverListener
         //     an identifier. We find that info from the route parameters.
         $identifierName = $this->restControllers[$controller];
         $id = $this->getIdentifier($identifierName, $routeMatch, $request);
-        if ($id) {
+        if ($id !== false) {
             return sprintf('%s::entity', $controller);
         }
         return sprintf('%s::collection', $controller);
@@ -126,7 +126,7 @@ class DefaultResourceResolverListener
     protected function getIdentifier($identifierName, $routeMatch, $request)
     {
         $id = $routeMatch->getParam($identifierName, false);
-        if ($id) {
+        if ($id !== false) {
             return $id;
         }
 
