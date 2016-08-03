@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.4.2 - TBD
+## 1.4.2 - 2016-08-03
 
 ### Added
 
@@ -18,7 +18,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#125](https://github.com/zfcampus/zf-mvc-auth/pull/125) updates the
+  `MvcRouteListener` to trigger events using `triggerEventUntil()` instead
+  of using argument overloading on `trigger()`; this change ensures that the
+  code will work with zend-eventmanager v3 properly.
 
 ## 1.4.1 - 2016-07-25
 

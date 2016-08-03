@@ -51,7 +51,7 @@ class ModuleTest extends TestCase
 
         // zend-servicemanager v2
         $servicesConfig = new ServiceManagerConfig($config['service_manager']);
-        $services = new ServiceManager($servicesConfig);
+        return new ServiceManager($servicesConfig);
     }
 
     public function testOnBootstrapReturnsEarlyForNonHttpEvents()
