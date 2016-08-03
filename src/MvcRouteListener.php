@@ -76,12 +76,13 @@ class MvcRouteListener extends AbstractListenerAggregate
         }
 
         $mvcAuthEvent = $this->mvcAuthEvent;
-        $responses    = $this->events->trigger($mvcAuthEvent::EVENT_AUTHENTICATION, $mvcAuthEvent, function ($r) {
+        $mvcAuthEvent->setName($mvcAuthEvent::EVENT_AUTHENTICATION);
+        $responses    = $this->events->triggerEventUntil(function ($r) {
             return ($r instanceof Identity\IdentityInterface
                 || $r instanceof Result
                 || $r instanceof Response
             );
-        });
+        }, $mvcAuthEvent);
 
         $result  = $responses->last();
         $storage = $this->authentication->getStorage();
@@ -148,13 +149,13 @@ class MvcRouteListener extends AbstractListenerAggregate
             return;
         }
 
-        $responses = $this->events->trigger(
-            MvcAuthEvent::EVENT_AUTHENTICATION_POST,
-            $this->mvcAuthEvent,
-            function ($r) {
-                return ($r instanceof Response);
-            }
-        );
+        $mvcAuthEvent = $this->mvcAuthEvent;
+        $mvcAuthEvent->setName($mvcAuthEvent::EVENT_AUTHENTICATION_POST);
+
+        $responses = $this->events->triggerEventUntil(function ($r) {
+            return ($r instanceof Response);
+        }, $mvcAuthEvent);
+
         return $responses->last();
     }
 
@@ -172,14 +173,17 @@ class MvcRouteListener extends AbstractListenerAggregate
             return;
         }
 
-        $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION, $this->mvcAuthEvent, function ($r) {
+        $mvcAuthEvent = $this->mvcAuthEvent;
+        $mvcAuthEvent->setName($mvcAuthEvent::EVENT_AUTHORIZATION);
+
+        $responses = $this->events->triggerEventUntil(function ($r) {
             return (is_bool($r) || $r instanceof Response);
-        });
+        }, $mvcAuthEvent);
 
         $result = $responses->last();
 
         if (is_bool($result)) {
-            $this->mvcAuthEvent->setIsAuthorized($result);
+            $mvcAuthEvent->setIsAuthorized($result);
             return;
         }
 
@@ -202,9 +206,13 @@ class MvcRouteListener extends AbstractListenerAggregate
             return;
         }
 
-        $responses = $this->events->trigger(MvcAuthEvent::EVENT_AUTHORIZATION_POST, $this->mvcAuthEvent, function ($r) {
+        $mvcAuthEvent = $this->mvcAuthEvent;
+        $mvcAuthEvent->setName($mvcAuthEvent::EVENT_AUTHORIZATION_POST);
+
+        $responses = $this->events->triggerEventUntil(function ($r) {
             return ($r instanceof Response);
-        });
+        }, $mvcAuthEvent);
+
         return $responses->last();
     }
 }
