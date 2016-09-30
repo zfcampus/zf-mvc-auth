@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.4.3 - TBD
+## 1.4.3 - 2016-09-30
 
 ### Added
 
@@ -18,7 +18,11 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#128](https://github.com/zfcampus/zf-mvc-auth/pull/128) fixes an issue
+  stemming from changes in the Admin API; controller service names are often
+  written in configuration using dash, versus namespace, separators, which
+  causes authorization lookups to fail. This version now converts dashes to
+  namespace separators in the controller names when creating the ACL.
 
 ## 1.4.2 - 2016-08-03
 
