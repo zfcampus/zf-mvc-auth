@@ -94,6 +94,10 @@ class AclAuthorizationFactory implements FactoryInterface
      */
     protected function createAclConfigFromPrivileges($controllerService, array $privileges, &$aclConfig, $denyByDefault)
     {
+        // Normalize the controller service name.
+        // zend-mvc will always pass the name using namespace seprators, but
+        // the admin may write the name using dash seprators.
+        $controllerService = strtr($controllerService, '-', '\\');
         if (isset($privileges['actions'])) {
             foreach ($privileges['actions'] as $action => $methods) {
                 $action = lcfirst($action);

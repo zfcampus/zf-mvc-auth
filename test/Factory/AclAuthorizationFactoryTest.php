@@ -21,37 +21,50 @@ class AclAuthorizationFactoryTest extends TestCase
         $this->factory  = new AclAuthorizationFactory();
     }
 
-    public function testCanCreateWhitelistAcl()
+    public function whitelistAclProvider()
     {
-        $config = ['zf-mvc-auth' => ['authorization' => [
-            'Foo\Bar\RestController' => [
-                'entity' => [
-                    'GET'    => false,
-                    'POST'   => false,
-                    'PUT'    => true,
-                    'PATCH'  => true,
-                    'DELETE' => true,
+        $entityConfig = [
+            'GET'    => false,
+            'POST'   => false,
+            'PUT'    => true,
+            'PATCH'  => true,
+            'DELETE' => true,
+        ];
+        $collectionConfig = [
+            'GET'    => false,
+            'POST'   => true,
+            'PUT'    => false,
+            'PATCH'  => false,
+            'DELETE' => false,
+        ];
+        $rpcConfig = [
+            'GET'    => false,
+            'POST'   => true,
+            'PUT'    => false,
+            'PATCH'  => false,
+            'DELETE' => false,
+        ];
+
+        foreach (['Foo\Bar\\', 'Foo-Bar-'] as $namespace) {
+            yield $namespace => [['zf-mvc-auth' => ['authorization' => [
+                $namespace . 'RestController' => [
+                    'entity' => $entityConfig,
+                    'collection' => $collectionConfig,
                 ],
-                'collection' => [
-                    'GET'    => false,
-                    'POST'   => true,
-                    'PUT'    => false,
-                    'PATCH'  => false,
-                    'DELETE' => false,
-                ],
-            ],
-            'Foo\Bar\RpcController' => [
-                'actions' => [
-                    'do' => [
-                        'GET'    => false,
-                        'POST'   => true,
-                        'PUT'    => false,
-                        'PATCH'  => false,
-                        'DELETE' => false,
+                $namespace . 'RpcController' => [
+                    'actions' => [
+                        'do' => $rpcConfig,
                     ],
                 ],
-            ],
-        ]]];
+            ]]]];
+        }
+    }
+
+    /**
+     * @dataProvider whitelistAclProvider
+     */
+    public function testCanCreateWhitelistAcl(array $config)
+    {
         $this->services->setService('config', $config);
 
         $factory = $this->factory;
@@ -63,6 +76,9 @@ class AclAuthorizationFactoryTest extends TestCase
         $authorizations = $config['zf-mvc-auth']['authorization'];
 
         foreach ($authorizations as $resource => $rules) {
+            // Internally, zend-mvc is always using namespace separators, so
+            // ensure we test against those specifically.
+            $resource = strtr($resource, '-', '\\');
             switch (true) {
                 case (array_key_exists('entity', $rules)):
                     foreach ($rules['entity'] as $method => $expected) {
@@ -236,5 +252,9 @@ class AclAuthorizationFactoryTest extends TestCase
         $acl = $factory($this->services, 'AclAuthorization');
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
         $this->assertFalse($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'POST'));
+    }
+
+    public function testNormalizesControllerServiceNames()
+    {
     }
 }
