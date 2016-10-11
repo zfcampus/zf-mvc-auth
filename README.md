@@ -206,7 +206,7 @@ return [
                         'dsn' => 'mysql:host=localhost;dbname=oauth2',
                         'username' => 'username',
                         'password' => 'password',
-                        'options' => aray(
+                        'options' => [
                             1002 => 'SET NAMES utf8', // PDO::MYSQL_ATTR_INIT_COMMAND
                         ],
                     ],
