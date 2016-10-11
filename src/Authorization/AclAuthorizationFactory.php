@@ -12,7 +12,7 @@ abstract class AclAuthorizationFactory
      * Create and return an AclAuthorization instance populated with provided privileges.
      *
      * @param array $config
-     * @return AclAuthoriazation
+     * @return AclAuthorization
      */
     public static function factory(array $config)
     {
