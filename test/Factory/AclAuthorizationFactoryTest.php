@@ -253,8 +253,4 @@ class AclAuthorizationFactoryTest extends TestCase
         $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
         $this->assertFalse($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'POST'));
     }
-
-    public function testNormalizesControllerServiceNames()
-    {
-    }
 }
