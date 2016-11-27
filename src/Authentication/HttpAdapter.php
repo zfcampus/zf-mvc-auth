@@ -120,10 +120,11 @@ class HttpAdapter extends AbstractAdapter
      */
     public function authenticate(Request $request, Response $response, MvcAuthEvent $mvcAuthEvent)
     {
-        if (! $request->getHeader('Authorization', false)) {
-            // No credentials were present at all, so we just return a guest identity.
-            return new Identity\GuestIdentity();
-        }
+        /**
+         * With or without credential we call the authentication service.
+         * In case of no credentials the service should trigger the authentication
+         * challenge according to the configured method (Basic or Digest)
+         */
 
         $this->httpAuth->setRequest($request);
         $this->httpAuth->setResponse($response);
