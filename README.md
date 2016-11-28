@@ -261,11 +261,7 @@ Example:
 >     'ZF\\OAuth2\\Controller\\Auth' => [
 >         'actions' => [
 >             'token' => [
->                 'GET'    => false,
->                 'POST'   => true,   // <-----
->                 'PATCH'  => false,
->                 'PUT'    => false,
->                 'DELETE' => false,
+>                 'POST'   => false,   
 >             ],
 >         ],
 >     ],
