@@ -256,7 +256,7 @@ Example:
 > As an example:
 >
 > ```php
-> `authorization` => [
+> 'authorization' => [
 >     'deny_by_default' => true,
 >     'ZF\\OAuth2\\Controller\\Auth' => [
 >         'actions' => [
@@ -294,7 +294,7 @@ the behavior of the `deny_by_default` key (discussed above) will be assumed.
 Below is an example:
 
 ```php
-`authorization` => [
+'authorization' => [
     'Controller\Service\Name' => [
         'actions' => [
             'action' => [
