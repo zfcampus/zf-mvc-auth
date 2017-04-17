@@ -85,7 +85,8 @@ final class OAuth2ServerFactory
             case 'mongo':
                 return self::createMongoAdapter($config, $container);
             default:
-                throw new ServiceNotCreatedException('Invalid storage adapter type for OAuth2');
+                $callback = $services->get($adapter);
+                return $callback($config, $services);
         }
     }
 
