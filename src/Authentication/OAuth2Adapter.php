@@ -145,7 +145,7 @@ class OAuth2Adapter extends AbstractAdapter
             $request->getHeaders()->toArray()
         );
 
-        $token = $this->oauth2Server->verifyResourceRequest($oauth2request);
+        $token = $this->oauth2Server->getAccessTokenData($oauth2request);
 
         // Failure to validate
         if (! $token) {
