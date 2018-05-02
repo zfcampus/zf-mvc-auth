@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2018 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZF\MvcAuth\Authentication;
@@ -145,27 +145,40 @@ class OAuth2Adapter extends AbstractAdapter
             $request->getHeaders()->toArray()
         );
 
+        $token = $this->oauth2Server->getAccessTokenData($oauth2request);
+
         // Failure to validate
-        if (! $this->oauth2Server->verifyResourceRequest($oauth2request)) {
-            $oauth2Response = $this->oauth2Server->getResponse();
-            $status = $oauth2Response->getStatusCode();
-
-            // 401 or 403 mean invalid credentials or unauthorized scopes; report those.
-            if (in_array($status, [401, 403], true) && null !== $oauth2Response->getParameter('error')) {
-                return $this->mergeOAuth2Response($status, $response, $oauth2Response);
-            }
-
-            // Merge in any headers; typically sets a WWW-Authenticate header.
-            $this->mergeOAuth2ResponseHeaders($response, $oauth2Response->getHttpHeaders());
-
-            // Otherwise, no credentials were present at all, so we just return a guest identity.
-            return new Identity\GuestIdentity();
+        if (! $token) {
+            return $this->processInvalidToken($response);
         }
 
-        $token    = $this->oauth2Server->getAccessTokenData($oauth2request);
         $identity = new Identity\AuthenticatedIdentity($token);
         $identity->setName($token['user_id']);
+
         return $identity;
+    }
+
+    /**
+     * Handle a invalid Token.
+     *
+     * @param $response
+     * @return Response|Identity\GuestIdentity
+     */
+    private function processInvalidToken($response)
+    {
+        $oauth2Response = $this->oauth2Server->getResponse();
+        $status = $oauth2Response->getStatusCode();
+
+        // 401 or 403 mean invalid credentials or unauthorized scopes; report those.
+        if (in_array($status, [401, 403], true) && null !== $oauth2Response->getParameter('error')) {
+            return $this->mergeOAuth2Response($status, $response, $oauth2Response);
+        }
+
+        // Merge in any headers; typically sets a WWW-Authenticate header.
+        $this->mergeOAuth2ResponseHeaders($response, $oauth2Response->getHttpHeaders());
+
+        // Otherwise, no credentials were present at all, so we just return a guest identity.
+        return new Identity\GuestIdentity();
     }
 
     /**

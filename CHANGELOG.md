@@ -26,6 +26,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
+### Changed
+
+- Nothing.
+
 ### Deprecated
 
 - Nothing.
@@ -36,7 +40,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#136](https://github.com/zfcampus/zf-mvc-auth/pull/136) provides changes to the `OAuth2Adapter` that prevent hitting
+  the database twice when the token is valid.
 
 ## 1.4.3 - 2016-09-30
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2018 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\MvcAuth\Authentication;
@@ -45,11 +45,11 @@ class OAuth2AdapterTest extends TestCase
 
         $this->oauthServer
             ->expects($this->once())
-            ->method('verifyResourceRequest')
+            ->method('getAccessTokenData')
             ->with($this->callback(function ($subject) {
                 return ($subject instanceof OAuth2Request);
             }))
-            ->willReturn(false);
+            ->willReturn(null);
 
         $this->oauthServer
             ->expects($this->once())
@@ -89,11 +89,11 @@ class OAuth2AdapterTest extends TestCase
 
         $this->oauthServer
             ->expects($this->once())
-            ->method('verifyResourceRequest')
+            ->method('getAccessTokenData')
             ->with($this->callback(function ($subject) {
                 return ($subject instanceof OAuth2Request);
             }))
-            ->willReturn(false);
+            ->willReturn(null);
 
         $this->oauthServer
             ->expects($this->once())
@@ -128,11 +128,11 @@ class OAuth2AdapterTest extends TestCase
 
         $this->oauthServer
             ->expects($this->once())
-            ->method('verifyResourceRequest')
+            ->method('getAccessTokenData')
             ->with($this->callback(function ($subject) {
                 return ($subject instanceof OAuth2Request);
             }))
-            ->willReturn(false);
+            ->willReturn(null);
 
         $this->oauthServer
             ->expects($this->once())
@@ -177,11 +177,11 @@ class OAuth2AdapterTest extends TestCase
 
         $this->oauthServer
             ->expects($this->once())
-            ->method('verifyResourceRequest')
+            ->method('getAccessTokenData')
             ->with($this->callback(function ($subject) {
                 return ($subject instanceof OAuth2Request);
             }))
-            ->willReturn(false);
+            ->willReturn(null);
 
         $this->oauthServer
             ->expects($this->once())
