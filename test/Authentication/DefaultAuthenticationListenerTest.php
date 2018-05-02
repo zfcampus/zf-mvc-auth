@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2014-2018 Zend Technologies USA Inc. (http://www.zend.com)
  */
 
 namespace ZFTest\MvcAuth\Authentication;
@@ -312,9 +312,6 @@ class DefaultAuthenticationListenerTest extends TestCase
         $server = $this->getMockBuilder('OAuth2\Server')
             ->disableOriginalConstructor()
             ->getMock();
-        $server->expects($this->atLeastOnce())
-            ->method('verifyResourceRequest')
-            ->will($this->returnValue(true));
 
         $server->expects($this->atLeastOnce())
             ->method('getAccessTokenData')
@@ -796,15 +793,10 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->getMock();
 
         $server->expects($this->atLeastOnce())
-            ->method('verifyResourceRequest')
+            ->method('getAccessTokenData')
             ->with($this->callback(function (OAuth2Request $request) {
                 return $request->headers('Authorization') === 'Bearer TOKEN';
             }))
-            ->willReturn(true);
-
-        $server->expects($this->atLeastOnce())
-            ->method('getAccessTokenData')
-            ->with($this->anything())
             ->willReturn(['user_id' => 'TOKEN']);
 
         $this->listener->attach(new OAuth2Adapter($server));
