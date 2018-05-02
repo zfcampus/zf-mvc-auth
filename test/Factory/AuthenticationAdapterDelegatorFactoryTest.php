@@ -6,9 +6,12 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Authentication\AuthenticationService;
 use Zend\ServiceManager\ServiceManager;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
+use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use ZF\MvcAuth\Factory\AuthenticationAdapterDelegatorFactory;
 
 class AuthenticationAdapterDelegatorFactoryTest extends TestCase
@@ -43,7 +46,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
 
         $listener = $factory(
             $this->services,
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
+            DefaultAuthenticationListener::class,
             $this->callback
         );
         $this->assertSame($this->listener, $listener);
@@ -69,7 +72,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
                 'authentication' => [
                     'adapters' => [
                         'foo' => [
-                            'adapter' => 'ZF\MvcAuth\Authentication\HttpAdapter',
+                            'adapter' => HttpAdapter::class,
                             'options' => [
                                 'accept_schemes' => ['basic'],
                                 'realm' => 'api',
@@ -77,7 +80,7 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
                             ],
                         ],
                         'bar' => [
-                            'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                            'adapter' => OAuth2Adapter::class,
                             'storage' => [
                                 'adapter' => 'pdo',
                                 'dsn' => 'sqlite::memory:',
@@ -96,14 +99,14 @@ class AuthenticationAdapterDelegatorFactoryTest extends TestCase
         $this->services->setService('config', $config);
         $this->services->setService(
             'authentication',
-            $this->getMockBuilder('Zend\Authentication\AuthenticationService')->getMock()
+            $this->getMockBuilder(AuthenticationService::class)->getMock()
         );
 
         $factory = $this->factory;
 
         $listener = $factory(
             $this->services,
-            'ZF\MvcAuth\Authentication\DefaultAuthenticationListener',
+            DefaultAuthenticationListener::class,
             $this->callback
         );
         $this->assertSame($this->listener, $listener);

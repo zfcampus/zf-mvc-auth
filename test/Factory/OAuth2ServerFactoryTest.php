@@ -6,9 +6,13 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use MongoDB;
+use OAuth2\GrantType;
+use OAuth2\Server as OAuth2Server;
+use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use ZF\MvcAuth\Factory\OAuth2ServerFactory;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\ServiceManager;
 
 class OAuth2ServerFactoryTest extends TestCase
@@ -37,25 +41,30 @@ class OAuth2ServerFactoryTest extends TestCase
 
     public function testRaisesExceptionIfAdapterIsMissing()
     {
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'storage adapter');
         $services = $this->mockConfig(new ServiceManager());
         $config = [
             'dsn' => 'sqlite::memory:',
         ];
-        $server = OAuth2ServerFactory::factory($config, $services);
+
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('storage adapter');
+
+        OAuth2ServerFactory::factory($config, $services);
     }
 
     public function testRaisesExceptionCreatingPdoBackedServerIfDsnIsMissing()
     {
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'Missing DSN');
         $services = $this->mockConfig(new ServiceManager());
         $config = [
             'adapter' => 'pdo',
             'username' => 'username',
             'password' => 'password',
         ];
-        $server = OAuth2ServerFactory::factory($config, $services);
-        $this->assertInstanceOf('OAuth2\Server', $server);
+
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('Missing DSN');
+
+        OAuth2ServerFactory::factory($config, $services);
     }
 
     public function testCanCreatePdoAdapterBackedServer()
@@ -66,17 +75,17 @@ class OAuth2ServerFactoryTest extends TestCase
             'dsn' => 'sqlite::memory:',
         ];
         $server = OAuth2ServerFactory::factory($config, $services);
-        $this->assertInstanceOf('OAuth2\Server', $server);
+        $this->assertInstanceOf(OAuth2Server::class, $server);
     }
 
     public function testCanCreateMongoBackedServerUsingMongoFromServices()
     {
-        if (! class_exists('MongoDB')) {
+        if (! class_exists(MongoDB::class)) {
             $this->markTestSkipped('Mongo extension is required for this test');
         }
 
         $services = $this->mockConfig(new ServiceManager());
-        $mongoClient = $this->getMockBuilder('MongoDB')
+        $mongoClient = $this->getMockBuilder(MongoDB::class)
             ->disableOriginalConstructor(true)
             ->getMock();
         $services->setService('MongoService', $mongoClient);
@@ -86,7 +95,7 @@ class OAuth2ServerFactoryTest extends TestCase
             'locator_name' => 'MongoService',
         ];
         $server = OAuth2ServerFactory::factory($config, $services);
-        $this->assertInstanceOf('OAuth2\Server', $server);
+        $this->assertInstanceOf(OAuth2Server::class, $server);
     }
 
     public function testRaisesExceptionCreatingMongoBackedServerIfDatabaseIsMissing()
@@ -96,13 +105,15 @@ class OAuth2ServerFactoryTest extends TestCase
             'adapter' => 'mongo',
         ];
 
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'database');
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('database');
+
         $server = OAuth2ServerFactory::factory($config, $services);
     }
 
     public function testCanCreateMongoAdapterBackedServer()
     {
-        if (! class_exists('MongoDB')) {
+        if (! class_exists(MongoDB::class)) {
             $this->markTestSkipped('Mongo extension is required for this test');
         }
 
@@ -112,7 +123,7 @@ class OAuth2ServerFactoryTest extends TestCase
             'database' => 'zf-mvc-auth-test',
         ];
         $server = OAuth2ServerFactory::factory($config, $services);
-        $this->assertInstanceOf('OAuth2\Server', $server);
+        $this->assertInstanceOf(OAuth2Server::class, $server);
     }
 
     public function disableGrantType()
@@ -150,7 +161,7 @@ class OAuth2ServerFactoryTest extends TestCase
             'dsn' => 'sqlite::memory:',
         ];
         $server = OAuth2ServerFactory::factory($config, $services);
-        $this->assertInstanceOf('OAuth2\Server', $server);
+        $this->assertInstanceOf(OAuth2Server::class, $server);
 
         $grantTypes = $server->getGrantTypes();
         foreach ($options['zf-oauth2']['grant_types'] as $type => $enabled) {
@@ -171,19 +182,19 @@ class OAuth2ServerFactoryTest extends TestCase
 
             switch ($type) {
                 case 'client_credentials':
-                    $class = 'OAuth2\GrantType\ClientCredentials';
+                    $class = GrantType\ClientCredentials::class;
                     break;
                 case 'authorization_code':
-                    $class = 'OAuth2\GrantType\AuthorizationCode';
+                    $class = GrantType\AuthorizationCode::class;
                     break;
                 case 'password':
-                    $class = 'OAuth2\GrantType\UserCredentials';
+                    $class = GrantType\UserCredentials::class;
                     break;
                 case 'urn:ietf:params:oauth:grant-type:jwt-bearer':
-                    $class = 'OAuth2\GrantType\JwtBearer';
+                    $class = GrantType\JwtBearer::class;
                     break;
                 case 'refresh_token':
-                    $class = 'OAuth2\GrantType\RefreshToken';
+                    $class = GrantType\RefreshToken::class;
                     break;
                 default:
                     $this->fail(sprintf('Unknown grant type: %s!', $type));

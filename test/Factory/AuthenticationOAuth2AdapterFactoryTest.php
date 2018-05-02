@@ -6,14 +6,17 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use ZF\MvcAuth\Factory\AuthenticationOAuth2AdapterFactory;
 
 class AuthenticationOAuth2AdapterFactoryTest extends TestCase
 {
     public function setUp()
     {
-        $this->services = $this->getMockBuilder('Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $this->services = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
     }
 
 
@@ -35,7 +38,8 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
      */
     public function testRaisesExceptionForMissingOrInvalidStorage(array $config)
     {
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException', 'Missing storage');
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('Missing storage');
         AuthenticationOAuth2AdapterFactory::factory('foo', $config, $this->services);
     }
 
@@ -66,7 +70,7 @@ class AuthenticationOAuth2AdapterFactoryTest extends TestCase
             ]));
 
         $adapter = AuthenticationOAuth2AdapterFactory::factory('foo', $config, $this->services);
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
+        $this->assertInstanceOf(OAuth2Adapter::class, $adapter);
         $this->assertEquals(['foo'], $adapter->provides());
     }
 }
