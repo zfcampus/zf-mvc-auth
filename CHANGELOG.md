@@ -6,7 +6,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- Nothing.
+- [#137](https://github.com/zfcampus/zf-mvc-auth/pull/137) adds support for zend-permissions-rbac 3.0.
+
+- [#137](https://github.com/zfcampus/zf-mvc-auth/pull/137) adds support for PHP 7.1 and 7.2.
 
 ### Changed
 
@@ -18,7 +20,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- [#137](https://github.com/zfcampus/zf-mvc-auth/pull/137) removes support for HHVM.
 
 ### Fixed
 
