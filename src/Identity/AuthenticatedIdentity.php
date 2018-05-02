@@ -6,9 +6,9 @@
 
 namespace ZF\MvcAuth\Identity;
 
-use Zend\Permissions\Rbac\AbstractRole as AbstractRbacRole;
+use Zend\Permissions\Rbac\Role;
 
-class AuthenticatedIdentity extends AbstractRbacRole implements IdentityInterface
+class AuthenticatedIdentity extends Role implements IdentityInterface
 {
     protected $identity;
 

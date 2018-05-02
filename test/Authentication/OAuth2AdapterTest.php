@@ -8,16 +8,20 @@ namespace ZFTest\MvcAuth\Authentication;
 
 use ArrayIterator;
 use OAuth2\Request as OAuth2Request;
-use PHPUnit_Framework_TestCase as TestCase;
+use OAuth2\Response as OAuth2Response;
+use OAuth2\Server as OAuth2Server;
+use PHPUnit\Framework\TestCase;
 use Zend\Http\PhpEnvironment\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use ZF\MvcAuth\Authentication\OAuth2Adapter;
+use ZF\MvcAuth\Identity\GuestIdentity;
+use ZF\MvcAuth\MvcAuthEvent;
 
 class OAuth2AdapterTest extends TestCase
 {
     public function setUp()
     {
-        $this->oauthServer = $this->getMockBuilder('OAuth2\Server')->getMock();
+        $this->oauthServer = $this->getMockBuilder(OAuth2Server::class)->getMock();
         $this->adapter = new OAuth2Adapter($this->oauthServer);
     }
 
@@ -26,7 +30,7 @@ class OAuth2AdapterTest extends TestCase
      */
     public function testReturns401ResponseWhenErrorOccursDuringValidation()
     {
-        $oauth2Response = $this->getMockBuilder('OAuth2\Response')
+        $oauth2Response = $this->getMockBuilder(OAuth2Response::class)
             ->disableOriginalConstructor()
             ->getMock();
         $oauth2Response
@@ -56,12 +60,12 @@ class OAuth2AdapterTest extends TestCase
             ->method('getResponse')
             ->willReturn($oauth2Response);
 
-        $mvcAuthEvent = $this->getMockBuilder('ZF\MvcAuth\MvcAuthEvent')
+        $mvcAuthEvent = $this->getMockBuilder(MvcAuthEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $result = $this->adapter->authenticate(new HttpRequest, new HttpResponse, $mvcAuthEvent);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(HttpResponse::class, $result);
         $this->assertEquals(401, $result->getStatusCode());
     }
 
@@ -70,7 +74,7 @@ class OAuth2AdapterTest extends TestCase
      */
     public function testReturns403ResponseWhenInvalidScopeDetected()
     {
-        $oauth2Response = $this->getMockBuilder('OAuth2\Response')
+        $oauth2Response = $this->getMockBuilder(OAuth2Response::class)
             ->disableOriginalConstructor()
             ->getMock();
         $oauth2Response
@@ -100,12 +104,12 @@ class OAuth2AdapterTest extends TestCase
             ->method('getResponse')
             ->willReturn($oauth2Response);
 
-        $mvcAuthEvent = $this->getMockBuilder('ZF\MvcAuth\MvcAuthEvent')
+        $mvcAuthEvent = $this->getMockBuilder(MvcAuthEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $result = $this->adapter->authenticate(new HttpRequest, new HttpResponse, $mvcAuthEvent);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(HttpResponse::class, $result);
         $this->assertEquals(403, $result->getStatusCode());
     }
 
@@ -114,7 +118,7 @@ class OAuth2AdapterTest extends TestCase
      */
     public function testReturnsGuestIdentityIfOAuth2ResponseIsNotAnError()
     {
-        $oauth2Response = $this->getMockBuilder('OAuth2\Response')
+        $oauth2Response = $this->getMockBuilder(OAuth2Response::class)
             ->disableOriginalConstructor()
             ->getMock();
         $oauth2Response
@@ -139,12 +143,12 @@ class OAuth2AdapterTest extends TestCase
             ->method('getResponse')
             ->willReturn($oauth2Response);
 
-        $mvcAuthEvent = $this->getMockBuilder('ZF\MvcAuth\MvcAuthEvent')
+        $mvcAuthEvent = $this->getMockBuilder(MvcAuthEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $result = $this->adapter->authenticate(new HttpRequest, new HttpResponse, $mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $result);
+        $this->assertInstanceOf(GuestIdentity::class, $result);
     }
 
     /**
@@ -158,7 +162,7 @@ class OAuth2AdapterTest extends TestCase
             . 'error="unauthorized", '
             . 'error_description="User has insufficient privileges"',
         ];
-        $oauth2Response = $this->getMockBuilder('OAuth2\Response')
+        $oauth2Response = $this->getMockBuilder(OAuth2Response::class)
             ->disableOriginalConstructor()
             ->getMock();
         $oauth2Response
@@ -188,12 +192,12 @@ class OAuth2AdapterTest extends TestCase
             ->method('getResponse')
             ->willReturn($oauth2Response);
 
-        $mvcAuthEvent = $this->getMockBuilder('ZF\MvcAuth\MvcAuthEvent')
+        $mvcAuthEvent = $this->getMockBuilder(MvcAuthEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $result = $this->adapter->authenticate(new HttpRequest, new HttpResponse, $mvcAuthEvent);
-        $this->assertInstanceOf('Zend\Http\Response', $result);
+        $this->assertInstanceOf(HttpResponse::class, $result);
 
         $headers = $result->getHeaders();
         foreach ($expectedHeaders as $name => $value) {

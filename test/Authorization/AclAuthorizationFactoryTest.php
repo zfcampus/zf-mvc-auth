@@ -2,7 +2,9 @@
 
 namespace ZFTest\MvcAuth\Authorization;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Permissions\Acl\Acl;
+use ZF\MvcAuth\Authorization\AclAuthorization;
 use ZF\MvcAuth\Authorization\AclAuthorizationFactory;
 
 class AclAuthorizationFactoryTest extends TestCase
@@ -26,8 +28,8 @@ class AclAuthorizationFactoryTest extends TestCase
 
         $acl = AclAuthorizationFactory::factory($config);
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
-        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
+        $this->assertInstanceOf(Acl::class, $acl);
         $this->assertTrue($acl->hasRole('guest'));
         $this->assertFalse($acl->hasRole('authenticated'));
 
@@ -73,8 +75,8 @@ class AclAuthorizationFactoryTest extends TestCase
 
         $acl = AclAuthorizationFactory::factory($config);
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
-        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
+        $this->assertInstanceOf(Acl::class, $acl);
         $this->assertTrue($acl->hasRole('guest'));
         $this->assertFalse($acl->hasRole('authenticated'));
 

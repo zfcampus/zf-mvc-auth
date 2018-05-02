@@ -2,8 +2,11 @@
 
 namespace ZFTest\MvcAuth\Identity;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Permissions\Acl\Role\RoleInterface as AclRoleInterface;
+use Zend\Permissions\Rbac\RoleInterface as RbacRoleInterface;
 use ZF\MvcAuth\Identity\GuestIdentity;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 class GuestIdentityTest extends TestCase
 {
@@ -14,17 +17,17 @@ class GuestIdentityTest extends TestCase
 
     public function testGuestIsAnIdentityType()
     {
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\IdentityInterface', $this->identity);
+        $this->assertInstanceOf(IdentityInterface::class, $this->identity);
     }
 
     public function testGuestImplementsAclRole()
     {
-        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->identity);
+        $this->assertInstanceOf(AclRoleInterface::class, $this->identity);
     }
 
     public function testGuestImplementsRbacRole()
     {
-        $this->assertInstanceOf('Zend\Permissions\Rbac\RoleInterface', $this->identity);
+        $this->assertInstanceOf(RbacRoleInterface::class, $this->identity);
     }
 
     public function testGuestRoleIdIsGuest()

@@ -1,7 +1,8 @@
 ZF MVC Auth
 ===========
 
-[![Build Status](https://travis-ci.org/zfcampus/zf-mvc-auth.png)](https://travis-ci.org/zfcampus/zf-mvc-auth)
+[![Build Status](https://secure.travis-ci.org/zfcampus/zf-mvc-auth.svg?branch=master)](https://secure.travis-ci.org/zfcampus/zf-mvc-auth)
+[![Coverage Status](https://coveralls.io/repos/github/zfcampus/zf-mvc-auth/badge.svg?branch=master)](https://coveralls.io/github/zfcampus/zf-mvc-auth?branch=master)
 
 Introduction
 ------------

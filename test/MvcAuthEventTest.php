@@ -2,17 +2,16 @@
 
 namespace ZFTest\MvcAuth;
 
+use PHPUnit\Framework\TestCase;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result;
+use Zend\Permissions\Acl\Acl;
 use Zend\Mvc\MvcEvent;
 use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
-use Zend\Permissions\Acl\Acl;
-use PHPUnit_Framework_TestCase as TestCase;
 
 class MvcAuthEventTest extends TestCase
 {
-
     /**
      * @var MvcAuthEvent
      */
@@ -26,10 +25,7 @@ class MvcAuthEventTest extends TestCase
 
     public function testGetAuthenticationService()
     {
-        $this->assertInstanceOf(
-            'Zend\Authentication\AuthenticationService',
-            $this->mvcAuthEvent->getAuthenticationService()
-        );
+        $this->assertInstanceOf(AuthenticationService::class, $this->mvcAuthEvent->getAuthenticationService());
     }
 
     public function testHasAuthenticationResult()
@@ -50,17 +46,17 @@ class MvcAuthEventTest extends TestCase
     public function testGetAuthenticationResult()
     {
         $this->mvcAuthEvent->setAuthenticationResult(new Result('success', 'foobar'));
-        $this->assertInstanceOf('Zend\Authentication\Result', $this->mvcAuthEvent->getAuthenticationResult());
+        $this->assertInstanceOf(Result::class, $this->mvcAuthEvent->getAuthenticationResult());
     }
 
     public function testGetAuthorizationService()
     {
-        $this->assertInstanceOf('Zend\Permissions\Acl\Acl', $this->mvcAuthEvent->getAuthorizationService());
+        $this->assertInstanceOf(Acl::class, $this->mvcAuthEvent->getAuthorizationService());
     }
 
     public function testGetMvcEvent()
     {
-        $this->assertInstanceOf('Zend\Mvc\MvcEvent', $this->mvcAuthEvent->getMvcEvent());
+        $this->assertInstanceOf(MvcEvent::class, $this->mvcAuthEvent->getMvcEvent());
     }
 
     public function testSetIdentity()

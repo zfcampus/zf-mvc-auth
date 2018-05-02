@@ -2,10 +2,12 @@
 
 namespace ZFTest\MvcAuth;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Authentication\AuthenticationService;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\Test\EventListenerIntrospectionTrait;
 use Zend\Mvc\MvcEvent;
+use ZF\MvcAuth\MvcAuthEvent;
 use ZF\MvcAuth\MvcRouteListener;
 
 class MvcRouteListenerTest extends TestCase
@@ -18,11 +20,11 @@ class MvcRouteListenerTest extends TestCase
     {
         $this->events = new EventManager;
         $this->auth   = $this
-            ->getMockBuilder('Zend\Authentication\AuthenticationService')
+            ->getMockBuilder(AuthenticationService::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->event  = $this
-            ->getMockBuilder('ZF\MvcAuth\MvcAuthEvent')
+            ->getMockBuilder(MvcAuthEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 

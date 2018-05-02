@@ -6,14 +6,18 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Authentication\AuthenticationService;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use ZF\MvcAuth\Authentication\HttpAdapter;
 use ZF\MvcAuth\Factory\AuthenticationHttpAdapterFactory;
 
 class AuthenticationHttpAdapterFactoryTest extends TestCase
 {
     public function setUp()
     {
-        $this->services = $this->getMockBuilder('Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $this->services = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
     }
 
     public function testRaisesExceptionIfNoAuthenticationServicePresent()
@@ -23,10 +27,8 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
             ->with($this->equalTo('authentication'))
             ->will($this->returnValue(false));
 
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'missing AuthenticationService'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('missing AuthenticationService');
         AuthenticationHttpAdapterFactory::factory('foo', [], $this->services);
     }
 
@@ -53,10 +55,8 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
             ->with($this->equalTo('authentication'))
             ->will($this->returnValue(true));
 
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'missing options'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('missing options');
         AuthenticationHttpAdapterFactory::factory('foo', $config, $this->services);
     }
 
@@ -91,7 +91,7 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
      */
     public function testCreatesHttpAdapterWhenConfigurationIsValid(array $options, array $provides)
     {
-        $authService = $this->getMockBuilder('Zend\Authentication\AuthenticationService')->getMock();
+        $authService = $this->getMockBuilder(AuthenticationService::class)->getMock();
         $this->services->expects($this->atLeastOnce())
             ->method('has')
             ->with($this->equalTo('authentication'))
@@ -102,7 +102,7 @@ class AuthenticationHttpAdapterFactoryTest extends TestCase
             ->will($this->returnValue($authService));
 
         $adapter = AuthenticationHttpAdapterFactory::factory('foo', ['options' => $options], $this->services);
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\HttpAdapter', $adapter);
+        $this->assertInstanceOf(HttpAdapter::class, $adapter);
         $this->assertEquals($provides, $adapter->provides());
     }
 }

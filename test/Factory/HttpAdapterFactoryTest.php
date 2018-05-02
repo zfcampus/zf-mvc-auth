@@ -6,7 +6,13 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Authentication\Adapter\Http as HttpBasic;
+use Zend\Authentication\Adapter\Http\ApacheResolver;
+use Zend\Authentication\Adapter\Http\FileResolver;
+use Zend\Authentication\Adapter\Http\ResolverInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use ZF\MvcAuth\Factory\HttpAdapterFactory;
 
 class HttpAdapterFactoryTest extends TestCase
@@ -22,10 +28,8 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testFactoryRaisesExceptionWhenNoAcceptSchemesPresent()
     {
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'accept_schemes'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('accept_schemes');
         HttpAdapterFactory::factory([]);
     }
 
@@ -49,19 +53,15 @@ class HttpAdapterFactoryTest extends TestCase
      */
     public function testFactoryRaisesExceptionWhenAcceptSchemesIsNotAnArray($acceptSchemes)
     {
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'accept_schemes'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('accept_schemes');
         HttpAdapterFactory::factory(['accept_schemes' => $acceptSchemes]);
     }
 
     public function testFactoryRaisesExceptionWhenRealmIsMissing()
     {
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'realm'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('realm');
         HttpAdapterFactory::factory([
             'accept_schemes' => ['basic'],
         ]);
@@ -69,10 +69,8 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testRaisesExceptionWhenDigestConfiguredAndNoDomainsPresent()
     {
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'digest_domains'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('digest_domains');
         HttpAdapterFactory::factory([
             'accept_schemes' => ['digest'],
             'realm' => 'api',
@@ -82,10 +80,8 @@ class HttpAdapterFactoryTest extends TestCase
 
     public function testRaisesExceptionWhenDigestConfiguredAndNoNoncePresent()
     {
-        $this->setExpectedException(
-            'Zend\ServiceManager\Exception\ServiceNotCreatedException',
-            'digest_domains'
-        );
+        $this->expectException(ServiceNotCreatedException::class);
+        $this->expectExceptionMessage('digest_domains');
         HttpAdapterFactory::factory([
             'accept_schemes' => ['digest'],
             'realm' => 'api',
@@ -121,7 +117,7 @@ class HttpAdapterFactoryTest extends TestCase
     public function testCanReturnAdapterWithNoResolvers($config)
     {
         $adapter = HttpAdapterFactory::factory($config);
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
@@ -134,8 +130,8 @@ class HttpAdapterFactoryTest extends TestCase
             'htpasswd' => $this->htpasswd,
         ]);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http\ApacheResolver', $adapter->getBasicResolver());
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
+        $this->assertInstanceOf(ApacheResolver::class, $adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
 
@@ -149,9 +145,9 @@ class HttpAdapterFactoryTest extends TestCase
             'htdigest' => $this->htdigest,
         ]);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http\FileResolver', $adapter->getDigestResolver());
+        $this->assertInstanceOf(FileResolver::class, $adapter->getDigestResolver());
     }
 
     public function testCanReturnCompoundAdapter()
@@ -165,23 +161,23 @@ class HttpAdapterFactoryTest extends TestCase
             'htdigest' => $this->htdigest,
         ]);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http\ApacheResolver', $adapter->getBasicResolver());
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http\FileResolver', $adapter->getDigestResolver());
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
+        $this->assertInstanceOf(ApacheResolver::class, $adapter->getBasicResolver());
+        $this->assertInstanceOf(FileResolver::class, $adapter->getDigestResolver());
     }
 
     public function testCanReturnBasicAdapterWithCustomResolverFromServiceManager()
     {
         $keyForServiceManager = 'keyForServiceManager';
 
-        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $serviceManager = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('has')
             ->with($keyForServiceManager)
             ->will($this->returnValue(true));
 
-        $resolver = $this->getMockBuilder('\Zend\Authentication\Adapter\Http\ResolverInterface')->getMock();
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('get')
@@ -197,7 +193,7 @@ class HttpAdapterFactoryTest extends TestCase
             'basic_resolver_factory' => $keyForServiceManager,
         ], $serviceManager);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertSame($resolver, $adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
@@ -206,14 +202,14 @@ class HttpAdapterFactoryTest extends TestCase
     {
         $keyForServiceManager = 'keyForServiceManager';
 
-        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $serviceManager = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('has')
             ->with($keyForServiceManager)
             ->will($this->returnValue(true));
 
-        $resolver = $this->getMockBuilder('\Zend\Authentication\Adapter\Http\ResolverInterface')->getMock();
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $serviceManager
             ->expects($this->once())
             ->method('get')
@@ -229,7 +225,7 @@ class HttpAdapterFactoryTest extends TestCase
             'digest_resolver_factory' => $keyForServiceManager,
         ], $serviceManager);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
         $this->assertSame($resolver, $adapter->getDigestResolver());
     }
@@ -245,14 +241,14 @@ class HttpAdapterFactoryTest extends TestCase
             'digest_resolver_factory' => 'uselessKeyDueToMissingServiceManager',
         ]);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
 
     public function testCanReturnAdapterWithNoResolversAndInvalidResolverKeys()
     {
-        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $serviceManager = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
         $serviceManager->expects($this->never())->method('has');
 
         $adapter = HttpAdapterFactory::factory([
@@ -264,7 +260,7 @@ class HttpAdapterFactoryTest extends TestCase
             'digest_resolver_factory' => [],
         ], $serviceManager);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
@@ -273,7 +269,7 @@ class HttpAdapterFactoryTest extends TestCase
     {
         $missingKeyForServiceManager = 'missingKeyForServiceManager';
 
-        $serviceManager = $this->getMockBuilder('\Zend\ServiceManager\ServiceLocatorInterface')->getMock();
+        $serviceManager = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
         $serviceManager
             ->expects($this->any())
             ->method('has')
@@ -292,7 +288,7 @@ class HttpAdapterFactoryTest extends TestCase
             'digest_resolver_factory' => $missingKeyForServiceManager,
         ], $serviceManager);
 
-        $this->assertInstanceOf('Zend\Authentication\Adapter\Http', $adapter);
+        $this->assertInstanceOf(HttpBasic::class, $adapter);
         $this->assertNull($adapter->getBasicResolver());
         $this->assertNull($adapter->getDigestResolver());
     }
