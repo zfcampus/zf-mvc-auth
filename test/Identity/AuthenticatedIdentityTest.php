@@ -2,8 +2,11 @@
 
 namespace ZFTest\MvcAuth\Identity;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
+use Zend\Permissions\Acl\Role\RoleInterface as AclRoleInterface;
+use Zend\Permissions\Rbac\RoleInterface as RbacRoleInterface;
 use ZF\MvcAuth\Identity\AuthenticatedIdentity;
+use ZF\MvcAuth\Identity\IdentityInterface;
 
 class AuthenticatedIdentityTest extends TestCase
 {
@@ -17,17 +20,17 @@ class AuthenticatedIdentityTest extends TestCase
 
     public function testAuthenticatedIsAnIdentityType()
     {
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\IdentityInterface', $this->identity);
+        $this->assertInstanceOf(IdentityInterface::class, $this->identity);
     }
 
     public function testAuthenticatedImplementsAclRole()
     {
-        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->identity);
+        $this->assertInstanceOf(AclRoleInterface::class, $this->identity);
     }
 
     public function testAuthenticatedImplementsRbacRole()
     {
-        $this->assertInstanceOf('Zend\Permissions\Rbac\RoleInterface', $this->identity);
+        $this->assertInstanceOf(RbacRoleInterface::class, $this->identity);
     }
 
     public function testAuthenticatedAllowsSettingName()

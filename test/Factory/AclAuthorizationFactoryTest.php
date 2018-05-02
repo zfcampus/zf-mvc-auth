@@ -6,8 +6,9 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\ServiceManager\ServiceManager;
+use ZF\MvcAuth\Authorization\AclAuthorization;
 use ZF\MvcAuth\Factory\AclAuthorizationFactory;
 
 class AclAuthorizationFactoryTest extends TestCase
@@ -71,7 +72,7 @@ class AclAuthorizationFactoryTest extends TestCase
 
         $acl = $factory($this->services, 'AclAuthorization');
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
 
         $authorizations = $config['zf-mvc-auth']['authorization'];
 
@@ -142,7 +143,7 @@ class AclAuthorizationFactoryTest extends TestCase
 
         $acl = $factory($this->services, 'AclAuthorization');
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
 
         $authorizations = $config['zf-mvc-auth']['authorization'];
         unset($authorizations['deny_by_default']);
@@ -206,7 +207,7 @@ class AclAuthorizationFactoryTest extends TestCase
 
         $acl = $factory($this->services, 'AclAuthorization');
 
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
 
         $authorizations = $config['zf-mvc-auth']['authorization'];
         unset($authorizations['deny_by_default']);
@@ -250,7 +251,7 @@ class AclAuthorizationFactoryTest extends TestCase
         $factory = $this->factory;
 
         $acl = $factory($this->services, 'AclAuthorization');
-        $this->assertInstanceOf('ZF\MvcAuth\Authorization\AclAuthorization', $acl);
+        $this->assertInstanceOf(AclAuthorization::class, $acl);
         $this->assertFalse($acl->isAllowed('guest', 'Foo\Bar\RpcController::do', 'POST'));
     }
 }

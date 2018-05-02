@@ -6,7 +6,7 @@
 
 namespace ZFTest\MvcAuth\Authentication;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\NonPersistent;
@@ -14,6 +14,9 @@ use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authorization\AuthorizationInterface;
+use ZF\MvcAuth\Identity\AuthenticatedIdentity;
+use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
 
 class HttpAdapterTest extends TestCase
@@ -33,7 +36,7 @@ class HttpAdapterTest extends TestCase
         $this->event = new MvcAuthEvent(
             $mvcEvent,
             $this->authentication,
-            $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock()
+            $this->getMockBuilder(AuthorizationInterface::class)->getMock()
         );
     }
 
@@ -49,7 +52,7 @@ class HttpAdapterTest extends TestCase
 
         $adapter = new HttpAdapter($httpAuth, $this->authentication);
         $result  = $adapter->authenticate($this->request, $this->response, $this->event);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $result);
+        $this->assertInstanceOf(GuestIdentity::class, $result);
     }
 
     public function testAuthenticateReturnsFalseIfInvalidCredentialsProvidedInAuthorizationHeader()
@@ -83,6 +86,6 @@ class HttpAdapterTest extends TestCase
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic dXNlcjp1c2Vy');
         $result  = $adapter->authenticate($this->request, $this->response, $this->event);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $result);
+        $this->assertInstanceOf(AuthenticatedIdentity::class, $result);
     }
 }

@@ -6,12 +6,13 @@
 
 namespace ZFTest\MvcAuth\Authentication;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Authentication\Result as AuthenticationResult;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Response;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationPostListener;
+use ZF\MvcAuth\Authorization\AuthorizationInterface;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZFTest\MvcAuth\TestAsset;
 
@@ -30,7 +31,7 @@ class DefaultAuthenticationPostListenerTest extends TestCase
     public function createMvcAuthEvent(MvcEvent $mvcEvent)
     {
         $this->authentication = new TestAsset\AuthenticationService();
-        $this->authorization  = $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock();
+        $this->authorization  = $this->getMockBuilder(AuthorizationInterface::class)->getMock();
         return new MvcAuthEvent($mvcEvent, $this->authentication, $this->authorization);
     }
 

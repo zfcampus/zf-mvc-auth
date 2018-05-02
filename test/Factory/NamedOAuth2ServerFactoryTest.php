@@ -6,7 +6,9 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use OAuth2\Storage\Memory as MemoryStorage;
+use PHPUnit\Framework\TestCase;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
 use ZF\MvcAuth\Factory\NamedOAuth2ServerFactory;
 use ZF\MvcAuth\Factory\OAuth2ServerFactory;
 use Zend\ServiceManager\ServiceManager;
@@ -37,14 +39,14 @@ class NamedOAuth2ServerFactoryTest extends TestCase
                 'authentication' => [
                     'adapters' => [
                         'test' => [
-                            'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                            'adapter' => OAuth2Adapter::class,
                             'storage' => [
                                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                                 'route'   => 'test',
                             ],
                         ],
                         'test2' => [
-                            'adapter' => 'ZF\MvcAuth\Authentication\OAuth2Adapter',
+                            'adapter' => OAuth2Adapter::class,
                             'storage' => [
                                 'storage' => 'ZFTest\OAuth2\TestAsset\MockAdapter',
                                 'route'   => 'test2',
@@ -55,7 +57,7 @@ class NamedOAuth2ServerFactoryTest extends TestCase
             ],
         ]);
 
-        $oauth2StorageAdapter = $this->getMockBuilder('OAuth2\Storage\Memory')
+        $oauth2StorageAdapter = $this->getMockBuilder(MemoryStorage::class)
             ->disableOriginalConstructor(true)
             ->getMock();
 

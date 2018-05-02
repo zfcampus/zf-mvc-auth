@@ -6,19 +6,25 @@
 
 namespace ZFTest\MvcAuth\Authentication;
 
-use PHPUnit_Framework_TestCase as TestCase;
 use OAuth2\Request as OAuth2Request;
+use OAuth2\Server as OAuth2Server;
+use PHPUnit\Framework\TestCase;
 use Zend\Authentication\Adapter\Http as HttpAuth;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Result as AuthenticationResult;
 use Zend\Authentication\Storage\NonPersistent;
+use Zend\Http\Header\HeaderInterface as HttpHeaderInterface;
 use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Request;
+use ZF\MvcAuth\Authentication\AdapterInterface;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
 use ZF\MvcAuth\Authentication\HttpAdapter;
 use ZF\MvcAuth\Authentication\OAuth2Adapter;
+use ZF\MvcAuth\Authorization\AuthorizationInterface;
+use ZF\MvcAuth\Identity\AuthenticatedIdentity;
+use ZF\MvcAuth\Identity\GuestIdentity;
 use ZF\MvcAuth\MvcAuthEvent;
 use ZFTest\MvcAuth\RouteMatchFactoryTrait;
 
@@ -69,7 +75,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->authentication = new AuthenticationService(new NonPersistent());
 
         // authorization service
-        $this->authorization = $this->getMockBuilder('ZF\MvcAuth\Authorization\AuthorizationInterface')->getMock();
+        $this->authorization = $this->getMockBuilder(AuthorizationInterface::class)->getMock();
 
         // event for mvc and mvc-auth
         $this->request    = new HttpRequest();
@@ -104,7 +110,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
-        $this->assertInstanceOf('Zend\Http\Header\HeaderInterface', $authHeader);
+        $this->assertInstanceOf(HttpHeaderInterface::class, $authHeader);
         $this->assertEquals('Basic realm="My Web Site"', $authHeader->getFieldValue());
     }
 
@@ -121,7 +127,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic dXNlcjp1c2Vy');
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertInstanceOf(AuthenticatedIdentity::class, $identity);
         $this->assertEquals('user', $identity->getRoleId());
         return ['identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent()];
     }
@@ -139,7 +145,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $this->request->getHeaders()->addHeaderLine('Authorization: Basic xxxxxxxxx');
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
         $this->assertEquals('guest', $identity->getRoleId());
         return ['identity' => $identity, 'mvc_event' => $this->mvcAuthEvent->getMvcEvent()];
     }
@@ -175,7 +181,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
         $authHeaders = $this->response->getHeaders()->get('WWW-Authenticate');
         $authHeader = $authHeaders[0];
-        $this->assertInstanceOf('Zend\Http\Header\HeaderInterface', $authHeader);
+        $this->assertInstanceOf(HttpHeaderInterface::class, $authHeader);
         $this->assertRegexp(
             '#^Digest realm="User Area", domain="/", '
             . 'nonce="[a-f0-9]{32}", '
@@ -215,7 +221,7 @@ class DefaultAuthenticationListenerTest extends TestCase
      */
     public function testListenerPullsDigestUsernameFromAuthenticationIdentityWhenCreatingAuthenticatedIdentityInstance()
     {
-        $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
+        $httpAuth = $this->getMockBuilder(HttpAuth::class)
             ->disableOriginalConstructor()
             ->getMock();
         $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, [
@@ -246,7 +252,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         );
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertInstanceOf(AuthenticatedIdentity::class, $identity);
         $this->assertEquals('user', $identity->getRoleId());
     }
 
@@ -309,7 +315,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     protected function setupMockOAuth2Server($token)
     {
-        $server = $this->getMockBuilder('OAuth2\Server')
+        $server = $this->getMockBuilder(OAuth2Server::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -322,7 +328,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public static function assertIdentityMatchesToken($token, $identity, $message = '')
     {
-        self::assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity, $message);
+        self::assertInstanceOf(AuthenticatedIdentity::class, $identity, $message);
         self::assertEquals($token['user_id'], $identity->getRoleId());
         self::assertEquals($token, $identity->getAuthenticationIdentity());
     }
@@ -341,7 +347,7 @@ class DefaultAuthenticationListenerTest extends TestCase
 
     public function setupHttpDigestAuth()
     {
-        $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
+        $httpAuth = $this->getMockBuilder(HttpAuth::class)
             ->disableOriginalConstructor()
             ->getMock();
         $resultIdentity = new AuthenticationResult(AuthenticationResult::SUCCESS, [
@@ -441,7 +447,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     ) {
         $this->setupMappedAuthenticatingListener($authType, $controller, $requestProvider());
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertInstanceOf(AuthenticatedIdentity::class, $identity);
     }
 
     /**
@@ -465,7 +471,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRequest($requestProvider())
             ->setRouteMatch($routeMatch);
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
     }
 
     /**
@@ -497,7 +503,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRequest($requestProvider())
             ->setRouteMatch($routeMatch);
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\AuthenticatedIdentity', $identity);
+        $this->assertInstanceOf(AuthenticatedIdentity::class, $identity);
     }
 
     /**
@@ -511,7 +517,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     ) {
         $this->setupHttpBasicAuth();
         // Minimal OAuth2 server mock, as we are not expecting any method calls
-        $server = $this->getMockBuilder('OAuth2\Server')
+        $server = $this->getMockBuilder(OAuth2Server::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->listener->setOauth2Server($server);
@@ -523,7 +529,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
     }
 
     /**
@@ -532,13 +538,13 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testDoesNotPerformAuthenticationWhenMatchedControllerHasNoAuthMapEntryAndAuthSchemesAreDefined()
     {
         // Minimal HTTP adapter mock, as we are not expecting any method calls
-        $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
+        $httpAuth = $this->getMockBuilder(HttpAuth::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->listener->setHttpAdapter($httpAuth);
 
         // Minimal OAuth2 server mock, as we are not expecting any method calls
-        $server = $this->getMockBuilder('OAuth2\Server')
+        $server = $this->getMockBuilder(OAuth2Server::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->listener->setOauth2Server($server);
@@ -561,7 +567,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
     }
 
     /**
@@ -570,7 +576,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testDoesNotPerformAuthenticationWhenMatchedControllerHasAuthMapEntryNotInDefinedAuthSchemes()
     {
         // Minimal HTTP adapter mock, as we are not expecting any method calls
-        $httpAuth = $this->getMockBuilder('Zend\Authentication\Adapter\Http')
+        $httpAuth = $this->getMockBuilder(HttpAuth::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->listener->setHttpAdapter($httpAuth);
@@ -595,13 +601,13 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
     }
 
     public function testAllowsAttachingAdapters()
     {
         $types = ['foo'];
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())
@@ -613,7 +619,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     public function testCanRetrieveSupportedAuthenticationTypes()
     {
         $types = ['foo'];
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())
@@ -639,7 +645,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $types = ['foo'];
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())
@@ -657,7 +663,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $this->listener->attach($adapter);
 
         $identity = $this->listener->__invoke($this->mvcAuthEvent);
-        $this->assertInstanceOf('ZF\MvcAuth\Identity\GuestIdentity', $identity);
+        $this->assertInstanceOf(GuestIdentity::class, $identity);
     }
 
     public function testMatchedAdapterIsAuthenticatedAgainst()
@@ -676,7 +682,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $types = ['oauth2'];
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())
@@ -690,7 +696,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->method('matches')
             ->with($this->equalTo('oauth2'))
             ->will($this->returnValue(true));
-        $expected = $this->getMockBuilder('ZF\MvcAuth\Identity\AuthenticatedIdentity')
+        $expected = $this->getMockBuilder(AuthenticatedIdentity::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->once())
@@ -719,7 +725,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $types = ['oauth2'];
-        $adapter1 = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter1 = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter1->expects($this->atLeastOnce())
@@ -733,7 +739,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->method('getTypeFromRequest')
             ->with($this->equalTo($request))
             ->will($this->returnValue('oauth2'));
-        $expected = $this->getMockBuilder('ZF\MvcAuth\Identity\AuthenticatedIdentity')
+        $expected = $this->getMockBuilder(AuthenticatedIdentity::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter1->expects($this->once())
@@ -741,7 +747,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->with($this->equalTo($request), $this->equalTo($this->response))
             ->will($this->returnValue($expected));
 
-        $adapter2 = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter2 = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter2->expects($this->atLeastOnce())
@@ -772,7 +778,7 @@ class DefaultAuthenticationListenerTest extends TestCase
         $customTypes = ['bar'];
         $this->listener->addAuthenticationTypes($customTypes);
 
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())
@@ -788,7 +794,7 @@ class DefaultAuthenticationListenerTest extends TestCase
     {
         $this->request->getHeaders()->addHeaderLine('Authorization', 'Bearer TOKEN');
 
-        $server = $this->getMockBuilder('OAuth2\Server')
+        $server = $this->getMockBuilder(OAuth2Server::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -820,7 +826,7 @@ class DefaultAuthenticationListenerTest extends TestCase
             ->setRouteMatch($routeMatch);
 
         $types = ['custom'];
-        $adapter = $this->getMockBuilder('ZF\MvcAuth\Authentication\AdapterInterface')
+        $adapter = $this->getMockBuilder(AdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
         $adapter->expects($this->atLeastOnce())

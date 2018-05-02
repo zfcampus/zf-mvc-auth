@@ -6,12 +6,21 @@
 
 namespace ZFTest\MvcAuth\Factory;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use OAuth2\Server as OAuth2Server;
+use OAuth2\Storage\Pdo as PdoStorage;
+use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
+use Zend\Authentication\Adapter\Http as HttpBasic;
 use Zend\Authentication\AuthenticationServiceInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\ServiceManager;
+use ZF\MvcAuth\ApacheResolver;
+use ZF\MvcAuth\Authentication\AuthHttpAdapter;
 use ZF\MvcAuth\Authentication\DefaultAuthenticationListener;
-use ZF\MvcAuth\Factory\DefaultAuthenticationListenerFactory;
+use ZF\MvcAuth\Authentication\HttpAdapter;
+use ZF\MvcAuth\Authentication\OAuth2Adapter;
+use ZF\MvcAuth\Factory;
+use ZF\MvcAuth\FileResolver;
 
 class DefaultAuthenticationListenerFactoryTest extends TestCase
 {
@@ -21,24 +30,15 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
     public function setUp()
     {
         $this->services = new ServiceManager();
-        $this->services->setFactory(
-            'ZF\MvcAuth\Authentication\AuthHttpAdapter',
-            'ZF\MvcAuth\Factory\DefaultAuthHttpAdapterFactory'
-        );
-        $this->services->setFactory(
-            'ZF\MvcAuth\ApacheResolver',
-            'ZF\MvcAuth\Factory\ApacheResolverFactory'
-        );
-        $this->services->setFactory(
-            'ZF\MvcAuth\FileResolver',
-            'ZF\MvcAuth\Factory\FileResolverFactory'
-        );
-        $this->factory  = new DefaultAuthenticationListenerFactory();
+        $this->services->setFactory(AuthHttpAdapter::class, Factory\DefaultAuthHttpAdapterFactory::class);
+        $this->services->setFactory(ApacheResolver::class, Factory\ApacheResolverFactory::class);
+        $this->services->setFactory(FileResolver::class, Factory\FileResolverFactory::class);
+        $this->factory  = new Factory\DefaultAuthenticationListenerFactory();
     }
 
     public function testCreatingOAuth2ServerFromStorageService()
     {
-        $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
+        $adapter = $this->getMockBuilder(PdoStorage::class)->disableOriginalConstructor()->getMock();
 
         $this->services->setService('TestAdapter', $adapter);
         $this->services->setService('config', [
@@ -58,8 +58,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithNoConfigServiceReturnsListenerWithNoHttpAdapter()
@@ -67,8 +67,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithConfigMissingMvcAuthSectionReturnsListenerWithNoHttpAdapter()
@@ -77,8 +77,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithConfigMissingAuthenticationSubSectionReturnsListenerWithNoHttpAdapter()
@@ -87,8 +87,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithConfigMissingHttpSubSubSectionReturnsListenerWithNoHttpAdapter()
@@ -97,8 +97,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithConfigMissingAcceptSchemesRaisesException()
@@ -113,10 +113,12 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
                 ],
             ]
         );
-        $this->setExpectedException('Zend\ServiceManager\Exception\ServiceNotCreatedException');
+
         $factory = $this->factory;
 
-        $listener = $factory($this->services, 'DefaultAuthenticationListener');
+        $this->expectException(ServiceNotCreatedException::class);
+
+        $factory($this->services, 'DefaultAuthenticationListener');
     }
 
     public function testCallingFactoryWithBasicSchemeButMissingHtpasswdValueReturnsListenerWithNoHttpAdapter()
@@ -135,8 +137,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
 
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithDigestSchemeButMissingHtdigestValueReturnsListenerWithNoHttpAdapter()
@@ -156,8 +158,8 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
-        $this->assertAttributeNotInstanceOf('Zend\Authentication\Adapter\Http', 'httpAdapter', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
+        $this->assertAttributeNotInstanceOf(HttpBasic::class, 'httpAdapter', $listener);
     }
 
     public function testCallingFactoryWithBasicSchemeAndHtpasswdValueReturnsListenerWithHttpAdapter()
@@ -180,7 +182,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
         $this->assertContains('basic', $listener->getAuthenticationTypes());
     }
 
@@ -204,7 +206,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
         $this->assertContains('digest', $listener->getAuthenticationTypes());
     }
 
@@ -231,21 +233,21 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
         $this->assertEquals(['digest', 'token'], $listener->getAuthenticationTypes());
     }
 
     public function testFactoryWillUsePreconfiguredOAuth2ServerInstanceProvidedByZfOAuth2()
     {
         // Configure mock OAuth2 Server
-        $oauth2Server = $this->getMockBuilder('OAuth2\Server')->disableOriginalConstructor()->getMock();
+        $oauth2Server = $this->getMockBuilder(OAuth2Server::class)->disableOriginalConstructor()->getMock();
         // Wrap it in a factory
         $this->services->setService('ZF\OAuth2\Service\OAuth2Server', function () use ($oauth2Server) {
             return $oauth2Server;
         });
 
         // Configure mock OAuth2 Server storage adapter
-        $adapter = $this->getMockBuilder('OAuth2\Storage\Pdo')->disableOriginalConstructor()->getMock();
+        $adapter = $this->getMockBuilder(PdoStorage::class)->disableOriginalConstructor()->getMock();
 
         $this->services->setService('TestAdapter', $adapter);
         $this->services->setService('config', [
@@ -257,13 +259,13 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
 
         $r = new ReflectionProperty($listener, 'adapters');
         $r->setAccessible(true);
         $adapters = $r->getValue($listener);
         $adapter = array_shift($adapters);
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\OAuth2Adapter', $adapter);
+        $this->assertInstanceOf(OAuth2Adapter::class, $adapter);
         $this->assertAttributeSame($oauth2Server, 'oauth2Server', $adapter);
     }
 
@@ -283,7 +285,7 @@ class DefaultAuthenticationListenerFactoryTest extends TestCase
         $factory = $this->factory;
 
         $listener = $factory($this->services, 'DefaultAuthenticationListener');
-        $this->assertInstanceOf('ZF\MvcAuth\Authentication\DefaultAuthenticationListener', $listener);
+        $this->assertInstanceOf(DefaultAuthenticationListener::class, $listener);
         $this->assertAttributeEquals(['Testing\V1' => 'oauth2'], 'authMap', $listener);
     }
 }
