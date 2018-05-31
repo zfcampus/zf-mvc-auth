@@ -276,14 +276,12 @@ final class OAuth2ServerFactory
         if (array_key_exists('authorization_code', $availableGrantTypes)
             && $availableGrantTypes['authorization_code'] === true
         ) {
-            $auth_code_class = AuthorizationCode::class;
-
-            if (array_key_exists('use_openid_connect', $options) && $options['use_openid_connect'] === true) {
-                $auth_code_class = OpenIDAuthorizationCodeGrantType::class;
-            }
+            $authCodeClass = array_key_exists('use_openid_connect', $options) && $options['use_openid_connect'] === true
+                ? OpenIDAuthorizationCodeGrantType::class
+                : AuthorizationCode::class;
 
             // Add the "Authorization Code" grant type (this is where the oauth magic happens)
-            $server->addGrantType(new $auth_code_class($server->getStorage('authorization_code')));
+            $server->addGrantType(new $authCodeClass($server->getStorage('authorization_code')));
         }
 
         if (array_key_exists('password', $availableGrantTypes) && $availableGrantTypes['password'] === true) {
