@@ -261,7 +261,9 @@ final class OAuth2ServerFactory
      */
     private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options)
     {
-        if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
+        if (array_key_exists('client_credentials', $availableGrantTypes)
+            && $availableGrantTypes['client_credentials'] === true
+        ) {
             $clientOptions = [];
             if (isset($options['allow_credentials_in_request_body'])) {
                 $clientOptions['allow_credentials_in_request_body'] = $options['allow_credentials_in_request_body'];
@@ -271,10 +273,12 @@ final class OAuth2ServerFactory
             $server->addGrantType(new ClientCredentials($server->getStorage('client_credentials'), $clientOptions));
         }
 
-        if (isset($availableGrantTypes['authorization_code']) && $availableGrantTypes['authorization_code'] === true) {
+        if (array_key_exists('authorization_code', $availableGrantTypes)
+            && $availableGrantTypes['authorization_code'] === true
+        ) {
             $auth_code_class = AuthorizationCode::class;
 
-            if (isset($options['use_openid_connect']) && $options['use_openid_connect'] === true) {
+            if (array_key_exists('use_openid_connect', $options) && $options['use_openid_connect'] === true) {
                 $auth_code_class = OpenIDAuthorizationCodeGrantType::class;
             }
 
@@ -282,17 +286,17 @@ final class OAuth2ServerFactory
             $server->addGrantType(new $auth_code_class($server->getStorage('authorization_code')));
         }
 
-        if (isset($availableGrantTypes['password']) && $availableGrantTypes['password'] === true) {
+        if (array_key_exists('password', $availableGrantTypes) && $availableGrantTypes['password'] === true) {
             // Add the "User Credentials" grant type
             $server->addGrantType(new UserCredentials($server->getStorage('user_credentials')));
         }
 
-        if (isset($availableGrantTypes['jwt']) && $availableGrantTypes['jwt'] === true) {
+        if (array_key_exists('jwt', $availableGrantTypes) && $availableGrantTypes['jwt'] === true) {
             // Add the "JWT Bearer" grant type
             $server->addGrantType(new JwtBearer($server->getStorage('jwt_bearer'), $options['audience']));
         }
 
-        if (isset($availableGrantTypes['refresh_token']) && $availableGrantTypes['refresh_token'] === true) {
+        if (array_key_exists('refresh_token', $availableGrantTypes) && $availableGrantTypes['refresh_token'] === true) {
             $refreshOptions = [];
             if (isset($options['always_issue_new_refresh_token'])) {
                 $refreshOptions['always_issue_new_refresh_token'] = $options['always_issue_new_refresh_token'];
