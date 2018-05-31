@@ -8,6 +8,7 @@ namespace ZF\MvcAuth\Factory;
 use Interop\Container\ContainerInterface;
 use MongoClient;
 use OAuth2\GrantType\AuthorizationCode;
+use OAuth2\OpenID\GrantType\AuthorizationCode as OpenIDAuthorizationCodeGrantType;
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\RefreshToken;
 use OAuth2\GrantType\UserCredentials;
@@ -271,8 +272,14 @@ final class OAuth2ServerFactory
         }
 
         if (isset($availableGrantTypes['authorization_code']) && $availableGrantTypes['authorization_code'] === true) {
+            $auth_code_class = AuthorizationCode::class;
+
+            if (isset($options['use_openid_connect']) && $options['use_openid_connect'] === true) {
+                $auth_code_class = OpenIDAuthorizationCodeGrantType::class;
+            }
+
             // Add the "Authorization Code" grant type (this is where the oauth magic happens)
-            $server->addGrantType(new AuthorizationCode($server->getStorage('authorization_code')));
+            $server->addGrantType(new $auth_code_class($server->getStorage('authorization_code')));
         }
 
         if (isset($availableGrantTypes['password']) && $availableGrantTypes['password'] === true) {
