@@ -8,6 +8,7 @@ namespace ZF\MvcAuth\Factory;
 use Interop\Container\ContainerInterface;
 use MongoClient;
 use OAuth2\GrantType\AuthorizationCode;
+use OAuth2\OpenID\GrantType\AuthorizationCode as OpenIDAuthorizationCodeGrantType;
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\RefreshToken;
 use OAuth2\GrantType\UserCredentials;
@@ -225,10 +226,10 @@ final class OAuth2ServerFactory
      */
     private static function marshalOptions(array $config)
     {
-        $enforceState   = isset($config['enforce_state'])
+        $enforceState = array_key_exists('enforce_state', $config)
             ? $config['enforce_state']
             : true;
-        $allowImplicit  = isset($config['allow_implicit'])
+        $allowImplicit = isset($config['allow_implicit'])
             ? $config['allow_implicit']
             : false;
         $accessLifetime = isset($config['access_lifetime'])
@@ -260,7 +261,9 @@ final class OAuth2ServerFactory
      */
     private static function injectGrantTypes(OAuth2Server $server, array $availableGrantTypes, array $options)
     {
-        if (isset($availableGrantTypes['client_credentials']) && $availableGrantTypes['client_credentials'] === true) {
+        if (array_key_exists('client_credentials', $availableGrantTypes)
+            && $availableGrantTypes['client_credentials'] === true
+        ) {
             $clientOptions = [];
             if (isset($options['allow_credentials_in_request_body'])) {
                 $clientOptions['allow_credentials_in_request_body'] = $options['allow_credentials_in_request_body'];
@@ -270,22 +273,28 @@ final class OAuth2ServerFactory
             $server->addGrantType(new ClientCredentials($server->getStorage('client_credentials'), $clientOptions));
         }
 
-        if (isset($availableGrantTypes['authorization_code']) && $availableGrantTypes['authorization_code'] === true) {
+        if (array_key_exists('authorization_code', $availableGrantTypes)
+            && $availableGrantTypes['authorization_code'] === true
+        ) {
+            $authCodeClass = array_key_exists('use_openid_connect', $options) && $options['use_openid_connect'] === true
+                ? OpenIDAuthorizationCodeGrantType::class
+                : AuthorizationCode::class;
+
             // Add the "Authorization Code" grant type (this is where the oauth magic happens)
-            $server->addGrantType(new AuthorizationCode($server->getStorage('authorization_code')));
+            $server->addGrantType(new $authCodeClass($server->getStorage('authorization_code')));
         }
 
-        if (isset($availableGrantTypes['password']) && $availableGrantTypes['password'] === true) {
+        if (array_key_exists('password', $availableGrantTypes) && $availableGrantTypes['password'] === true) {
             // Add the "User Credentials" grant type
             $server->addGrantType(new UserCredentials($server->getStorage('user_credentials')));
         }
 
-        if (isset($availableGrantTypes['jwt']) && $availableGrantTypes['jwt'] === true) {
+        if (array_key_exists('jwt', $availableGrantTypes) && $availableGrantTypes['jwt'] === true) {
             // Add the "JWT Bearer" grant type
             $server->addGrantType(new JwtBearer($server->getStorage('jwt_bearer'), $options['audience']));
         }
 
-        if (isset($availableGrantTypes['refresh_token']) && $availableGrantTypes['refresh_token'] === true) {
+        if (array_key_exists('refresh_token', $availableGrantTypes) && $availableGrantTypes['refresh_token'] === true) {
             $refreshOptions = [];
             if (isset($options['always_issue_new_refresh_token'])) {
                 $refreshOptions['always_issue_new_refresh_token'] = $options['always_issue_new_refresh_token'];

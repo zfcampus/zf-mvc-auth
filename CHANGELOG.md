@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.5.1 - TBD
+## 1.5.1 - 2018-05-31
 
 ### Added
 
@@ -22,7 +22,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#143](https://github.com/zfcampus/zf-mvc-auth/pull/143) provides an update to `ZF\MvcAuth\Factory\OAuth2ServerFactory` to allow the `zf-oauth2.options.use_openid_connect`
+  option (or adapter-specific setting `options.use_openid_connect`) to vary which class is used for an
+  `authorization_code` grant type. If the setting is present and a boolean `true` value, the class
+  `OAuth2\OpenID\GrantType\AuthorizationCode` will be used instead of `OAuth2\GrantType\AuthorizationCode`.
 
 ## 1.5.0 - 2018-05-02
 
