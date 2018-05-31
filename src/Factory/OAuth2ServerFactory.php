@@ -226,10 +226,10 @@ final class OAuth2ServerFactory
      */
     private static function marshalOptions(array $config)
     {
-        $enforceState   = isset($config['enforce_state'])
+        $enforceState = array_key_exists('enforce_state', $config)
             ? $config['enforce_state']
             : true;
-        $allowImplicit  = isset($config['allow_implicit'])
+        $allowImplicit = isset($config['allow_implicit'])
             ? $config['allow_implicit']
             : false;
         $accessLifetime = isset($config['access_lifetime'])

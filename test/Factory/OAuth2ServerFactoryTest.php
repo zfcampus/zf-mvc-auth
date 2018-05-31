@@ -8,6 +8,7 @@ namespace ZFTest\MvcAuth\Factory;
 
 use MongoDB;
 use OAuth2\GrantType;
+use OAuth2\OpenID\GrantType\AuthorizationCode as OpenIDAuthorizationCodeGrantType;
 use OAuth2\Server as OAuth2Server;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -215,5 +216,32 @@ class OAuth2ServerFactoryTest extends TestCase
             $this->assertArrayHasKey($key, $storageConfig);
             $this->assertEquals($value, $storageConfig[$key]);
         }
+    }
+
+    public function testAllowsUsingOpenIDConnectGrantTypeViaConfiguration()
+    {
+        $options  = $this->getOAuth2Options();
+        $options['zf-oauth2']['options']['use_openid_connect'] = true;
+        $options['zf-oauth2']['storage_settings'] = [
+            'client_table'        => 'CLIENTS',
+            'code_table'          => 'AUTHORIZATION_CODES',
+            'user_table'          => 'USERS',
+            'refresh_token_table' => 'REFRESH_TOKENS',
+            'jwt_table'           => 'JWT',
+        ];
+
+        $services = new ServiceManager();
+        $services->setService('config', $options);
+
+        $config = [
+            'adapter' => 'pdo',
+            'dsn' => 'sqlite::memory:',
+        ];
+        $server = OAuth2ServerFactory::factory($config, $services);
+        $this->assertInstanceOf(OAuth2Server::class, $server);
+
+        $grantTypes = $server->getGrantTypes();
+        $this->assertArrayHasKey('authorization_code', $grantTypes);
+        $this->assertInstanceOf(OpenIDAuthorizationCodeGrantType::class, $grantTypes['authorization_code']);
     }
 }
